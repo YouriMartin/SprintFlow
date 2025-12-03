@@ -1,8 +1,16 @@
-# Nestjs specific
-/dist
+# Dependencies
 /node_modules
+apps/*/node_modules
+node_modules/
+
+# Build outputs
+/dist
 /build
-/tmp
+apps/*/dist
+apps/*/build
+.next
+apps/*/.next
+out
 
 # Logs
 logs
@@ -18,7 +26,31 @@ lerna-debug.log*
 .env.development
 .env.test
 .env.production
+.env.local
+.env*.local
 
 # temp directory
 .temp
 .tmp
+/tmp
+
+# Testing
+coverage
+.nyc_output
+
+# IDEs
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# TypeScript
+*.tsbuildinfo
