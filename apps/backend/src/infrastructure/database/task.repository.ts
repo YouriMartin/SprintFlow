@@ -26,7 +26,11 @@ export class TaskRepository implements ITaskRepository {
 
   async update(id: string, task: Partial<Task>): Promise<Task> {
     await this.taskRepository.update(id, task);
-    return this.findById(id);
+    const updatedTask = await this.findById(id);
+    if (!updatedTask) {
+      throw new Error('Task not found after update');
+    }
+    return updatedTask;
   }
 
   async delete(id: string): Promise<void> {
