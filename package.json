@@ -15,9 +15,9 @@
     "backend:test": "npm run test --workspace=apps/backend",
     "frontend:dev": "npm run dev --workspace=apps/frontend",
     "frontend:build": "npm run build --workspace=apps/frontend",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:build": "docker-compose build"
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:build": "docker compose build"
   },
   "keywords": [
     "monorepo",

@@ -3,11 +3,12 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy workspace root files
+# Copy package files
 COPY package*.json ./
 COPY apps/frontend/package*.json ./apps/frontend/
 
-# Install dependencies
+# Install all dependencies
+WORKDIR /app
 RUN npm install
 
 # Copy frontend source
@@ -20,21 +21,18 @@ RUN npm run build
 # Production stage
 FROM node:20-alpine
 
-WORKDIR /app
+WORKDIR /app/apps/frontend
 
-# Copy workspace root files
-COPY package*.json ./
-COPY apps/frontend/package*.json ./apps/frontend/
+# Copy package files
+COPY apps/frontend/package*.json ./
 
 # Install production dependencies
-RUN npm install --production
+RUN npm install --omit=dev
 
-# Copy built application
-COPY --from=builder /app/apps/frontend/.next ./apps/frontend/.next
-COPY --from=builder /app/apps/frontend/public ./apps/frontend/public
-COPY --from=builder /app/apps/frontend/next.config.ts ./apps/frontend/
-
-WORKDIR /app/apps/frontend
+# Copy built application from builder
+COPY --from=builder /app/apps/frontend/.next ./.next
+COPY --from=builder /app/apps/frontend/public ./public
+COPY --from=builder /app/apps/frontend/next.config.ts ./
 
 EXPOSE 3001
 
