@@ -247,7 +247,20 @@ NEXT_PUBLIC_API_URL=http://localhost:3000
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0) with a **mandatory remuneration clause** - see the [LICENSE](LICENSE) file for details.
+
+### ⚠️ Important License Notice
+
+**Commercial Use Requires Remuneration**: Any commercial use, deployment, or distribution of this software requires mandatory remuneration to the copyright holder(s). This includes:
+
+- Using the software in a commercial environment
+- Offering services based on this software
+- Integrating this software into commercial products
+- Using this software to generate revenue
+
+**Contact Required**: You must contact the copyright holder(s) for licensing terms and remuneration arrangements before any commercial use.
+
+For non-commercial use, this software is available under the standard AGPL-3.0 terms.
 
 ## 🎯 Roadmap
 
