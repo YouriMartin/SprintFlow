@@ -1,5 +1,3 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-
 export enum TaskStatus {
   TODO = 'todo',
   IN_PROGRESS = 'in_progress',
@@ -13,40 +11,14 @@ export enum TaskPriority {
   URGENT = 'urgent',
 }
 
-@Entity('tasks')
-export class Task {
-  @PrimaryGeneratedColumn('uuid')
+export interface Task {
   id: string;
-
-  @Column()
   title: string;
-
-  @Column({ type: 'text', nullable: true })
-  description: string;
-
-  @Column({
-    type: 'enum',
-    enum: TaskStatus,
-    default: TaskStatus.TODO,
-  })
+  description: string | null;
   status: TaskStatus;
-
-  @Column({
-    type: 'enum',
-    enum: TaskPriority,
-    default: TaskPriority.MEDIUM,
-  })
   priority: TaskPriority;
-
-  @Column({ nullable: true })
-  assignee: string;
-
-  @Column({ type: 'timestamp', nullable: true })
-  dueDate: Date;
-
-  @CreateDateColumn()
+  assignee: string | null;
+  dueDate: Date | null;
   createdAt: Date;
-
-  @UpdateDateColumn()
   updatedAt: Date;
 }
