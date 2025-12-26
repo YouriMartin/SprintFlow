@@ -1,0 +1,75 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sprintflow-postgres-dev
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sprintflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sprintflow-dev-network
+
+  backend:
+    image: node:20-alpine
+    container_name: sprintflow-backend-dev
+    working_dir: /app
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: sprintflow
+      CORS_ORIGIN: http://localhost:3001
+      LOG_LEVEL: debug
+      ENABLE_TELEMETRY: false
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/backend/node_modules
+    command: sh -c "npm install && npm run backend:dev"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sprintflow-dev-network
+    restart: unless-stopped
+
+  frontend:
+    image: node:20-alpine
+    container_name: sprintflow-frontend-dev
+    working_dir: /app
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+    ports:
+      - "3001:3001"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/frontend/node_modules
+    command: sh -c "npm install && npm run frontend:dev"
+    depends_on:
+      - backend
+    networks:
+      - sprintflow-dev-network
+    restart: unless-stopped
+
+volumes:
+  postgres_dev_data:
+
+networks:
+  sprintflow-dev-network:
+    driver: bridge
