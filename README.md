@@ -15,7 +15,7 @@ This is a mono repo application with the following structure:
 
 ### Backend (NestJS)
 - ✅ Clean Architecture (Domain, Application, Infrastructure, Presentation layers)
-- ✅ TypeORM with PostgreSQL
+- ✅ Kysely with PostgreSQL
 - ✅ Winston Logger for comprehensive logging
 - ✅ OpenTelemetry for observability and tracing
 - ✅ Swagger/OpenAPI documentation
@@ -184,7 +184,7 @@ SprintFlow/
 - **Framework**: NestJS 11
 - **Language**: TypeScript
 - **Database**: PostgreSQL 16
-- **ORM**: TypeORM
+- **Query Builder**: Kysely
 - **Validation**: class-validator, class-transformer
 - **Documentation**: Swagger/OpenAPI
 - **Logging**: Winston
@@ -275,7 +275,7 @@ For non-commercial use, this software is available under the standard AGPL-3.0 t
 
 ## 👥 Authors
 
-- **Your Name** - Initial work
+- **Youri Martin** - Initial work
 
 ## 🙏 Acknowledgments
 

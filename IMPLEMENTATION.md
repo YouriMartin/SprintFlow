@@ -29,7 +29,7 @@ src/
 ```
 
 **Features Implemented:**
-- ✅ Domain Layer: Task entity with TypeORM decorators
+- ✅ Domain Layer: Task entity with Kysely schema
 - ✅ Application Layer: Task use cases and DTOs
 - ✅ Infrastructure Layer: Database repository, config, logging, telemetry
 - ✅ Presentation Layer: REST API controllers
@@ -91,10 +91,10 @@ src/
 
 **Configuration:**
 - PostgreSQL 16 Alpine Docker image
-- TypeORM integration
+- Kysely query builder integration
 - Database entities (Task)
 - Repository pattern
-- Auto-synchronization in development
+- Type-safe database queries
 - Health checks in Docker Compose
 - Persistent data volumes
 

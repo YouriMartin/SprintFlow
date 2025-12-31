@@ -174,11 +174,11 @@ docker-compose logs -f postgres
 
 1. **Create Entity** (`domain/entities/your-entity.entity.ts`)
    ```typescript
-   @Entity('your_entities')
-   export class YourEntity {
-     @PrimaryGeneratedColumn('uuid')
+   export interface YourEntity {
      id: string;
      // ... fields
+     createdAt: Date;
+     updatedAt: Date;
    }
    ```
 
@@ -194,7 +194,8 @@ docker-compose logs -f postgres
    ```typescript
    @Injectable()
    export class YourRepository implements IYourRepository {
-     // ... implementation
+     constructor(private readonly db: Kysely<Database>) {}
+     // ... implementation using Kysely queries
    }
    ```
 
@@ -221,8 +222,8 @@ docker-compose logs -f postgres
 7. **Create Module** (`modules/your-entity.module.ts`)
    ```typescript
    @Module({
-     imports: [TypeOrmModule.forFeature([YourEntity])],
-     // ... setup
+     providers: [YourEntityUseCases, YourRepository],
+     controllers: [YourEntityController],
    })
    ```
 
@@ -299,11 +300,11 @@ OpenTelemetry is configured but disabled by default. To enable:
 
 ## Database Migrations
 
-TypeORM is configured with `synchronize: true` in development, which automatically syncs the schema. For production:
+The project uses Kysely for database queries, which provides type-safe query building. For schema management:
 
-1. Disable `synchronize` in production
-2. Create migrations manually
-3. Run migrations on deployment
+1. Create migration files using Kysely migrations
+2. Run migrations on deployment
+3. Keep the schema in sync with TypeScript types
 
 ## Troubleshooting
 
@@ -352,5 +353,5 @@ docker-compose logs
 
 - [NestJS Documentation](https://docs.nestjs.com/)
 - [Next.js Documentation](https://nextjs.org/docs)
-- [TypeORM Documentation](https://typeorm.io/)
+- [Kysely Documentation](https://kysely.dev/)
 - [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
