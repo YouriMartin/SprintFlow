@@ -15,9 +15,18 @@
     "backend:test": "npm run test --workspace=apps/backend",
     "frontend:dev": "npm run dev --workspace=apps/frontend",
     "frontend:build": "npm run build --workspace=apps/frontend",
+    "docker:start": "./scripts/docker-start.sh",
+    "docker:stop": "./scripts/docker-stop.sh",
+    "docker:restart": "./scripts/docker-restart.sh",
+    "docker:logs": "./scripts/docker-logs.sh",
+    "docker:clean": "./scripts/docker-clean.sh",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
-    "docker:build": "docker compose build"
+    "docker:build": "docker compose build",
+    "dev:backend": "./scripts/dev-backend.sh",
+    "dev:frontend": "./scripts/dev-frontend.sh",
+    "dev:all": "./scripts/dev-all.sh",
+    "dev:postgres": "./scripts/dev-postgres.sh"
   },
   "keywords": [
     "monorepo",
