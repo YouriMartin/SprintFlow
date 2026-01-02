@@ -5,6 +5,11 @@
 
 set -e
 
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Get the project root (parent of scripts directory)
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 echo "🔧 Starting SprintFlow Backend in development mode..."
 echo ""
 echo "📍 Backend will be available at: http://localhost:3000"
@@ -16,5 +21,5 @@ echo ""
 echo "🔄 Hot-reload enabled - changes will restart the server automatically"
 echo ""
 
-cd apps/backend
+cd "$PROJECT_ROOT/apps/backend"
 npm run start:dev

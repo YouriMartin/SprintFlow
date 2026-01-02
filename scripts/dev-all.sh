@@ -5,6 +5,14 @@
 
 set -e
 
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Get the project root (parent of scripts directory)
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Change to project root
+cd "$PROJECT_ROOT"
+
 echo "🚀 Starting SprintFlow in full development mode..."
 echo ""
 
@@ -40,16 +48,16 @@ echo ""
 # Detect terminal emulator and open new windows
 if command -v gnome-terminal &> /dev/null; then
   # GNOME Terminal
-  gnome-terminal --tab --title="SprintFlow Backend" -- bash -c "cd $(pwd) && ./scripts/dev-backend.sh; exec bash"
-  gnome-terminal --tab --title="SprintFlow Frontend" -- bash -c "cd $(pwd) && ./scripts/dev-frontend.sh; exec bash"
+  gnome-terminal --tab --title="SprintFlow Backend" -- bash -c "cd '$PROJECT_ROOT' && ./scripts/dev-backend.sh; exec bash"
+  gnome-terminal --tab --title="SprintFlow Frontend" -- bash -c "cd '$PROJECT_ROOT' && ./scripts/dev-frontend.sh; exec bash"
 elif command -v konsole &> /dev/null; then
   # KDE Konsole
-  konsole --new-tab -e bash -c "cd $(pwd) && ./scripts/dev-backend.sh; exec bash" &
-  konsole --new-tab -e bash -c "cd $(pwd) && ./scripts/dev-frontend.sh; exec bash" &
+  konsole --new-tab -e bash -c "cd '$PROJECT_ROOT' && ./scripts/dev-backend.sh; exec bash" &
+  konsole --new-tab -e bash -c "cd '$PROJECT_ROOT' && ./scripts/dev-frontend.sh; exec bash" &
 elif command -v xterm &> /dev/null; then
   # xterm
-  xterm -e bash -c "cd $(pwd) && ./scripts/dev-backend.sh; exec bash" &
-  xterm -e bash -c "cd $(pwd) && ./scripts/dev-frontend.sh; exec bash" &
+  xterm -e bash -c "cd '$PROJECT_ROOT' && ./scripts/dev-backend.sh; exec bash" &
+  xterm -e bash -c "cd '$PROJECT_ROOT' && ./scripts/dev-frontend.sh; exec bash" &
 else
   # Fallback: run sequentially with message
   echo "⚠️  Could not detect terminal emulator for split windows"
