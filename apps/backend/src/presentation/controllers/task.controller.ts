@@ -14,6 +14,7 @@ import { TaskUseCases } from '../../application/use-cases/task.use-cases';
 import { CreateTaskDto } from '../../application/dtos/create-task.dto';
 import { UpdateTaskDto } from '../../application/dtos/update-task.dto';
 import { Task } from '../../domain/entities/task.entity';
+import { Project } from '../../domain/entities/project.entity';
 
 @ApiTags('tasks')
 @Controller('tasks')
@@ -61,5 +62,13 @@ export class TaskController {
   @ApiResponse({ status: 404, description: 'Task not found' })
   async delete(@Param('id') id: string): Promise<void> {
     return this.taskUseCases.deleteTask(id);
+  }
+
+  @Get(':id/projects')
+  @ApiOperation({ summary: 'Get all projects linked to a task' })
+  @ApiResponse({ status: 200, description: 'Return all projects for the task' })
+  @ApiResponse({ status: 404, description: 'Task not found' })
+  async getProjects(@Param('id') id: string): Promise<Project[]> {
+    return this.taskUseCases.getTaskProjects(id);
   }
 }

@@ -5,6 +5,8 @@ import { Pool } from 'pg';
 // Database schema interface
 export interface Database {
   tasks: TaskTable;
+  projects: ProjectTable;
+  task_projects: TaskProjectTable;
 }
 
 export interface TaskTable {
@@ -17,6 +19,23 @@ export interface TaskTable {
   due_date: Date | null;
   created_at: Date;
   updated_at: Date;
+}
+
+export interface ProjectTable {
+  id: string;
+  name: string;
+  description: string | null;
+  repository_url: string;
+  repository_type: 'gitlab' | 'github';
+  repository_id: string | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface TaskProjectTable {
+  task_id: string;
+  project_id: string;
+  created_at: Date;
 }
 
 export type KyselyDatabase = Kysely<Database>;
