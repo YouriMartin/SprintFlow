@@ -19,6 +19,7 @@ export interface UserStory {
   priority: UserStoryPriority;
   assignee: string | null;
   dueDate: Date | null;
+  epicId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

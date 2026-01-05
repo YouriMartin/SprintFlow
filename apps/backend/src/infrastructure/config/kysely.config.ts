@@ -1,12 +1,24 @@
-import {registerAs} from '@nestjs/config';
-import {Kysely, PostgresDialect} from 'kysely';
-import {Pool} from 'pg';
+import { registerAs } from '@nestjs/config';
+import { Kysely, PostgresDialect } from 'kysely';
+import { Pool } from 'pg';
 
 // Database schema interface
 export interface Database {
+  epics: EpicTable;
   user_stories: UserStoryTable;
   code_repositories: CodeRepositoryTable;
   user_story_code_repositories: UserStoryCodeRepositoryTable;
+}
+
+export interface EpicTable {
+  id: string;
+  title: string;
+  description: string | null;
+  status: 'planned' | 'in_progress' | 'completed' | 'cancelled';
+  start_date: Date;
+  end_date: Date;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface UserStoryTable {
@@ -17,6 +29,7 @@ export interface UserStoryTable {
   priority: 'low' | 'medium' | 'high' | 'urgent';
   assignee: string | null;
   due_date: Date | null;
+  epic_id: string | null;
   created_at: Date;
   updated_at: Date;
 }

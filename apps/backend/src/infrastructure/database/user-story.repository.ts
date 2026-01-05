@@ -37,6 +37,7 @@ export class UserStoryRepository implements IUserStoryRepository {
         priority: userStory.priority || UserStoryPriority.MEDIUM,
         assignee: userStory.assignee || null,
         due_date: userStory.dueDate || null,
+        epic_id: userStory.epicId || null,
         created_at: now,
         updated_at: now,
       })
@@ -58,6 +59,7 @@ export class UserStoryRepository implements IUserStoryRepository {
     if (userStory.priority !== undefined) updateData.priority = userStory.priority;
     if (userStory.assignee !== undefined) updateData.assignee = userStory.assignee;
     if (userStory.dueDate !== undefined) updateData.due_date = userStory.dueDate;
+    if (userStory.epicId !== undefined) updateData.epic_id = userStory.epicId;
 
     const updatedUserStory = await this.db
       .updateTable('user_stories')
@@ -86,6 +88,7 @@ export class UserStoryRepository implements IUserStoryRepository {
       priority: dbUserStory.priority as UserStoryPriority,
       assignee: dbUserStory.assignee,
       dueDate: dbUserStory.due_date,
+      epicId: dbUserStory.epic_id,
       createdAt: dbUserStory.created_at,
       updatedAt: dbUserStory.updated_at,
     };

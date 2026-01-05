@@ -1,14 +1,25 @@
-import {IsDateString, IsEnum, IsOptional, IsString} from 'class-validator';
-import {ApiProperty} from '@nestjs/swagger';
-import {UserStoryPriority, UserStoryStatus} from '../../domain/entities/user-story.entity';
+import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  UserStoryPriority,
+  UserStoryStatus,
+} from '../../domain/entities/user-story.entity';
 
 export class UpdateUserStoryDto {
-  @ApiProperty({ example: 'As a user, I want to authenticate so that I can access my account', required: false })
+  @ApiProperty({
+    example:
+      'As a user, I want to authenticate so that I can access my account',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   title?: string;
 
-  @ApiProperty({ example: 'Implement JWT-based authentication system with email/password login', required: false })
+  @ApiProperty({
+    example:
+      'Implement JWT-based authentication system with email/password login',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   description?: string;
@@ -32,4 +43,12 @@ export class UpdateUserStoryDto {
   @IsOptional()
   @IsDateString()
   dueDate?: Date;
+
+  @ApiProperty({
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  epicId?: string;
 }
