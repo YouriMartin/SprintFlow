@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { UserModule } from './modules/user.module';
 import { ProjectModule } from './modules/project.module';
 import { EpicModule } from './modules/epic.module';
 import { UserStoryModule } from './modules/user-story.module';
@@ -17,6 +18,7 @@ import appConfig from './infrastructure/config/app.config';
       load: [kyselyConfig, appConfig],
     }),
     DatabaseModule,
+    UserModule,
     ProjectModule,
     EpicModule,
     UserStoryModule,

@@ -1,5 +1,40 @@
 -- Initial database schema for SprintFlow
--- This script creates the tables for projects, epics, user stories, code repositories, and their relationships
+-- This script creates the tables for users, projects, epics, user stories, code repositories, and their relationships
+
+-- Users table
+CREATE TABLE IF NOT EXISTS users
+(
+    id
+    UUID
+    PRIMARY
+    KEY,
+    email
+    VARCHAR
+(
+    255
+) NOT NULL UNIQUE,
+    name VARCHAR
+(
+    255
+) NOT NULL,
+    password VARCHAR
+(
+    255
+) NOT NULL,
+    role VARCHAR
+(
+    50
+) NOT NULL CHECK
+(
+    role
+    IN
+(
+    'superadmin',
+    'dev'
+)),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
 
 -- Projects table
 CREATE TABLE IF NOT EXISTS projects
@@ -28,6 +63,31 @@ CREATE TABLE IF NOT EXISTS projects
 )),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+-- Project-User junction table (many-to-many relationship)
+CREATE TABLE IF NOT EXISTS project_users
+(
+    project_id
+    UUID
+    NOT
+    NULL
+    REFERENCES
+    projects
+(
+    id
+) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users
+(
+    id
+)
+  ON DELETE CASCADE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY
+(
+    project_id,
+    user_id
+)
     );
 
 -- Epics table
@@ -151,7 +211,11 @@ CREATE TABLE IF NOT EXISTS user_story_code_repositories
 );
 
 -- Indexes for better query performance
+CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users (role);
 CREATE INDEX IF NOT EXISTS idx_projects_status ON projects (status);
+CREATE INDEX IF NOT EXISTS idx_project_users_project_id ON project_users (project_id);
+CREATE INDEX IF NOT EXISTS idx_project_users_user_id ON project_users (user_id);
 CREATE INDEX IF NOT EXISTS idx_epics_status ON epics (status);
 CREATE INDEX IF NOT EXISTS idx_epics_start_date ON epics (start_date);
 CREATE INDEX IF NOT EXISTS idx_epics_end_date ON epics (end_date);
@@ -166,7 +230,11 @@ CREATE INDEX IF NOT EXISTS idx_user_story_code_repositories_code_repository_id O
 
 -- Comments for documentation
 COMMENT
+ON TABLE users IS 'Stores user information with roles';
+COMMENT
 ON TABLE projects IS 'Stores project information (workspaces containing epics)';
+COMMENT
+ON TABLE project_users IS 'Many-to-many relationship between projects and users';
 COMMENT
 ON TABLE epics IS 'Stores epic information for roadmap planning';
 COMMENT
@@ -175,6 +243,8 @@ COMMENT ON TABLE code_repositories IS 'Stores code repository information linked
 COMMENT
 ON TABLE user_story_code_repositories IS 'Many-to-many relationship between user stories and code repositories';
 
+COMMENT
+ON COLUMN users.role IS 'User role: superadmin or dev';
 COMMENT
 ON COLUMN projects.status IS 'Project status: active, archived, or on_hold';
 COMMENT

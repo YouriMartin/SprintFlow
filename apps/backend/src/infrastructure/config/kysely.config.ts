@@ -4,11 +4,23 @@ import { Pool } from 'pg';
 
 // Database schema interface
 export interface Database {
+  users: UserTable;
   projects: ProjectTable;
+  project_users: ProjectUserTable;
   epics: EpicTable;
   user_stories: UserStoryTable;
   code_repositories: CodeRepositoryTable;
   user_story_code_repositories: UserStoryCodeRepositoryTable;
+}
+
+export interface UserTable {
+  id: string;
+  email: string;
+  name: string;
+  password: string;
+  role: 'superadmin' | 'dev';
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface ProjectTable {
@@ -18,6 +30,12 @@ export interface ProjectTable {
   status: 'active' | 'archived' | 'on_hold';
   created_at: Date;
   updated_at: Date;
+}
+
+export interface ProjectUserTable {
+  project_id: string;
+  user_id: string;
+  created_at: Date;
 }
 
 export interface EpicTable {
