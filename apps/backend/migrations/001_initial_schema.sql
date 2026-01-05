@@ -1,8 +1,9 @@
 -- Initial database schema for SprintFlow
--- This script creates the tables for tasks, projects, and their relationships
+-- This script creates the tables for user stories, code repositories, and their relationships
 
--- Tasks table
-CREATE TABLE IF NOT EXISTS tasks (
+-- User Stories table
+CREATE TABLE IF NOT EXISTS user_stories
+(
   id UUID PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
   description TEXT,
@@ -26,28 +27,45 @@ CREATE TABLE IF NOT EXISTS code_repositories (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Task-CodeRepository junction table (many-to-many relationship)
-CREATE TABLE IF NOT EXISTS task_code_repositories (
-  task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+-- UserStory-CodeRepository junction table (many-to-many relationship)
+CREATE TABLE IF NOT EXISTS user_story_code_repositories
+(
+    user_story_id
+    UUID
+    NOT
+    NULL
+    REFERENCES
+    user_stories
+(
+    id
+) ON DELETE CASCADE,
   code_repository_id UUID NOT NULL REFERENCES code_repositories(id) ON DELETE CASCADE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (task_id, code_repository_id)
+    PRIMARY KEY
+(
+    user_story_id,
+    code_repository_id
+)
 );
 
 -- Indexes for better query performance
-CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
-CREATE INDEX IF NOT EXISTS idx_tasks_assignee ON tasks(assignee);
-CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(due_date);
+CREATE INDEX IF NOT EXISTS idx_user_stories_status ON user_stories(status);
+CREATE INDEX IF NOT EXISTS idx_user_stories_assignee ON user_stories(assignee);
+CREATE INDEX IF NOT EXISTS idx_user_stories_due_date ON user_stories(due_date);
 CREATE INDEX IF NOT EXISTS idx_code_repositories_repository_type ON code_repositories(repository_type);
-CREATE INDEX IF NOT EXISTS idx_task_code_repositories_task_id ON task_code_repositories(task_id);
-CREATE INDEX IF NOT EXISTS idx_task_code_repositories_code_repository_id ON task_code_repositories(code_repository_id);
+CREATE INDEX IF NOT EXISTS idx_user_story_code_repositories_user_story_id ON user_story_code_repositories(user_story_id);
+CREATE INDEX IF NOT EXISTS idx_user_story_code_repositories_code_repository_id ON user_story_code_repositories(code_repository_id);
 
 -- Comments for documentation
-COMMENT ON TABLE tasks IS 'Stores task information for sprint planning';
+COMMENT
+ON TABLE user_stories IS 'Stores user story information for sprint planning and product backlog';
 COMMENT ON TABLE code_repositories IS 'Stores code repository information linked to Git repositories (GitLab/GitHub)';
-COMMENT ON TABLE task_code_repositories IS 'Many-to-many relationship between tasks and code repositories';
+COMMENT
+ON TABLE user_story_code_repositories IS 'Many-to-many relationship between user stories and code repositories';
 
-COMMENT ON COLUMN tasks.status IS 'Task status: todo, in_progress, or done';
-COMMENT ON COLUMN tasks.priority IS 'Task priority: low, medium, high, or urgent';
+COMMENT
+ON COLUMN user_stories.status IS 'User story status: todo, in_progress, or done';
+COMMENT
+ON COLUMN user_stories.priority IS 'User story priority: low, medium, high, or urgent';
 COMMENT ON COLUMN code_repositories.repository_type IS 'Type of Git repository: gitlab or github';
 COMMENT ON COLUMN code_repositories.repository_id IS 'External repository ID from GitLab/GitHub API';

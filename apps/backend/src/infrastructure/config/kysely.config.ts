@@ -1,15 +1,15 @@
-import { registerAs } from '@nestjs/config';
-import { Kysely, PostgresDialect } from 'kysely';
-import { Pool } from 'pg';
+import {registerAs} from '@nestjs/config';
+import {Kysely, PostgresDialect} from 'kysely';
+import {Pool} from 'pg';
 
 // Database schema interface
 export interface Database {
-  tasks: TaskTable;
+  user_stories: UserStoryTable;
   code_repositories: CodeRepositoryTable;
-  task_code_repositories: TaskCodeRepositoryTable;
+  user_story_code_repositories: UserStoryCodeRepositoryTable;
 }
 
-export interface TaskTable {
+export interface UserStoryTable {
   id: string;
   title: string;
   description: string | null;
@@ -32,8 +32,8 @@ export interface CodeRepositoryTable {
   updated_at: Date;
 }
 
-export interface TaskCodeRepositoryTable {
-  task_id: string;
+export interface UserStoryCodeRepositoryTable {
+  user_story_id: string;
   code_repository_id: string;
   created_at: Date;
 }

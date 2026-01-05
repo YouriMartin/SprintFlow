@@ -1,10 +1,7 @@
-import { Injectable, Inject } from '@nestjs/common';
-import {
-  CodeRepository,
-  RepositoryType,
-} from '../../domain/entities/code-repository.entity';
-import { CodeRepositoryRepository } from '../../domain/repositories/code-repository.repository.interface';
-import type { KyselyDatabase, CodeRepositoryTable } from '../config/kysely.config';
+import {Inject, Injectable} from '@nestjs/common';
+import {CodeRepository, RepositoryType,} from '../../domain/entities/code-repository.entity';
+import {CodeRepositoryRepository} from '../../domain/repositories/code-repository.repository.interface';
+import type {CodeRepositoryTable, KyselyDatabase} from '../config/kysely.config';
 
 @Injectable()
 export class CodeRepositoryRepositoryImpl implements CodeRepositoryRepository {
@@ -81,12 +78,12 @@ export class CodeRepositoryRepositoryImpl implements CodeRepositoryRepository {
     return result.numDeletedRows > 0;
   }
 
-  async findByTaskId(taskId: string): Promise<CodeRepository[]> {
+  async findByUserStoryId(userStoryId: string): Promise<CodeRepository[]> {
     const codeRepositories = await this.db
       .selectFrom('code_repositories')
-      .innerJoin('task_code_repositories', 'task_code_repositories.code_repository_id', 'code_repositories.id')
+      .innerJoin('user_story_code_repositories', 'user_story_code_repositories.code_repository_id', 'code_repositories.id')
       .selectAll('code_repositories')
-      .where('task_code_repositories.task_id', '=', taskId)
+      .where('user_story_code_repositories.user_story_id', '=', userStoryId)
       .execute();
 
     return codeRepositories.map((codeRepository) => this.mapToCodeRepository(codeRepository));
