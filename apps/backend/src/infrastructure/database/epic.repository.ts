@@ -38,6 +38,7 @@ export class EpicRepository implements IEpicRepository {
         status: epic.status || EpicStatus.PLANNED,
         start_date: epic.startDate,
         end_date: epic.endDate,
+        project_id: epic.projectId || null,
         created_at: now,
         updated_at: now,
       })
@@ -61,6 +62,7 @@ export class EpicRepository implements IEpicRepository {
     if (epic.status !== undefined) updateData.status = epic.status;
     if (epic.startDate !== undefined) updateData.start_date = epic.startDate;
     if (epic.endDate !== undefined) updateData.end_date = epic.endDate;
+    if (epic.projectId !== undefined) updateData.project_id = epic.projectId;
 
     const updatedEpic = await this.db
       .updateTable('epics')
@@ -84,6 +86,7 @@ export class EpicRepository implements IEpicRepository {
       status: dbEpic.status as EpicStatus,
       startDate: dbEpic.start_date,
       endDate: dbEpic.end_date,
+      projectId: dbEpic.project_id,
       createdAt: dbEpic.created_at,
       updatedAt: dbEpic.updated_at,
     };

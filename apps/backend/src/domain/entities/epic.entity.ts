@@ -12,6 +12,7 @@ export interface Epic {
   status: EpicStatus;
   startDate: Date;
   endDate: Date;
+  projectId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

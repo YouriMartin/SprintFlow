@@ -1,5 +1,34 @@
 -- Initial database schema for SprintFlow
--- This script creates the tables for epics, user stories, code repositories, and their relationships
+-- This script creates the tables for projects, epics, user stories, code repositories, and their relationships
+
+-- Projects table
+CREATE TABLE IF NOT EXISTS projects
+(
+    id
+    UUID
+    PRIMARY
+    KEY,
+    name
+    VARCHAR
+(
+    255
+) NOT NULL,
+    description TEXT,
+    status VARCHAR
+(
+    50
+) NOT NULL CHECK
+(
+    status
+    IN
+(
+    'active',
+    'archived',
+    'on_hold'
+)),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
 
 -- Epics table
 CREATE TABLE IF NOT EXISTS epics
@@ -29,6 +58,10 @@ CREATE TABLE IF NOT EXISTS epics
 )),
     start_date TIMESTAMP NOT NULL,
     end_date TIMESTAMP NOT NULL,
+    project_id UUID REFERENCES projects
+(
+    id
+) ON DELETE SET NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
@@ -118,9 +151,11 @@ CREATE TABLE IF NOT EXISTS user_story_code_repositories
 );
 
 -- Indexes for better query performance
+CREATE INDEX IF NOT EXISTS idx_projects_status ON projects (status);
 CREATE INDEX IF NOT EXISTS idx_epics_status ON epics (status);
 CREATE INDEX IF NOT EXISTS idx_epics_start_date ON epics (start_date);
 CREATE INDEX IF NOT EXISTS idx_epics_end_date ON epics (end_date);
+CREATE INDEX IF NOT EXISTS idx_epics_project_id ON epics (project_id);
 CREATE INDEX IF NOT EXISTS idx_user_stories_status ON user_stories (status);
 CREATE INDEX IF NOT EXISTS idx_user_stories_assignee ON user_stories (assignee);
 CREATE INDEX IF NOT EXISTS idx_user_stories_due_date ON user_stories (due_date);
@@ -131,6 +166,8 @@ CREATE INDEX IF NOT EXISTS idx_user_story_code_repositories_code_repository_id O
 
 -- Comments for documentation
 COMMENT
+ON TABLE projects IS 'Stores project information (workspaces containing epics)';
+COMMENT
 ON TABLE epics IS 'Stores epic information for roadmap planning';
 COMMENT
 ON TABLE user_stories IS 'Stores user story information for sprint planning and product backlog';
@@ -139,11 +176,15 @@ COMMENT
 ON TABLE user_story_code_repositories IS 'Many-to-many relationship between user stories and code repositories';
 
 COMMENT
+ON COLUMN projects.status IS 'Project status: active, archived, or on_hold';
+COMMENT
 ON COLUMN epics.status IS 'Epic status: planned, in_progress, completed, or cancelled';
 COMMENT
 ON COLUMN epics.start_date IS 'Start date of the epic for roadmap visualization (required)';
 COMMENT
 ON COLUMN epics.end_date IS 'End date of the epic for roadmap visualization (required)';
+COMMENT
+ON COLUMN epics.project_id IS 'Foreign key to the project this epic belongs to';
 COMMENT
 ON COLUMN user_stories.status IS 'User story status: todo, in_progress, or done';
 COMMENT
