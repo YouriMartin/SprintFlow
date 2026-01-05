@@ -11,7 +11,11 @@ export class UserStoryRepository implements IUserStoryRepository {
   ) {}
 
   async findAll(): Promise<UserStory[]> {
-    const userStories = await this.db.selectFrom('user_stories').selectAll().execute();
+    const userStories = await this.db
+      .selectFrom('user_stories')
+      .selectAll()
+      .where('deleted_at', 'is', null)
+      .execute();
     return userStories.map((userStory) => this.mapToUserStory(userStory));
   }
 
@@ -20,6 +24,7 @@ export class UserStoryRepository implements IUserStoryRepository {
       .selectFrom('user_stories')
       .selectAll()
       .where('id', '=', id)
+      .where('deleted_at', 'is', null)
       .executeTakeFirst();
 
     return userStory ? this.mapToUserStory(userStory) : null;
@@ -38,8 +43,12 @@ export class UserStoryRepository implements IUserStoryRepository {
         assignee: userStory.assignee || null,
         due_date: userStory.dueDate || null,
         epic_id: userStory.epicId || null,
+        created_by: userStory.createdBy!,
+        updated_by: null,
+        deleted_by: null,
         created_at: now,
         updated_at: now,
+        deleted_at: null,
       })
       .returningAll()
       .executeTakeFirstOrThrow();
@@ -60,11 +69,13 @@ export class UserStoryRepository implements IUserStoryRepository {
     if (userStory.assignee !== undefined) updateData.assignee = userStory.assignee;
     if (userStory.dueDate !== undefined) updateData.due_date = userStory.dueDate;
     if (userStory.epicId !== undefined) updateData.epic_id = userStory.epicId;
+    if (userStory.updatedBy !== undefined) updateData.updated_by = userStory.updatedBy;
 
     const updatedUserStory = await this.db
       .updateTable('user_stories')
       .set(updateData)
       .where('id', '=', id)
+      .where('deleted_at', 'is', null)
       .returningAll()
       .executeTakeFirst();
 
@@ -75,8 +86,16 @@ export class UserStoryRepository implements IUserStoryRepository {
     return this.mapToUserStory(updatedUserStory);
   }
 
-  async delete(id: string): Promise<void> {
-    await this.db.deleteFrom('user_stories').where('id', '=', id).execute();
+  async delete(id: string, userId: string): Promise<void> {
+    await this.db
+      .updateTable('user_stories')
+      .set({
+        deleted_by: userId,
+        deleted_at: new Date(),
+      })
+      .where('id', '=', id)
+      .where('deleted_at', 'is', null)
+      .execute();
   }
 
   private mapToUserStory(dbUserStory: UserStoryTable): UserStory {
@@ -89,8 +108,12 @@ export class UserStoryRepository implements IUserStoryRepository {
       assignee: dbUserStory.assignee,
       dueDate: dbUserStory.due_date,
       epicId: dbUserStory.epic_id,
+      createdBy: dbUserStory.created_by,
+      updatedBy: dbUserStory.updated_by,
+      deletedBy: dbUserStory.deleted_by,
       createdAt: dbUserStory.created_at,
       updatedAt: dbUserStory.updated_at,
+      deletedAt: dbUserStory.deleted_at,
     };
   }
 }

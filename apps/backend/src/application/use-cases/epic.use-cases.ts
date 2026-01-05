@@ -24,23 +24,25 @@ export class EpicUseCases {
     return epic;
   }
 
-  async createEpic(createEpicDto: CreateEpicDto): Promise<Epic> {
+  async createEpic(createEpicDto: CreateEpicDto, userId: string): Promise<Epic> {
     return this.epicRepository.create({
       title: createEpicDto.title,
       description: createEpicDto.description ?? null,
       status: createEpicDto.status!,
       startDate: createEpicDto.startDate,
       endDate: createEpicDto.endDate,
+      projectId: createEpicDto.projectId ?? null,
+      createdBy: userId,
     });
   }
 
-  async updateEpic(id: string, updateEpicDto: UpdateEpicDto): Promise<Epic> {
+  async updateEpic(id: string, updateEpicDto: UpdateEpicDto, userId: string): Promise<Epic> {
     const epic = await this.epicRepository.findById(id);
     if (!epic) {
       throw new NotFoundException(`Epic with ID ${id} not found`);
     }
 
-    const updateData: Partial<Omit<Epic, 'id' | 'createdAt' | 'updatedAt'>> =
+    const updateData: Partial<Omit<Epic, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'deletedBy' | 'deletedAt'>> =
       {};
     if (updateEpicDto.title !== undefined)
       updateData.title = updateEpicDto.title;
@@ -52,6 +54,10 @@ export class EpicUseCases {
       updateData.startDate = updateEpicDto.startDate;
     if (updateEpicDto.endDate !== undefined)
       updateData.endDate = updateEpicDto.endDate;
+    if (updateEpicDto.projectId !== undefined)
+      updateData.projectId = updateEpicDto.projectId ?? null;
+
+    updateData.updatedBy = userId;
 
     const updated = await this.epicRepository.update(id, updateData);
     if (!updated) {
@@ -60,11 +66,11 @@ export class EpicUseCases {
     return updated;
   }
 
-  async deleteEpic(id: string): Promise<void> {
+  async deleteEpic(id: string, userId: string): Promise<void> {
     const epic = await this.epicRepository.findById(id);
     if (!epic) {
       throw new NotFoundException(`Epic with ID ${id} not found`);
     }
-    await this.epicRepository.delete(id);
+    await this.epicRepository.delete(id, userId);
   }
 }

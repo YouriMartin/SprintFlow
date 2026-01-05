@@ -122,8 +122,21 @@ CREATE TABLE IF NOT EXISTS epics
 (
     id
 ) ON DELETE SET NULL,
+    created_by UUID NOT NULL REFERENCES users
+(
+    id
+) ON DELETE RESTRICT,
+    updated_by UUID REFERENCES users
+(
+    id
+) ON DELETE SET NULL,
+    deleted_by UUID REFERENCES users
+(
+    id
+) ON DELETE SET NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
     );
 
 -- User Stories table
@@ -173,8 +186,21 @@ CREATE TABLE IF NOT EXISTS user_stories
 (
     id
 ) ON DELETE SET NULL,
+    created_by UUID NOT NULL REFERENCES users
+(
+    id
+) ON DELETE RESTRICT,
+    updated_by UUID REFERENCES users
+(
+    id
+) ON DELETE SET NULL,
+    deleted_by UUID REFERENCES users
+(
+    id
+) ON DELETE SET NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- Code Repositories table
@@ -220,10 +246,14 @@ CREATE INDEX IF NOT EXISTS idx_epics_status ON epics (status);
 CREATE INDEX IF NOT EXISTS idx_epics_start_date ON epics (start_date);
 CREATE INDEX IF NOT EXISTS idx_epics_end_date ON epics (end_date);
 CREATE INDEX IF NOT EXISTS idx_epics_project_id ON epics (project_id);
+CREATE INDEX IF NOT EXISTS idx_epics_created_by ON epics (created_by);
+CREATE INDEX IF NOT EXISTS idx_epics_deleted_at ON epics (deleted_at);
 CREATE INDEX IF NOT EXISTS idx_user_stories_status ON user_stories (status);
 CREATE INDEX IF NOT EXISTS idx_user_stories_assignee ON user_stories (assignee);
 CREATE INDEX IF NOT EXISTS idx_user_stories_due_date ON user_stories (due_date);
 CREATE INDEX IF NOT EXISTS idx_user_stories_epic_id ON user_stories (epic_id);
+CREATE INDEX IF NOT EXISTS idx_user_stories_created_by ON user_stories (created_by);
+CREATE INDEX IF NOT EXISTS idx_user_stories_deleted_at ON user_stories (deleted_at);
 CREATE INDEX IF NOT EXISTS idx_code_repositories_repository_type ON code_repositories (repository_type);
 CREATE INDEX IF NOT EXISTS idx_user_story_code_repositories_user_story_id ON user_story_code_repositories (user_story_id);
 CREATE INDEX IF NOT EXISTS idx_user_story_code_repositories_code_repository_id ON user_story_code_repositories (code_repository_id);
@@ -256,10 +286,26 @@ ON COLUMN epics.end_date IS 'End date of the epic for roadmap visualization (req
 COMMENT
 ON COLUMN epics.project_id IS 'Foreign key to the project this epic belongs to';
 COMMENT
+ON COLUMN epics.created_by IS 'User who created this epic';
+COMMENT
+ON COLUMN epics.updated_by IS 'User who last updated this epic';
+COMMENT
+ON COLUMN epics.deleted_by IS 'User who deleted this epic (soft delete)';
+COMMENT
+ON COLUMN epics.deleted_at IS 'Timestamp when this epic was deleted (soft delete)';
+COMMENT
 ON COLUMN user_stories.status IS 'User story status: todo, in_progress, or done';
 COMMENT
 ON COLUMN user_stories.priority IS 'User story priority: low, medium, high, or urgent';
 COMMENT
 ON COLUMN user_stories.epic_id IS 'Foreign key to the epic this user story belongs to';
+COMMENT
+ON COLUMN user_stories.created_by IS 'User who created this user story';
+COMMENT
+ON COLUMN user_stories.updated_by IS 'User who last updated this user story';
+COMMENT
+ON COLUMN user_stories.deleted_by IS 'User who deleted this user story (soft delete)';
+COMMENT
+ON COLUMN user_stories.deleted_at IS 'Timestamp when this user story was deleted (soft delete)';
 COMMENT ON COLUMN code_repositories.repository_type IS 'Type of Git repository: gitlab or github';
 COMMENT ON COLUMN code_repositories.repository_id IS 'External repository ID from GitLab/GitHub API';

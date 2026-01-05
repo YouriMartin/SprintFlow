@@ -29,24 +29,30 @@ export class UserStoryUseCases {
     return userStory;
   }
 
-  async createUserStory(createUserStoryDto: CreateUserStoryDto): Promise<UserStory> {
-    return this.userStoryRepository.create(createUserStoryDto);
+  async createUserStory(createUserStoryDto: CreateUserStoryDto, userId: string): Promise<UserStory> {
+    return this.userStoryRepository.create({
+      ...createUserStoryDto,
+      createdBy: userId,
+    });
   }
 
-  async updateUserStory(id: string, updateUserStoryDto: UpdateUserStoryDto): Promise<UserStory> {
+  async updateUserStory(id: string, updateUserStoryDto: UpdateUserStoryDto, userId: string): Promise<UserStory> {
     const userStory = await this.userStoryRepository.findById(id);
     if (!userStory) {
       throw new NotFoundException(`UserStory with ID ${id} not found`);
     }
-    return this.userStoryRepository.update(id, updateUserStoryDto);
+    return this.userStoryRepository.update(id, {
+      ...updateUserStoryDto,
+      updatedBy: userId,
+    });
   }
 
-  async deleteUserStory(id: string): Promise<void> {
+  async deleteUserStory(id: string, userId: string): Promise<void> {
     const userStory = await this.userStoryRepository.findById(id);
     if (!userStory) {
       throw new NotFoundException(`UserStory with ID ${id} not found`);
     }
-    await this.userStoryRepository.delete(id);
+    await this.userStoryRepository.delete(id, userId);
   }
 
   async getUserStoryCodeRepositories(userStoryId: string): Promise<CodeRepository[]> {

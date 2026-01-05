@@ -1,5 +1,5 @@
-import {Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put,} from '@nestjs/common';
-import {ApiOperation, ApiResponse, ApiTags} from '@nestjs/swagger';
+import {Body, Controller, Delete, Get, Headers, HttpCode, HttpStatus, Param, Post, Put,} from '@nestjs/common';
+import {ApiHeader, ApiOperation, ApiResponse, ApiTags} from '@nestjs/swagger';
 import {UserStoryUseCases} from '../../application/use-cases/user-story.use-cases';
 import {CreateUserStoryDto} from '../../application/dtos/create-user-story.dto';
 import {UpdateUserStoryDto} from '../../application/dtos/update-user-story.dto';
@@ -28,30 +28,40 @@ export class UserStoryController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new user story' })
+  @ApiHeader({ name: 'x-user-id', description: 'ID of the user creating the user story', required: true })
   @ApiResponse({ status: 201, description: 'User story created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
-  async create(@Body() createUserStoryDto: CreateUserStoryDto): Promise<UserStory> {
-    return this.userStoryUseCases.createUserStory(createUserStoryDto);
+  async create(
+    @Body() createUserStoryDto: CreateUserStoryDto,
+    @Headers('x-user-id') userId: string,
+  ): Promise<UserStory> {
+    return this.userStoryUseCases.createUserStory(createUserStoryDto, userId);
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Update a user story' })
+  @ApiHeader({ name: 'x-user-id', description: 'ID of the user updating the user story', required: true })
   @ApiResponse({ status: 200, description: 'User story updated successfully' })
   @ApiResponse({ status: 404, description: 'User story not found' })
   async update(
     @Param('id') id: string,
     @Body() updateUserStoryDto: UpdateUserStoryDto,
+    @Headers('x-user-id') userId: string,
   ): Promise<UserStory> {
-    return this.userStoryUseCases.updateUserStory(id, updateUserStoryDto);
+    return this.userStoryUseCases.updateUserStory(id, updateUserStoryDto, userId);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete a user story' })
+  @ApiOperation({ summary: 'Delete a user story (soft delete)' })
+  @ApiHeader({ name: 'x-user-id', description: 'ID of the user deleting the user story', required: true })
   @ApiResponse({ status: 204, description: 'User story deleted successfully' })
   @ApiResponse({ status: 404, description: 'User story not found' })
-  async delete(@Param('id') id: string): Promise<void> {
-    return this.userStoryUseCases.deleteUserStory(id);
+  async delete(
+    @Param('id') id: string,
+    @Headers('x-user-id') userId: string,
+  ): Promise<void> {
+    return this.userStoryUseCases.deleteUserStory(id, userId);
   }
 
   @Get(':id/code-repositories')

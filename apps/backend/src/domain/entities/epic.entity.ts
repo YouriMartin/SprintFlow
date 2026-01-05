@@ -13,6 +13,10 @@ export interface Epic {
   startDate: Date;
   endDate: Date;
   projectId: string | null;
+  createdBy: string;
+  updatedBy: string | null;
+  deletedBy: string | null;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt: Date | null;
 }

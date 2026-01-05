@@ -5,7 +5,7 @@ export interface IUserStoryRepository {
   findById(id: string): Promise<UserStory | null>;
   create(userStory: Partial<UserStory>): Promise<UserStory>;
   update(id: string, userStory: Partial<UserStory>): Promise<UserStory>;
-  delete(id: string): Promise<void>;
+  delete(id: string, userId: string): Promise<void>;
 }
 
 export const USER_STORY_REPOSITORY = Symbol('USER_STORY_REPOSITORY');

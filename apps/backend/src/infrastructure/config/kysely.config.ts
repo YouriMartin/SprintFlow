@@ -46,8 +46,12 @@ export interface EpicTable {
   start_date: Date;
   end_date: Date;
   project_id: string | null;
+  created_by: string;
+  updated_by: string | null;
+  deleted_by: string | null;
   created_at: Date;
   updated_at: Date;
+  deleted_at: Date | null;
 }
 
 export interface UserStoryTable {
@@ -59,8 +63,12 @@ export interface UserStoryTable {
   assignee: string | null;
   due_date: Date | null;
   epic_id: string | null;
+  created_by: string;
+  updated_by: string | null;
+  deleted_by: string | null;
   created_at: Date;
   updated_at: Date;
+  deleted_at: Date | null;
 }
 
 export interface CodeRepositoryTable {
