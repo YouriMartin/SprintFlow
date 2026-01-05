@@ -1,4 +1,9 @@
-import { ConflictException, Inject, Injectable, NotFoundException, } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { IUserRepository } from '../../domain/repositories/user.repository.interface';
 import { USER_REPOSITORY } from '../../domain/repositories/user.repository.interface';
 import { User } from '../../domain/entities/user.entity';
