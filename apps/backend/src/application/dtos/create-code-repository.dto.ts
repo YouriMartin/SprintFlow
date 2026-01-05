@@ -1,8 +1,8 @@
 import { IsString, IsOptional, IsEnum, IsUrl } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { RepositoryType } from '../../domain/entities/project.entity';
+import { RepositoryType } from '../../domain/entities/code-repository.entity';
 
-export class CreateProjectDto {
+export class CreateCodeRepositoryDto {
   @ApiProperty({ example: 'SprintFlow' })
   @IsString()
   name: string;

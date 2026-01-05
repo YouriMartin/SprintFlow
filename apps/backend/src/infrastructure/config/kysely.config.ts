@@ -5,8 +5,8 @@ import { Pool } from 'pg';
 // Database schema interface
 export interface Database {
   tasks: TaskTable;
-  projects: ProjectTable;
-  task_projects: TaskProjectTable;
+  code_repositories: CodeRepositoryTable;
+  task_code_repositories: TaskCodeRepositoryTable;
 }
 
 export interface TaskTable {
@@ -21,7 +21,7 @@ export interface TaskTable {
   updated_at: Date;
 }
 
-export interface ProjectTable {
+export interface CodeRepositoryTable {
   id: string;
   name: string;
   description: string | null;
@@ -32,9 +32,9 @@ export interface ProjectTable {
   updated_at: Date;
 }
 
-export interface TaskProjectTable {
+export interface TaskCodeRepositoryTable {
   task_id: string;
-  project_id: string;
+  code_repository_id: string;
   created_at: Date;
 }
 

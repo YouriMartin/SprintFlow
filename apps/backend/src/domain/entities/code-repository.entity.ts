@@ -3,7 +3,7 @@ export enum RepositoryType {
   GITHUB = 'github',
 }
 
-export interface Project {
+export interface CodeRepository {
   id: string;
   name: string;
   description: string | null;

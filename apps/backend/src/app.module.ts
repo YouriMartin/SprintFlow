@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TaskModule } from './modules/task.module';
-import { ProjectModule } from './modules/project.module';
+import { CodeRepositoryModule } from './modules/code-repository.module';
 import { DatabaseModule } from './infrastructure/database/database.module';
 import kyselyConfig from './infrastructure/config/kysely.config';
 import appConfig from './infrastructure/config/app.config';
@@ -16,7 +16,7 @@ import appConfig from './infrastructure/config/app.config';
     }),
     DatabaseModule,
     TaskModule,
-    ProjectModule,
+    CodeRepositoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

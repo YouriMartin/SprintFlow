@@ -1,8 +1,8 @@
 import { IsString, IsOptional, IsEnum, IsUrl } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { RepositoryType } from '../../domain/entities/project.entity';
+import { RepositoryType } from '../../domain/entities/code-repository.entity';
 
-export class UpdateProjectDto {
+export class UpdateCodeRepositoryDto {
   @ApiProperty({ example: 'SprintFlow', required: false })
   @IsOptional()
   @IsString()
