@@ -9,22 +9,34 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ProjectUseCases } from '../../application/use-cases/project.use-cases';
 import { CreateProjectDto } from '../../application/dtos/create-project.dto';
 import { UpdateProjectDto } from '../../application/dtos/update-project.dto';
 import { Project } from '../../domain/entities/project.entity';
+import {
+  CreateProjectCommand,
+  UpdateProjectCommand,
+  DeleteProjectCommand,
+} from '../../application/commands/impl/project';
+import {
+  GetAllProjectsQuery,
+  GetProjectByIdQuery,
+} from '../../application/queries/impl/project';
 
 @ApiTags('projects')
 @Controller('projects')
 export class ProjectController {
-  constructor(private readonly projectUseCases: ProjectUseCases) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all projects' })
   @ApiResponse({ status: 200, description: 'Return all projects' })
   async findAll(): Promise<Project[]> {
-    return this.projectUseCases.getAllProjects();
+    return this.queryBus.execute(new GetAllProjectsQuery());
   }
 
   @Get(':id')
@@ -32,7 +44,7 @@ export class ProjectController {
   @ApiResponse({ status: 200, description: 'Return the project' })
   @ApiResponse({ status: 404, description: 'Project not found' })
   async findOne(@Param('id') id: string): Promise<Project> {
-    return this.projectUseCases.getProjectById(id);
+    return this.queryBus.execute(new GetProjectByIdQuery(id));
   }
 
   @Post()
@@ -40,7 +52,7 @@ export class ProjectController {
   @ApiResponse({ status: 201, description: 'Project created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   async create(@Body() createProjectDto: CreateProjectDto): Promise<Project> {
-    return this.projectUseCases.createProject(createProjectDto);
+    return this.commandBus.execute(new CreateProjectCommand(createProjectDto));
   }
 
   @Put(':id')
@@ -51,7 +63,9 @@ export class ProjectController {
     @Param('id') id: string,
     @Body() updateProjectDto: UpdateProjectDto,
   ): Promise<Project> {
-    return this.projectUseCases.updateProject(id, updateProjectDto);
+    return this.commandBus.execute(
+      new UpdateProjectCommand(id, updateProjectDto),
+    );
   }
 
   @Delete(':id')
@@ -60,6 +74,6 @@ export class ProjectController {
   @ApiResponse({ status: 204, description: 'Project deleted successfully' })
   @ApiResponse({ status: 404, description: 'Project not found' })
   async delete(@Param('id') id: string): Promise<void> {
-    return this.projectUseCases.deleteProject(id);
+    return this.commandBus.execute(new DeleteProjectCommand(id));
   }
 }

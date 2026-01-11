@@ -3,7 +3,7 @@
 ## Project Overview
 
 SprintFlow is a task management mono repo with:
-- **Backend**: NestJS API with clean architecture (port 3000)
+- **Backend**: NestJS API with Clean Architecture + CQRS (port 3000)
 - **Frontend**: Next.js with TypeScript and Tailwind CSS (port 3001)
 - **Database**: PostgreSQL 16
 
@@ -27,23 +27,62 @@ docker compose up -d     # Start all services
 docker compose down      # Stop all services
 ```
 
-## Architecture - Clean Architecture (Backend)
+## Architecture - Clean Architecture + CQRS (Backend)
 
 ```
 apps/backend/src/
 ├── domain/              # Entities & repository interfaces (no dependencies)
-├── application/         # Use cases & DTOs (depends on domain)
+├── application/
+│   ├── commands/        # CQRS Commands
+│   │   ├── impl/        # Command objects (CreateXCommand, UpdateXCommand, DeleteXCommand)
+│   │   └── handlers/    # Command handlers (business logic for writes)
+│   ├── queries/         # CQRS Queries
+│   │   ├── impl/        # Query objects (GetAllXQuery, GetXByIdQuery)
+│   │   └── handlers/    # Query handlers (business logic for reads)
+│   └── dtos/            # Data transfer objects
 ├── infrastructure/      # Database, config, logging (implements domain interfaces)
-├── presentation/        # Controllers (depends on application)
+├── presentation/        # Controllers (uses CommandBus & QueryBus)
 └── modules/             # NestJS modules (wiring)
+```
+
+### CQRS Pattern
+
+**Commands** (write operations):
+- `CreateXCommand` - Create entity
+- `UpdateXCommand` - Update entity
+- `DeleteXCommand` - Delete entity
+
+**Queries** (read operations):
+- `GetAllXQuery` - Get all entities
+- `GetXByIdQuery` - Get entity by ID
+
+**Controller Pattern**:
+```typescript
+@Controller('entities')
+export class EntityController {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
+
+  @Get()
+  findAll() {
+    return this.queryBus.execute(new GetAllEntitiesQuery());
+  }
+
+  @Post()
+  create(@Body() dto: CreateEntityDto) {
+    return this.commandBus.execute(new CreateEntityCommand(dto));
+  }
+}
 ```
 
 ### Layer Rules
 
 1. **Domain**: Pure business entities, no framework dependencies
-2. **Application**: Business logic in use cases, DTOs for validation
+2. **Application**: Commands/Queries with handlers, DTOs for validation
 3. **Infrastructure**: Implements repository interfaces, external services
-4. **Presentation**: HTTP controllers, thin - delegate to use cases
+4. **Presentation**: HTTP controllers, use CommandBus/QueryBus
 
 ## Adding New Features (Backend)
 
@@ -51,21 +90,47 @@ Follow this order:
 1. Entity in `domain/entities/`
 2. Repository interface in `domain/repositories/`
 3. DTOs in `application/dtos/`
-4. Use cases in `application/use-cases/`
-5. Repository implementation in `infrastructure/database/`
-6. Controller in `presentation/controllers/`
-7. Module in `modules/`
-8. Tests in `*.spec.ts`
+4. Commands in `application/commands/impl/{entity}/`
+5. Command handlers in `application/commands/handlers/{entity}/`
+6. Queries in `application/queries/impl/{entity}/`
+7. Query handlers in `application/queries/handlers/{entity}/`
+8. Repository implementation in `infrastructure/database/`
+9. Controller in `presentation/controllers/`
+10. Module in `modules/` (import CqrsModule, register handlers)
+
+### Example: Adding a New Entity "Sprint"
+
+```bash
+# Create directories
+mkdir -p application/commands/impl/sprint
+mkdir -p application/commands/handlers/sprint
+mkdir -p application/queries/impl/sprint
+mkdir -p application/queries/handlers/sprint
+```
+
+**Files to create:**
+- `domain/entities/sprint.entity.ts`
+- `domain/repositories/sprint.repository.interface.ts`
+- `application/dtos/create-sprint.dto.ts`
+- `application/dtos/update-sprint.dto.ts`
+- `application/commands/impl/sprint/create-sprint.command.ts`
+- `application/commands/handlers/sprint/create-sprint.handler.ts`
+- `application/queries/impl/sprint/get-all-sprints.query.ts`
+- `application/queries/handlers/sprint/get-all-sprints.handler.ts`
+- `infrastructure/database/sprint.repository.ts`
+- `presentation/controllers/sprint.controller.ts`
+- `modules/sprint.module.ts`
 
 ## Code Conventions
 
-### Backend (NestJS)
+### Backend (NestJS + CQRS)
 - Use Kysely for database queries (type-safe)
 - Repository pattern with interfaces
 - DTOs with class-validator decorators
-- Keep controllers thin - business logic in use cases
+- Commands for write operations, Queries for read operations
+- Handlers contain business logic
+- Controllers are thin - only dispatch commands/queries
 - Document endpoints with Swagger decorators
-- Write unit tests for use cases
 
 ### Frontend (Next.js)
 - Functional components with hooks
@@ -85,6 +150,7 @@ Follow this order:
 
 - Jest for backend tests
 - Mock repositories for isolated testing
+- Test handlers individually
 - Follow AAA pattern: Arrange, Act, Assert
 - Test files: `*.spec.ts` next to source files
 
