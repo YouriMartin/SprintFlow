@@ -237,6 +237,12 @@ NEXT_PUBLIC_API_URL=http://localhost:3000
 6. Commit and push changes
 7. Create a pull request
 
+## 📖 Documentation
+
+- [Quick Start Guide](docs/QUICKSTART.md) - Get started in 5 minutes
+- [Development Guide](docs/DEVELOPMENT.md) - Development guidelines
+- [Implementation Summary](docs/IMPLEMENTATION.md) - Technical details
+
 ## 🤝 Contributing
 
 1. Fork the repository
