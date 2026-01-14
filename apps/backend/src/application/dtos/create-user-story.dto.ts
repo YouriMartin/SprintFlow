@@ -49,4 +49,13 @@ export class CreateUserStoryDto {
   @IsOptional()
   @IsString()
   epicId?: string;
+
+  @ApiProperty({
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'Sprint ID to assign this user story to',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  sprintId?: string;
 }

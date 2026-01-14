@@ -20,6 +20,7 @@ export interface UserStory {
   assignee: string | null;
   dueDate: Date | null;
   epicId: string | null;
+  sprintId: string | null;
   createdBy: string;
   updatedBy: string | null;
   deletedBy: string | null;

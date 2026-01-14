@@ -8,6 +8,7 @@ export interface Database {
   projects: ProjectTable;
   project_users: ProjectUserTable;
   epics: EpicTable;
+  sprints: SprintTable;
   user_stories: UserStoryTable;
   code_repositories: CodeRepositoryTable;
   user_story_code_repositories: UserStoryCodeRepositoryTable;
@@ -55,6 +56,25 @@ export interface EpicTable {
   deleted_at: Date | null;
 }
 
+export interface SprintTable {
+  id: string;
+  name: string;
+  goal: string | null;
+  sprint_number: number;
+  start_date: Date;
+  end_date: Date;
+  status: 'planned' | 'active' | 'completed' | 'cancelled';
+  velocity: number | null;
+  capacity: number | null;
+  project_id: string | null;
+  created_by: string;
+  updated_by: string | null;
+  deleted_by: string | null;
+  created_at: Date;
+  updated_at: Date;
+  deleted_at: Date | null;
+}
+
 export interface UserStoryTable {
   id: string;
   title: string;
@@ -64,6 +84,7 @@ export interface UserStoryTable {
   assignee: string | null;
   due_date: Date | null;
   epic_id: string | null;
+  sprint_id: string | null;
   created_by: string;
   updated_by: string | null;
   deleted_by: string | null;

@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { UserModule } from './modules/user.module';
 import { ProjectModule } from './modules/project.module';
 import { EpicModule } from './modules/epic.module';
+import { SprintModule } from './modules/sprint.module';
 import { UserStoryModule } from './modules/user-story.module';
 import { CodeRepositoryModule } from './modules/code-repository.module';
 import { DatabaseModule } from './infrastructure/database/database.module';
@@ -21,6 +22,7 @@ import appConfig from './infrastructure/config/app.config';
     UserModule,
     ProjectModule,
     EpicModule,
+    SprintModule,
     UserStoryModule,
     CodeRepositoryModule,
   ],

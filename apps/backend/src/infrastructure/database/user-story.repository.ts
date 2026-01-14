@@ -43,6 +43,7 @@ export class UserStoryRepository implements IUserStoryRepository {
         assignee: userStory.assignee || null,
         due_date: userStory.dueDate || null,
         epic_id: userStory.epicId || null,
+        sprint_id: userStory.sprintId || null,
         created_by: userStory.createdBy!,
         updated_by: null,
         deleted_by: null,
@@ -69,6 +70,7 @@ export class UserStoryRepository implements IUserStoryRepository {
     if (userStory.assignee !== undefined) updateData.assignee = userStory.assignee;
     if (userStory.dueDate !== undefined) updateData.due_date = userStory.dueDate;
     if (userStory.epicId !== undefined) updateData.epic_id = userStory.epicId;
+    if (userStory.sprintId !== undefined) updateData.sprint_id = userStory.sprintId;
     if (userStory.updatedBy !== undefined) updateData.updated_by = userStory.updatedBy;
 
     const updatedUserStory = await this.db
@@ -108,6 +110,7 @@ export class UserStoryRepository implements IUserStoryRepository {
       assignee: dbUserStory.assignee,
       dueDate: dbUserStory.due_date,
       epicId: dbUserStory.epic_id,
+      sprintId: dbUserStory.sprint_id,
       createdBy: dbUserStory.created_by,
       updatedBy: dbUserStory.updated_by,
       deletedBy: dbUserStory.deleted_by,
