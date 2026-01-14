@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { UserStoryRepository } from '../infrastructure/database/user-story.repository';
 import { USER_STORY_REPOSITORY } from '../domain/repositories/user-story.repository.interface';
@@ -8,7 +8,7 @@ import { UserStoryCommandHandlers } from '../application/commands/handlers/user-
 import { UserStoryQueryHandlers } from '../application/queries/handlers/user-story';
 
 @Module({
-  imports: [CqrsModule, CodeRepositoryModule],
+  imports: [CqrsModule, forwardRef(() => CodeRepositoryModule)],
   controllers: [UserStoryController],
   providers: [
     {

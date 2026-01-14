@@ -89,6 +89,26 @@ export class CodeRepositoryRepositoryImpl implements CodeRepositoryRepository {
     return codeRepositories.map((codeRepository) => this.mapToCodeRepository(codeRepository));
   }
 
+  async linkToUserStory(codeRepositoryId: string, userStoryId: string): Promise<void> {
+    await this.db
+      .insertInto('user_story_code_repositories')
+      .values({
+        code_repository_id: codeRepositoryId,
+        user_story_id: userStoryId,
+        created_at: new Date(),
+      })
+      .onConflict((oc) => oc.doNothing())
+      .execute();
+  }
+
+  async unlinkFromUserStory(codeRepositoryId: string, userStoryId: string): Promise<void> {
+    await this.db
+      .deleteFrom('user_story_code_repositories')
+      .where('code_repository_id', '=', codeRepositoryId)
+      .where('user_story_id', '=', userStoryId)
+      .execute();
+  }
+
   private mapToCodeRepository(dbCodeRepository: CodeRepositoryTable): CodeRepository {
     return {
       id: dbCodeRepository.id,
