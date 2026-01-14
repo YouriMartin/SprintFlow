@@ -46,6 +46,7 @@ export interface EpicTable {
   start_date: Date;
   end_date: Date;
   project_id: string | null;
+  is_visible_in_roadmap: boolean;
   created_by: string;
   updated_by: string | null;
   deleted_by: string | null;

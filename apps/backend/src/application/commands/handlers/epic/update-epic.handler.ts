@@ -35,6 +35,8 @@ export class UpdateEpicHandler implements ICommandHandler<UpdateEpicCommand> {
     if (dto.endDate !== undefined) updateData.endDate = dto.endDate;
     if (dto.projectId !== undefined)
       updateData.projectId = dto.projectId ?? null;
+    if (dto.isVisibleInRoadmap !== undefined)
+      updateData.isVisibleInRoadmap = dto.isVisibleInRoadmap;
 
     updateData.updatedBy = userId;
 

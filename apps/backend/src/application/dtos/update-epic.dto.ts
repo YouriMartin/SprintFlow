@@ -1,4 +1,10 @@
-import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsDateString,
+  IsEnum,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { EpicStatus } from '../../domain/entities/epic.entity';
 
@@ -38,4 +44,13 @@ export class UpdateEpicDto {
   @IsOptional()
   @IsString()
   projectId?: string;
+
+  @ApiProperty({
+    example: true,
+    description: 'Whether the epic is visible in the roadmap',
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isVisibleInRoadmap?: boolean;
 }

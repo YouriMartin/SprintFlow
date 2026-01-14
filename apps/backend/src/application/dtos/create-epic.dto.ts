@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsNotEmpty,
@@ -50,4 +51,14 @@ export class CreateEpicDto {
   @IsOptional()
   @IsString()
   projectId?: string;
+
+  @ApiProperty({
+    example: true,
+    default: true,
+    description: 'Whether the epic is visible in the roadmap',
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isVisibleInRoadmap?: boolean;
 }

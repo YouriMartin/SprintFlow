@@ -13,6 +13,7 @@ export interface Epic {
   startDate: Date;
   endDate: Date;
   projectId: string | null;
+  isVisibleInRoadmap: boolean;
   createdBy: string;
   updatedBy: string | null;
   deletedBy: string | null;

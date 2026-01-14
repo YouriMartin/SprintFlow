@@ -22,6 +22,7 @@ export class CreateEpicHandler implements ICommandHandler<CreateEpicCommand> {
       startDate: dto.startDate,
       endDate: dto.endDate,
       projectId: dto.projectId ?? null,
+      isVisibleInRoadmap: dto.isVisibleInRoadmap ?? true,
       createdBy: userId,
     });
   }

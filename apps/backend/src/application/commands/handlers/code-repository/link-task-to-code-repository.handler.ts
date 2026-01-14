@@ -3,7 +3,7 @@ import { Inject, NotFoundException } from '@nestjs/common';
 import { LinkTaskToCodeRepositoryCommand } from '../../impl/code-repository/link-task-to-code-repository.command';
 import type { CodeRepositoryRepository } from '../../../../domain/repositories/code-repository.repository.interface';
 import { CODE_REPOSITORY_REPOSITORY } from '../../../../domain/repositories/code-repository.repository.interface';
-import type { UserStoryRepository } from '../../../../domain/repositories/user-story.repository.interface';
+import type { IUserStoryRepository } from '../../../../domain/repositories/user-story.repository.interface';
 import { USER_STORY_REPOSITORY } from '../../../../domain/repositories/user-story.repository.interface';
 
 @CommandHandler(LinkTaskToCodeRepositoryCommand)
@@ -14,7 +14,7 @@ export class LinkTaskToCodeRepositoryHandler
     @Inject(CODE_REPOSITORY_REPOSITORY)
     private readonly codeRepositoryRepository: CodeRepositoryRepository,
     @Inject(USER_STORY_REPOSITORY)
-    private readonly userStoryRepository: UserStoryRepository,
+    private readonly userStoryRepository: IUserStoryRepository,
   ) {}
 
   async execute(command: LinkTaskToCodeRepositoryCommand): Promise<void> {

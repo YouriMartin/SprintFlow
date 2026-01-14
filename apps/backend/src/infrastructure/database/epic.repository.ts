@@ -44,6 +44,7 @@ export class EpicRepository implements IEpicRepository {
         start_date: epic.startDate,
         end_date: epic.endDate,
         project_id: epic.projectId || null,
+        is_visible_in_roadmap: epic.isVisibleInRoadmap ?? true,
         created_by: epic.createdBy,
         updated_by: null,
         deleted_by: null,
@@ -72,6 +73,8 @@ export class EpicRepository implements IEpicRepository {
     if (epic.startDate !== undefined) updateData.start_date = epic.startDate;
     if (epic.endDate !== undefined) updateData.end_date = epic.endDate;
     if (epic.projectId !== undefined) updateData.project_id = epic.projectId;
+    if (epic.isVisibleInRoadmap !== undefined)
+      updateData.is_visible_in_roadmap = epic.isVisibleInRoadmap;
     if (epic.updatedBy !== undefined) updateData.updated_by = epic.updatedBy;
 
     const updatedEpic = await this.db
@@ -106,6 +109,7 @@ export class EpicRepository implements IEpicRepository {
       startDate: dbEpic.start_date,
       endDate: dbEpic.end_date,
       projectId: dbEpic.project_id,
+      isVisibleInRoadmap: dbEpic.is_visible_in_roadmap,
       createdBy: dbEpic.created_by,
       updatedBy: dbEpic.updated_by,
       deletedBy: dbEpic.deleted_by,
