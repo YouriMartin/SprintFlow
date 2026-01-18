@@ -127,10 +127,12 @@
 	});
 </script>
 
-<div class="container">
-	<header class="header">
-		<h1>SprintFlow</h1>
-		<p class="subtitle">Jira and Monday's Killer</p>
+<div class="page">
+	<header class="page-header">
+		<div>
+			<h1>Dashboard</h1>
+			<p class="subtitle">Welcome to SprintFlow</p>
+		</div>
 	</header>
 
 	{#if error}
@@ -235,25 +237,29 @@
 </div>
 
 <style>
-	.container {
+	.page {
 		max-width: 1200px;
-		margin: 0 auto;
-		padding: 2rem 1rem;
 	}
 
-	.header {
+	.page-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 		margin-bottom: 2rem;
+		padding-bottom: 1rem;
+		border-bottom: 1px solid #e5e7eb;
 	}
 
-	.header h1 {
-		font-size: 2.5rem;
-		font-weight: 700;
+	.page-header h1 {
+		font-size: 1.75rem;
+		font-weight: 600;
 		color: #111827;
-		margin-bottom: 0.5rem;
+		margin-bottom: 0.25rem;
 	}
 
 	.subtitle {
 		color: #6b7280;
+		font-size: 0.875rem;
 	}
 
 	.error-banner {
