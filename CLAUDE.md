@@ -7,6 +7,33 @@ SprintFlow is a task management mono repo with:
 - **Frontend**: Next.js with TypeScript and Tailwind CSS (port 3001)
 - **Database**: PostgreSQL 16
 
+## Domain Entities
+
+```
+Project (workspace)
+├── Epic (roadmap planning, has start/end dates)
+│   └── UserStory (backlog items)
+├── Sprint (time-boxed iterations)
+│   └── UserStory (assigned to sprint)
+└── Users (team members)
+
+CodeRepository (GitLab/GitHub repos linked to UserStories)
+```
+
+### Entity Details
+
+| Entity | Status Enum | Key Fields |
+|--------|-------------|------------|
+| **User** | `superadmin`, `dev` | email, name, password, role |
+| **Project** | `active`, `archived`, `on_hold` | name, description |
+| **Epic** | `planned`, `in_progress`, `completed`, `cancelled` | title, startDate, endDate, projectId, isVisibleInRoadmap |
+| **Sprint** | `planned`, `active`, `completed`, `cancelled` | name, goal, sprintNumber, startDate, endDate, velocity, capacity, projectId |
+| **UserStory** | `todo`, `in_progress`, `done` | title, priority (low/medium/high/urgent), epicId, sprintId, assignee |
+| **CodeRepository** | - | name, repositoryUrl, repositoryType (gitlab/github) |
+
+### Soft Delete Pattern
+Entities with audit trail have: `createdBy`, `updatedBy`, `deletedBy`, `createdAt`, `updatedAt`, `deletedAt`
+
 ## Commands
 
 ```bash
@@ -138,6 +165,222 @@ mkdir -p application/queries/handlers/sprint
 - API client in `lib/api.ts`
 - Types in `lib/types.ts`
 
+## Best Practices
+
+### Function Documentation (MANDATORY)
+
+**Every function MUST have a JSDoc comment** explaining its purpose, parameters, and return value.
+
+```typescript
+/**
+ * Creates a new sprint in the database
+ * @param sprint - Sprint data without auto-generated fields (id, timestamps)
+ * @returns The created sprint with all fields populated
+ * @throws Error if project doesn't exist or sprint number is duplicate
+ */
+async create(
+  sprint: Omit<Sprint, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>,
+): Promise<Sprint> {
+  // implementation
+}
+```
+
+```typescript
+/**
+ * Finds all sprints for a given project
+ * @param projectId - UUID of the project
+ * @returns Array of sprints ordered by sprint number, empty array if none found
+ */
+async findByProjectId(projectId: string): Promise<Sprint[]> {
+  // implementation
+}
+```
+
+```typescript
+/**
+ * Soft deletes a sprint by setting deleted_at and deleted_by
+ * @param id - UUID of the sprint to delete
+ * @param userId - UUID of the user performing the deletion
+ */
+async delete(id: string, userId: string): Promise<void> {
+  // implementation
+}
+```
+
+### JSDoc Format
+
+| Tag | Usage |
+|-----|-------|
+| `@param name - description` | Document each parameter |
+| `@returns description` | Document return value |
+| `@throws Error description` | Document possible errors |
+| `@example` | Provide usage example if complex |
+
+### When to Add Comments
+
+- **Always**: Public methods, exported functions, repository methods, handlers
+- **Optional**: Private helper methods (if logic is complex)
+- **Never**: Obvious getters/setters, trivial one-liners
+
+### Naming Conventions
+
+| Element | Convention | Example |
+|---------|------------|---------|
+| **Files** | kebab-case | `create-sprint.command.ts`, `sprint.repository.ts` |
+| **Classes** | PascalCase | `SprintRepository`, `CreateSprintHandler` |
+| **Interfaces** | PascalCase with `I` prefix (repos only) | `ISprintRepository`, `Sprint` |
+| **Methods** | camelCase, verb first | `findById()`, `createSprint()`, `handleDelete()` |
+| **Variables** | camelCase | `sprintNumber`, `projectId`, `isActive` |
+| **Constants** | SCREAMING_SNAKE_CASE | `MAX_SPRINT_DURATION`, `DEFAULT_STATUS` |
+| **Enums** | PascalCase (type), SCREAMING_SNAKE_CASE (values) | `SprintStatus.ACTIVE` |
+| **Database columns** | snake_case | `sprint_number`, `project_id`, `created_at` |
+| **API endpoints** | kebab-case, plural nouns | `/user-stories`, `/code-repositories` |
+
+### Data Validation
+
+**Always validate input data using class-validator in DTOs:**
+
+```typescript
+import { IsString, IsNotEmpty, IsOptional, IsEnum, IsUUID, IsDateString, Min, Max } from 'class-validator';
+
+export class CreateSprintDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  goal?: string;
+
+  @IsInt()
+  @Min(1)
+  sprintNumber: number;
+
+  @IsDateString()
+  startDate: string;
+
+  @IsDateString()
+  endDate: string;
+
+  @IsOptional()
+  @IsEnum(SprintStatus)
+  status?: SprintStatus;
+
+  @IsOptional()
+  @IsUUID()
+  projectId?: string;
+
+  @IsUUID()
+  createdBy: string;
+}
+```
+
+**Validation Rules:**
+- Use `@IsNotEmpty()` for required string fields
+- Use `@IsOptional()` for nullable fields
+- Use `@IsUUID()` for all ID fields
+- Use `@IsEnum()` for status/type fields
+- Use `@IsDateString()` for dates (ISO 8601 format)
+- Use `@Min()`, `@Max()` for numeric constraints
+- Use `@IsEmail()` for email fields
+- Use `@Length(min, max)` for string length constraints
+
+### Error Handling
+
+**Use NestJS HttpException for API errors:**
+
+```typescript
+import { HttpException, HttpStatus, NotFoundException, BadRequestException } from '@nestjs/common';
+
+// In handlers - throw specific exceptions
+@CommandHandler(CreateSprintCommand)
+export class CreateSprintHandler {
+  async execute(command: CreateSprintCommand): Promise<Sprint> {
+    // Validate business rules
+    const project = await this.projectRepository.findById(command.projectId);
+    if (!project) {
+      throw new NotFoundException(`Project with ID ${command.projectId} not found`);
+    }
+
+    const existingSprint = await this.sprintRepository.findByNumber(command.sprintNumber);
+    if (existingSprint) {
+      throw new BadRequestException(`Sprint number ${command.sprintNumber} already exists`);
+    }
+
+    // Create sprint...
+  }
+}
+```
+
+**Standard Error Responses:**
+
+| Status | Exception | Use Case |
+|--------|-----------|----------|
+| 400 | `BadRequestException` | Invalid input, business rule violation |
+| 401 | `UnauthorizedException` | Missing or invalid authentication |
+| 403 | `ForbiddenException` | Authenticated but not authorized |
+| 404 | `NotFoundException` | Resource not found |
+| 409 | `ConflictException` | Duplicate resource, version conflict |
+| 500 | `InternalServerErrorException` | Unexpected server error |
+
+**Error Message Format:**
+- Be specific: `"Sprint with ID abc-123 not found"` not `"Not found"`
+- Include context: `"Cannot delete sprint: has 5 active user stories"`
+- Don't expose internals: Never include stack traces or SQL in responses
+
+### Security
+
+**SQL Injection Prevention:**
+- Always use Kysely parameterized queries (automatic)
+- Never concatenate user input into queries
+```typescript
+// GOOD - Kysely handles escaping
+const sprint = await this.db
+  .selectFrom('sprints')
+  .where('id', '=', userProvidedId)  // Safe
+  .execute();
+
+// BAD - Never do this
+const sprint = await this.db.raw(`SELECT * FROM sprints WHERE id = '${userProvidedId}'`);
+```
+
+**XSS Prevention:**
+- Sanitize HTML input if storing rich text
+- React/Next.js escapes output by default
+- Never use `dangerouslySetInnerHTML` with user content
+
+**Authentication & Authorization:**
+- Validate `createdBy`, `updatedBy` against authenticated user
+- Check project membership before allowing access
+- Use guards for route protection
+```typescript
+@UseGuards(AuthGuard)
+@Controller('sprints')
+export class SprintController {
+  // All routes require authentication
+}
+```
+
+**Input Sanitization:**
+- Trim whitespace from strings
+- Validate UUIDs format
+- Limit string lengths to prevent DoS
+- Validate date ranges (endDate > startDate)
+
+**Sensitive Data:**
+- Never log passwords or tokens
+- Use `@Exclude()` from class-transformer for sensitive fields
+- Don't return password field in user responses
+```typescript
+export class UserResponseDto {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  // password is NOT included
+}
+```
+
 ## Database
 
 - PostgreSQL with Kysely query builder
@@ -163,3 +406,75 @@ Backend `.env`:
 
 Frontend `.env.local`:
 - `NEXT_PUBLIC_API_URL=http://localhost:3000`
+
+## Migrations
+
+Migrations are SQL files in `apps/backend/migrations/`. Naming convention: `XXX_description.sql`
+
+### Creating a New Migration
+
+```bash
+# Create migration file
+touch apps/backend/migrations/003_add_feature.sql
+```
+
+### Running Migrations
+
+```bash
+# With Docker
+docker compose exec postgres psql -U postgres -d sprintflow -f /migrations/XXX_migration.sql
+
+# Without Docker
+psql -U postgres -d sprintflow -f apps/backend/migrations/XXX_migration.sql
+```
+
+### Migration Checklist
+
+When adding a new entity, create migration with:
+1. `CREATE TABLE` with all columns
+2. Foreign key constraints (`REFERENCES table(id) ON DELETE ...`)
+3. `CREATE INDEX` for frequently queried columns (status, foreign keys, deleted_at)
+4. `COMMENT ON TABLE/COLUMN` for documentation
+
+Also update `infrastructure/config/kysely.config.ts`:
+- Add table interface (e.g., `SprintTable`)
+- Add to `Database` interface
+
+## Frontend Structure
+
+```
+apps/frontend/
+├── app/              # Next.js App Router pages
+├── lib/
+│   ├── api.ts        # API client (fetch wrapper)
+│   └── types.ts      # TypeScript types (mirrors backend DTOs)
+└── public/           # Static assets
+```
+
+## API Endpoints
+
+| Resource | Endpoints |
+|----------|-----------|
+| Users | `GET/POST /users`, `GET/PATCH/DELETE /users/:id` |
+| Projects | `GET/POST /projects`, `GET/PATCH/DELETE /projects/:id` |
+| Epics | `GET/POST /epics`, `GET/PATCH/DELETE /epics/:id` |
+| Sprints | `GET/POST /sprints`, `GET/PATCH/DELETE /sprints/:id` |
+| User Stories | `GET/POST /user-stories`, `GET/PATCH/DELETE /user-stories/:id` |
+| Code Repos | `GET/POST /code-repositories`, `GET/PATCH/DELETE /code-repositories/:id` |
+| Links | `POST /user-stories/:id/link`, `DELETE /user-stories/:id/unlink` |
+
+## Quick Reference
+
+```bash
+# Start everything
+docker compose up -d && npm run backend:dev
+
+# Run specific migration
+docker compose exec postgres psql -U postgres -d sprintflow -f /migrations/002_add_sprints.sql
+
+# Check database
+docker compose exec postgres psql -U postgres -d sprintflow -c "\dt"
+
+# View table structure
+docker compose exec postgres psql -U postgres -d sprintflow -c "\d sprints"
+```
