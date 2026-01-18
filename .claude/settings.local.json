@@ -18,7 +18,9 @@
       "Bash(find *)",
       "Bash(tree *)",
       "Bash(mkdir *)",
-      "Bash(touch *)"
+      "Bash(touch *)",
+      "Bash(npm install)",
+      "Bash(npx svelte-kit sync)"
     ]
   }
 }

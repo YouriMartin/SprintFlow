@@ -4,7 +4,7 @@
 
 SprintFlow is a task management mono repo with:
 - **Backend**: NestJS API with Clean Architecture + CQRS (port 3000)
-- **Frontend**: Next.js with TypeScript and Tailwind CSS (port 3001)
+- **Frontend**: SvelteKit with TypeScript and native CSS (port 3001)
 - **Database**: PostgreSQL 16
 
 ## Domain Entities
@@ -159,11 +159,13 @@ mkdir -p application/queries/handlers/sprint
 - Controllers are thin - only dispatch commands/queries
 - Document endpoints with Swagger decorators
 
-### Frontend (Next.js)
-- Functional components with hooks
+### Frontend (SvelteKit)
+- Svelte 5 with runes (`$state`, `$effect`, `$props`)
 - TypeScript for type safety
-- API client in `lib/api.ts`
-- Types in `lib/types.ts`
+- Scoped CSS in components (no Tailwind)
+- API client in `src/lib/api.ts`
+- Types in `src/lib/types.ts`
+- Environment variables with `PUBLIC_` prefix
 
 ## Best Practices
 
@@ -346,8 +348,8 @@ const sprint = await this.db.raw(`SELECT * FROM sprints WHERE id = '${userProvid
 
 **XSS Prevention:**
 - Sanitize HTML input if storing rich text
-- React/Next.js escapes output by default
-- Never use `dangerouslySetInnerHTML` with user content
+- Svelte escapes output by default
+- Never use `{@html}` with user content
 
 **Authentication & Authorization:**
 - Validate `createdBy`, `updatedBy` against authenticated user
@@ -404,8 +406,8 @@ Backend `.env`:
 - `PORT=3000`, `CORS_ORIGIN=http://localhost:3001`
 - `LOG_LEVEL=info`, `ENABLE_TELEMETRY=false`
 
-Frontend `.env.local`:
-- `NEXT_PUBLIC_API_URL=http://localhost:3000`
+Frontend `.env`:
+- `PUBLIC_API_URL=http://localhost:3000`
 
 ## Migrations
 
@@ -440,15 +442,60 @@ Also update `infrastructure/config/kysely.config.ts`:
 - Add table interface (e.g., `SprintTable`)
 - Add to `Database` interface
 
-## Frontend Structure
+## Frontend Structure (SvelteKit)
 
 ```
 apps/frontend/
-├── app/              # Next.js App Router pages
-├── lib/
-│   ├── api.ts        # API client (fetch wrapper)
-│   └── types.ts      # TypeScript types (mirrors backend DTOs)
-└── public/           # Static assets
+├── src/
+│   ├── app.html          # HTML template
+│   ├── app.d.ts          # Global type definitions
+│   ├── lib/
+│   │   ├── api.ts        # API client (fetch wrapper)
+│   │   ├── types.ts      # TypeScript types (mirrors backend DTOs)
+│   │   └── index.ts      # Library exports
+│   └── routes/
+│       ├── +layout.svelte  # Root layout (global styles)
+│       └── +page.svelte    # Home page
+├── static/               # Static assets
+├── svelte.config.js      # Svelte configuration
+└── vite.config.ts        # Vite configuration
+```
+
+### Svelte 5 Patterns
+
+```svelte
+<script lang="ts">
+  import { onMount } from 'svelte';
+
+  // Reactive state with runes
+  let count = $state(0);
+  let items: string[] = $state([]);
+
+  // Props
+  interface Props {
+    title: string;
+  }
+  let { title }: Props = $props();
+
+  // Lifecycle
+  onMount(() => {
+    // runs on component mount
+  });
+</script>
+
+<!-- Template -->
+{#if condition}
+  <p>{count}</p>
+{/if}
+
+{#each items as item}
+  <li>{item}</li>
+{/each}
+
+<style>
+  /* Scoped CSS - only applies to this component */
+  p { color: blue; }
+</style>
 ```
 
 ## API Endpoints

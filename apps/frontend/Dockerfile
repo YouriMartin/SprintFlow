@@ -21,19 +21,16 @@ RUN npm run build
 # Production stage
 FROM node:20-alpine
 
-WORKDIR /app/apps/frontend
-
-# Copy package files
-COPY apps/frontend/package*.json ./
-
-# Install production dependencies
-RUN npm install --omit=dev
+WORKDIR /app
 
 # Copy built application from builder
-COPY --from=builder /app/apps/frontend/.next ./.next
-COPY --from=builder /app/apps/frontend/public ./public
-COPY --from=builder /app/apps/frontend/next.config.ts ./
+COPY --from=builder /app/apps/frontend/build ./build
+COPY --from=builder /app/apps/frontend/package.json ./
+
+# SvelteKit with adapter-node generates a standalone server
+ENV NODE_ENV=production
+ENV PORT=3001
 
 EXPOSE 3001
 
-CMD ["npm", "run", "start"]
+CMD ["node", "build"]
