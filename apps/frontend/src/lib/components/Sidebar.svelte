@@ -11,9 +11,8 @@
 	const navItems = [
 		{ icon: '📊', label: 'Dashboard', href: '/', active: true },
 		{ icon: '📁', label: 'Projects', href: '/projects', active: false },
-		{ icon: '🎯', label: 'Epics', href: '/epics', active: false },
+		{ icon: '📋', label: 'Backlog', href: '/backlog', active: false },
 		{ icon: '🏃', label: 'Sprints', href: '/sprints', active: false },
-		{ icon: '📋', label: 'User Stories', href: '/user-stories', active: false },
 		{ icon: '👥', label: 'Team', href: '/team', active: false },
 	];
 

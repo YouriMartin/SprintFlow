@@ -1,4 +1,14 @@
-import type { Task, CreateTaskDto, UpdateTaskDto } from './types';
+import type {
+	Task,
+	CreateTaskDto,
+	UpdateTaskDto,
+	Epic,
+	CreateEpicDto,
+	UpdateEpicDto,
+	UserStory,
+	CreateUserStoryDto,
+	UpdateUserStoryDto
+} from './types';
 import { PUBLIC_API_URL } from '$env/static/public';
 
 const API_BASE_URL = PUBLIC_API_URL || 'http://localhost:3000';
@@ -86,6 +96,190 @@ export const api = {
 		});
 		if (!response.ok) {
 			throw new Error('Failed to delete task');
+		}
+	},
+
+	// ==================== EPICS ====================
+
+	/**
+	 * Fetches all epics from the backend
+	 * @returns Array of epics
+	 * @throws Error if the request fails
+	 */
+	async getEpics(): Promise<Epic[]> {
+		const response = await fetch(`${API_BASE_URL}/epics`);
+		if (!response.ok) {
+			throw new Error('Failed to fetch epics');
+		}
+		return response.json();
+	},
+
+	/**
+	 * Fetches a single epic by ID
+	 * @param id - UUID of the epic
+	 * @returns The epic object
+	 * @throws Error if the epic is not found or request fails
+	 */
+	async getEpic(id: string): Promise<Epic> {
+		const response = await fetch(`${API_BASE_URL}/epics/${id}`);
+		if (!response.ok) {
+			throw new Error('Failed to fetch epic');
+		}
+		return response.json();
+	},
+
+	/**
+	 * Creates a new epic
+	 * @param data - Epic data to create
+	 * @param userId - UUID of the user creating the epic
+	 * @returns The created epic with generated ID and timestamps
+	 * @throws Error if validation fails or request fails
+	 */
+	async createEpic(data: CreateEpicDto, userId: string): Promise<Epic> {
+		const response = await fetch(`${API_BASE_URL}/epics`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-user-id': userId
+			},
+			body: JSON.stringify(data)
+		});
+		if (!response.ok) {
+			throw new Error('Failed to create epic');
+		}
+		return response.json();
+	},
+
+	/**
+	 * Updates an existing epic
+	 * @param id - UUID of the epic to update
+	 * @param data - Partial epic data to update
+	 * @param userId - UUID of the user updating the epic
+	 * @returns The updated epic
+	 * @throws Error if epic not found or request fails
+	 */
+	async updateEpic(id: string, data: UpdateEpicDto, userId: string): Promise<Epic> {
+		const response = await fetch(`${API_BASE_URL}/epics/${id}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-user-id': userId
+			},
+			body: JSON.stringify(data)
+		});
+		if (!response.ok) {
+			throw new Error('Failed to update epic');
+		}
+		return response.json();
+	},
+
+	/**
+	 * Deletes an epic (soft delete)
+	 * @param id - UUID of the epic to delete
+	 * @param userId - UUID of the user deleting the epic
+	 * @throws Error if epic not found or request fails
+	 */
+	async deleteEpic(id: string, userId: string): Promise<void> {
+		const response = await fetch(`${API_BASE_URL}/epics/${id}`, {
+			method: 'DELETE',
+			headers: {
+				'x-user-id': userId
+			}
+		});
+		if (!response.ok) {
+			throw new Error('Failed to delete epic');
+		}
+	},
+
+	// ==================== USER STORIES ====================
+
+	/**
+	 * Fetches all user stories from the backend
+	 * @returns Array of user stories
+	 * @throws Error if the request fails
+	 */
+	async getUserStories(): Promise<UserStory[]> {
+		const response = await fetch(`${API_BASE_URL}/user-stories`);
+		if (!response.ok) {
+			throw new Error('Failed to fetch user stories');
+		}
+		return response.json();
+	},
+
+	/**
+	 * Fetches a single user story by ID
+	 * @param id - UUID of the user story
+	 * @returns The user story object
+	 * @throws Error if the user story is not found or request fails
+	 */
+	async getUserStory(id: string): Promise<UserStory> {
+		const response = await fetch(`${API_BASE_URL}/user-stories/${id}`);
+		if (!response.ok) {
+			throw new Error('Failed to fetch user story');
+		}
+		return response.json();
+	},
+
+	/**
+	 * Creates a new user story
+	 * @param data - User story data to create
+	 * @param userId - UUID of the user creating the user story
+	 * @returns The created user story with generated ID and timestamps
+	 * @throws Error if validation fails or request fails
+	 */
+	async createUserStory(data: CreateUserStoryDto, userId: string): Promise<UserStory> {
+		const response = await fetch(`${API_BASE_URL}/user-stories`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-user-id': userId
+			},
+			body: JSON.stringify(data)
+		});
+		if (!response.ok) {
+			throw new Error('Failed to create user story');
+		}
+		return response.json();
+	},
+
+	/**
+	 * Updates an existing user story
+	 * @param id - UUID of the user story to update
+	 * @param data - Partial user story data to update
+	 * @param userId - UUID of the user updating the user story
+	 * @returns The updated user story
+	 * @throws Error if user story not found or request fails
+	 */
+	async updateUserStory(id: string, data: UpdateUserStoryDto, userId: string): Promise<UserStory> {
+		const response = await fetch(`${API_BASE_URL}/user-stories/${id}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-user-id': userId
+			},
+			body: JSON.stringify(data)
+		});
+		if (!response.ok) {
+			throw new Error('Failed to update user story');
+		}
+		return response.json();
+	},
+
+	/**
+	 * Deletes a user story (soft delete)
+	 * @param id - UUID of the user story to delete
+	 * @param userId - UUID of the user deleting the user story
+	 * @throws Error if user story not found or request fails
+	 */
+	async deleteUserStory(id: string, userId: string): Promise<void> {
+		const response = await fetch(`${API_BASE_URL}/user-stories/${id}`, {
+			method: 'DELETE',
+			headers: {
+				'x-user-id': userId
+			}
+		});
+		if (!response.ok) {
+			throw new Error('Failed to delete user story');
 		}
 	}
 };
