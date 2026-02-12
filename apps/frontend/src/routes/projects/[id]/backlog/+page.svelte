@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import { api } from '$lib/api';
 	import Modal from '$lib/components/Modal.svelte';
 	import {
 		type Epic,
 		type UserStory,
+		type Project,
 		type CreateEpicDto,
 		type CreateUserStoryDto,
 		EpicStatus,
@@ -15,10 +17,16 @@
 	/** Temporary user ID for development */
 	const TEMP_USER_ID = '00000000-0000-0000-0000-000000000001';
 
-	/** List of all epics */
+	/** Project ID from route params */
+	let projectId: string = $state('');
+
+	/** Current project */
+	let project: Project | null = $state(null);
+
+	/** List of all epics for this project */
 	let epics: Epic[] = $state([]);
 
-	/** List of all user stories */
+	/** List of all user stories for this project */
 	let userStories: UserStory[] = $state([]);
 
 	/** Loading state */
@@ -46,7 +54,8 @@
 		startDate: new Date().toISOString().split('T')[0],
 		endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
 		status: EpicStatus.PLANNED,
-		isVisibleInRoadmap: true
+		isVisibleInRoadmap: true,
+		projectId: ''
 	});
 
 	/** Form data for creating a new user story */
@@ -59,18 +68,25 @@
 	});
 
 	/**
-	 * Fetches epics and user stories from the API
+	 * Fetches project, epics and user stories from the API
 	 */
 	async function fetchData(): Promise<void> {
 		try {
 			loading = true;
 			error = null;
-			const [epicsData, userStoriesData] = await Promise.all([
+			const [projectData, epicsData, userStoriesData] = await Promise.all([
+				api.getProject(projectId),
 				api.getEpics(),
 				api.getUserStories()
 			]);
-			epics = epicsData;
-			userStories = userStoriesData;
+			project = projectData;
+			// Filter epics by project
+			epics = epicsData.filter((e) => e.projectId === projectId);
+			// Filter user stories by epics in this project or without epic
+			const epicIds = new Set(epics.map((e) => e.id));
+			userStories = userStoriesData.filter(
+				(s) => s.epicId === null || s.epicId === undefined || epicIds.has(s.epicId)
+			);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to load data';
 		} finally {
@@ -122,7 +138,8 @@
 			startDate: new Date().toISOString().split('T')[0],
 			endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
 			status: EpicStatus.PLANNED,
-			isVisibleInRoadmap: true
+			isVisibleInRoadmap: true,
+			projectId: projectId
 		};
 		showCreateEpicModal = true;
 	}
@@ -255,8 +272,20 @@
 		}
 	}
 
+	// Subscribe to page store for route params
+	$effect(() => {
+		const unsubscribe = page.subscribe((p) => {
+			const newProjectId = p.params.id;
+			if (newProjectId && newProjectId !== projectId) {
+				projectId = newProjectId;
+				fetchData();
+			}
+		});
+		return unsubscribe;
+	});
+
 	onMount(() => {
-		fetchData();
+		// Initial fetch is triggered by the $effect when projectId is set
 	});
 
 	// Derived state for grouped stories
@@ -265,7 +294,12 @@
 
 <div class="backlog-page">
 	<header class="page-header">
-		<h1>Backlog</h1>
+		<div class="page-title">
+			<h1>Backlog</h1>
+			{#if project}
+				<span class="project-name">{project.name}</span>
+			{/if}
+		</div>
 		<div class="header-actions">
 			<button class="btn btn-secondary" onclick={openCreateEpicModal}>
 				+ New Epic
@@ -544,10 +578,22 @@
 		margin-bottom: 2rem;
 	}
 
-	.page-header h1 {
+	.page-title {
+		display: flex;
+		align-items: baseline;
+		gap: 1rem;
+	}
+
+	.page-title h1 {
 		margin: 0;
 		font-size: 1.75rem;
 		color: #1f2937;
+	}
+
+	.project-name {
+		font-size: 1rem;
+		color: #6b7280;
+		font-weight: 400;
 	}
 
 	.header-actions {

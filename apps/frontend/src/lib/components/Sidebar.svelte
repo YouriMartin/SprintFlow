@@ -1,26 +1,48 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
+	import { api } from '$lib/api';
+	import type { Project } from '$lib/types';
+
 	/**
 	 * Navigation sidebar component inspired by GitLab
-	 * Collapsible left navigation with icons and labels
+	 * Collapsible left navigation with project dropdowns
 	 */
 
 	/** Whether the sidebar is collapsed (icons only) */
 	let collapsed: boolean = $state(false);
 
-	/** Navigation items configuration */
-	const navItems = [
-		{ icon: '📊', label: 'Dashboard', href: '/', active: true },
-		{ icon: '📁', label: 'Projects', href: '/projects', active: false },
-		{ icon: '📋', label: 'Backlog', href: '/backlog', active: false },
-		{ icon: '🏃', label: 'Sprints', href: '/sprints', active: false },
-		{ icon: '👥', label: 'Team', href: '/team', active: false },
-	];
+	/** List of projects loaded from API */
+	let projects: Project[] = $state([]);
+
+	/** Loading state for projects */
+	let loadingProjects: boolean = $state(true);
+
+	/** Expanded state for each project dropdown */
+	let expandedProjects: Record<string, boolean> = $state({});
+
+	/** Current path for active state */
+	let currentPath: string = $state('');
 
 	/** Bottom navigation items */
 	const bottomItems = [
 		{ icon: '⚙️', label: 'Settings', href: '/settings' },
-		{ icon: '❓', label: 'Help', href: '/help' },
+		{ icon: '❓', label: 'Help', href: '/help' }
 	];
+
+	/**
+	 * Fetches all projects from the API
+	 */
+	async function fetchProjects(): Promise<void> {
+		try {
+			loadingProjects = true;
+			projects = await api.getProjects();
+		} catch (err) {
+			console.error('Failed to fetch projects:', err);
+		} finally {
+			loadingProjects = false;
+		}
+	}
 
 	/**
 	 * Toggles the sidebar collapsed state
@@ -28,6 +50,53 @@
 	function toggleSidebar(): void {
 		collapsed = !collapsed;
 	}
+
+	/**
+	 * Toggles a project's expanded state
+	 * @param projectId - ID of the project to toggle
+	 */
+	function toggleProject(projectId: string): void {
+		expandedProjects[projectId] = !expandedProjects[projectId];
+	}
+
+	/**
+	 * Checks if a nav item is active based on current path
+	 * @param href - The href to check
+	 * @returns True if the item is active
+	 */
+	function isActive(href: string): boolean {
+		if (href === '/') {
+			return currentPath === '/';
+		}
+		return currentPath.startsWith(href);
+	}
+
+	/**
+	 * Checks if a project has an active child route
+	 * @param projectId - ID of the project
+	 * @returns True if the project has an active child
+	 */
+	function isProjectActive(projectId: string): boolean {
+		return currentPath.startsWith(`/projects/${projectId}`);
+	}
+
+	onMount(() => {
+		fetchProjects();
+	});
+
+	// Subscribe to page store for current path
+	$effect(() => {
+		const unsubscribe = page.subscribe((p) => {
+			currentPath = p.url.pathname;
+			// Auto-expand project if its child is active
+			for (const project of projects) {
+				if (isProjectActive(project.id)) {
+					expandedProjects[project.id] = true;
+				}
+			}
+		});
+		return unsubscribe;
+	});
 </script>
 
 <aside class="sidebar" class:collapsed>
@@ -51,16 +120,77 @@
 
 	<nav class="sidebar-nav">
 		<ul class="nav-list">
-			{#each navItems as item}
-				<li>
-					<a href={item.href} class="nav-item" class:active={item.active}>
-						<span class="nav-icon">{item.icon}</span>
-						{#if !collapsed}
-							<span class="nav-label">{item.label}</span>
-						{/if}
-					</a>
+			<!-- Dashboard -->
+			<li>
+				<a href="/" class="nav-item" class:active={isActive('/')}>
+					<span class="nav-icon">📊</span>
+					{#if !collapsed}
+						<span class="nav-label">Dashboard</span>
+					{/if}
+				</a>
+			</li>
+
+			<!-- Projects Section -->
+			{#if !collapsed}
+				<li class="nav-section-title">Projects</li>
+			{/if}
+
+			{#if loadingProjects}
+				<li class="nav-loading">
+					{#if !collapsed}
+						<span class="nav-label">Loading...</span>
+					{/if}
 				</li>
-			{/each}
+			{:else if projects.length === 0}
+				<li class="nav-empty">
+					{#if !collapsed}
+						<span class="nav-label">No projects</span>
+					{/if}
+				</li>
+			{:else}
+				{#each projects as project (project.id)}
+					<li class="project-item">
+						<button
+							class="nav-item project-toggle"
+							class:active={isProjectActive(project.id)}
+							onclick={() => toggleProject(project.id)}
+						>
+							<span class="nav-icon">📁</span>
+							{#if !collapsed}
+								<span class="nav-label">{project.name}</span>
+								<span class="expand-icon">
+									{expandedProjects[project.id] ? '▼' : '▶'}
+								</span>
+							{/if}
+						</button>
+
+						{#if !collapsed && expandedProjects[project.id]}
+							<ul class="project-subnav">
+								<li>
+									<a
+										href="/projects/{project.id}/backlog"
+										class="nav-item subnav-item"
+										class:active={isActive(`/projects/${project.id}/backlog`)}
+									>
+										<span class="nav-icon">📋</span>
+										<span class="nav-label">Backlog</span>
+									</a>
+								</li>
+								<li>
+									<a
+										href="/projects/{project.id}/sprints"
+										class="nav-item subnav-item"
+										class:active={isActive(`/projects/${project.id}/sprints`)}
+									>
+										<span class="nav-icon">🏃</span>
+										<span class="nav-label">Sprints</span>
+									</a>
+								</li>
+							</ul>
+						{/if}
+					</li>
+				{/each}
+			{/if}
 		</ul>
 	</nav>
 
@@ -68,7 +198,7 @@
 		<ul class="nav-list">
 			{#each bottomItems as item}
 				<li>
-					<a href={item.href} class="nav-item">
+					<a href={item.href} class="nav-item" class:active={isActive(item.href)}>
 						<span class="nav-icon">{item.icon}</span>
 						{#if !collapsed}
 							<span class="nav-label">{item.label}</span>
@@ -169,6 +299,15 @@
 		padding: 0;
 	}
 
+	.nav-section-title {
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		color: #6b7280;
+		padding: 1rem 1rem 0.5rem;
+		letter-spacing: 0.05em;
+	}
+
 	.nav-item {
 		display: flex;
 		align-items: center;
@@ -178,6 +317,15 @@
 		text-decoration: none;
 		transition: background-color 0.2s, color 0.2s;
 		border-left: 3px solid transparent;
+		width: 100%;
+		background: transparent;
+		border-right: none;
+		border-top: none;
+		border-bottom: none;
+		font-size: inherit;
+		font-family: inherit;
+		cursor: pointer;
+		text-align: left;
 	}
 
 	.nav-item:hover {
@@ -202,11 +350,45 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		flex: 1;
 	}
 
 	.sidebar.collapsed .nav-item {
 		justify-content: center;
 		padding: 0.75rem;
+	}
+
+	/* Project toggle specific styles */
+	.project-toggle {
+		position: relative;
+	}
+
+	.expand-icon {
+		font-size: 0.625rem;
+		color: #6b7280;
+		margin-left: auto;
+	}
+
+	.project-subnav {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.subnav-item {
+		padding-left: 2.5rem;
+	}
+
+	.subnav-item .nav-icon {
+		font-size: 1rem;
+		width: 20px;
+	}
+
+	.nav-loading,
+	.nav-empty {
+		padding: 0.5rem 1rem;
+		color: #6b7280;
+		font-size: 0.875rem;
 	}
 
 	.sidebar-footer {

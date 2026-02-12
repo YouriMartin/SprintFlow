@@ -1,4 +1,43 @@
 /**
+ * Status enum for projects
+ */
+export enum ProjectStatus {
+	ACTIVE = 'active',
+	ARCHIVED = 'archived',
+	ON_HOLD = 'on_hold'
+}
+
+/**
+ * Project entity representing a workspace
+ */
+export interface Project {
+	id: string;
+	name: string;
+	description?: string;
+	status: ProjectStatus;
+	createdAt: string;
+	updatedAt: string;
+}
+
+/**
+ * DTO for creating a new project
+ */
+export interface CreateProjectDto {
+	name: string;
+	description?: string;
+	status?: ProjectStatus;
+}
+
+/**
+ * DTO for updating an existing project
+ */
+export interface UpdateProjectDto {
+	name?: string;
+	description?: string;
+	status?: ProjectStatus;
+}
+
+/**
  * Status enum for tasks
  */
 export enum TaskStatus {
