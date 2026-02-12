@@ -6,11 +6,8 @@
 
 	/**
 	 * Navigation sidebar component inspired by GitLab
-	 * Collapsible left navigation with project dropdowns
+	 * Fixed left navigation with project dropdowns
 	 */
-
-	/** Whether the sidebar is collapsed (icons only) */
-	let collapsed: boolean = $state(false);
 
 	/** List of projects loaded from API */
 	let projects: Project[] = $state([]);
@@ -42,13 +39,6 @@
 		} finally {
 			loadingProjects = false;
 		}
-	}
-
-	/**
-	 * Toggles the sidebar collapsed state
-	 */
-	function toggleSidebar(): void {
-		collapsed = !collapsed;
 	}
 
 	/**
@@ -99,23 +89,12 @@
 	});
 </script>
 
-<aside class="sidebar" class:collapsed>
+<aside class="sidebar">
 	<div class="sidebar-header">
 		<div class="logo">
-			{#if collapsed}
-				<span class="logo-icon">SF</span>
-			{:else}
-				<span class="logo-icon">SF</span>
-				<span class="logo-text">SprintFlow</span>
-			{/if}
+			<span class="logo-icon">SF</span>
+			<span class="logo-text">SprintFlow</span>
 		</div>
-		<button class="collapse-btn" onclick={toggleSidebar} aria-label="Toggle sidebar">
-			{#if collapsed}
-				<span class="icon">▶</span>
-			{:else}
-				<span class="icon">◀</span>
-			{/if}
-		</button>
 	</div>
 
 	<nav class="sidebar-nav">
@@ -124,28 +103,20 @@
 			<li>
 				<a href="/" class="nav-item" class:active={isActive('/')}>
 					<span class="nav-icon">📊</span>
-					{#if !collapsed}
-						<span class="nav-label">Dashboard</span>
-					{/if}
+					<span class="nav-label">Dashboard</span>
 				</a>
 			</li>
 
 			<!-- Projects Section -->
-			{#if !collapsed}
-				<li class="nav-section-title">Projects</li>
-			{/if}
+			<li class="nav-section-title">Projects</li>
 
 			{#if loadingProjects}
 				<li class="nav-loading">
-					{#if !collapsed}
-						<span class="nav-label">Loading...</span>
-					{/if}
+					<span class="nav-label">Loading...</span>
 				</li>
 			{:else if projects.length === 0}
 				<li class="nav-empty">
-					{#if !collapsed}
-						<span class="nav-label">No projects</span>
-					{/if}
+					<span class="nav-label">No projects</span>
 				</li>
 			{:else}
 				{#each projects as project (project.id)}
@@ -156,15 +127,13 @@
 							onclick={() => toggleProject(project.id)}
 						>
 							<span class="nav-icon">📁</span>
-							{#if !collapsed}
-								<span class="nav-label">{project.name}</span>
-								<span class="expand-icon">
-									{expandedProjects[project.id] ? '▼' : '▶'}
-								</span>
-							{/if}
+							<span class="nav-label">{project.name}</span>
+							<span class="expand-icon">
+								{expandedProjects[project.id] ? '▼' : '▶'}
+							</span>
 						</button>
 
-						{#if !collapsed && expandedProjects[project.id]}
+						{#if expandedProjects[project.id]}
 							<ul class="project-subnav">
 								<li>
 									<a
@@ -200,9 +169,7 @@
 				<li>
 					<a href={item.href} class="nav-item" class:active={isActive(item.href)}>
 						<span class="nav-icon">{item.icon}</span>
-						{#if !collapsed}
-							<span class="nav-label">{item.label}</span>
-						{/if}
+						<span class="nav-label">{item.label}</span>
 					</a>
 				</li>
 			{/each}
@@ -221,18 +188,12 @@
 		color: #e5e7eb;
 		display: flex;
 		flex-direction: column;
-		transition: width 0.2s ease;
 		z-index: 100;
-	}
-
-	.sidebar.collapsed {
-		width: 64px;
 	}
 
 	.sidebar-header {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
 		padding: 1rem;
 		border-bottom: 1px solid #374151;
 		min-height: 64px;
@@ -242,7 +203,6 @@
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
-		overflow: hidden;
 	}
 
 	.logo-icon {
@@ -263,28 +223,6 @@
 		font-weight: 600;
 		font-size: 1.1rem;
 		white-space: nowrap;
-	}
-
-	.collapse-btn {
-		background: transparent;
-		border: none;
-		color: #9ca3af;
-		cursor: pointer;
-		padding: 0.5rem;
-		border-radius: 4px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition: background-color 0.2s;
-	}
-
-	.collapse-btn:hover {
-		background-color: #374151;
-		color: #e5e7eb;
-	}
-
-	.sidebar.collapsed .collapse-btn {
-		display: none;
 	}
 
 	.sidebar-nav {
@@ -351,11 +289,6 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		flex: 1;
-	}
-
-	.sidebar.collapsed .nav-item {
-		justify-content: center;
-		padding: 0.75rem;
 	}
 
 	/* Project toggle specific styles */

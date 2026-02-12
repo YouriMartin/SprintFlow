@@ -45,11 +45,5 @@
 		flex: 1;
 		margin-left: 240px;
 		padding: 2rem;
-		transition: margin-left 0.2s ease;
-	}
-
-	/* Handle collapsed sidebar */
-	:global(.sidebar.collapsed) ~ .main-content {
-		margin-left: 64px;
 	}
 </style>
