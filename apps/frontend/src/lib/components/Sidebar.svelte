@@ -2,7 +2,9 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { api } from '$lib/api';
-	import type { Project } from '$lib/types';
+	import Modal from '$lib/components/Modal.svelte';
+	import type { Project, CreateProjectDto } from '$lib/types';
+	import { ProjectStatus } from '$lib/types';
 
 	/**
 	 * Navigation sidebar component inspired by GitLab
@@ -20,6 +22,19 @@
 
 	/** Current path for active state */
 	let currentPath: string = $state('');
+
+	/** Whether the create project modal is open */
+	let showCreateProjectModal: boolean = $state(false);
+
+	/** Form data for creating a new project */
+	let newProjectForm: CreateProjectDto = $state({
+		name: '',
+		description: '',
+		status: ProjectStatus.ACTIVE
+	});
+
+	/** Error message for project creation */
+	let createError: string | null = $state(null);
 
 	/** Bottom navigation items */
 	const bottomItems = [
@@ -70,6 +85,35 @@
 		return currentPath.startsWith(`/projects/${projectId}`);
 	}
 
+	/**
+	 * Opens the create project modal
+	 */
+	function openCreateProjectModal(): void {
+		newProjectForm = {
+			name: '',
+			description: '',
+			status: ProjectStatus.ACTIVE
+		};
+		createError = null;
+		showCreateProjectModal = true;
+	}
+
+	/**
+	 * Creates a new project
+	 */
+	async function createProject(): Promise<void> {
+		try {
+			createError = null;
+			const created = await api.createProject(newProjectForm);
+			showCreateProjectModal = false;
+			await fetchProjects();
+			// Auto-expand the newly created project
+			expandedProjects[created.id] = true;
+		} catch (err) {
+			createError = err instanceof Error ? err.message : 'Failed to create project';
+		}
+	}
+
 	onMount(() => {
 		fetchProjects();
 	});
@@ -108,7 +152,16 @@
 			</li>
 
 			<!-- Projects Section -->
-			<li class="nav-section-title">Projects</li>
+			<li class="nav-section-header">
+				<span class="nav-section-title">Projects</span>
+				<button
+					class="add-project-btn"
+					onclick={openCreateProjectModal}
+					title="New project"
+				>
+					+
+				</button>
+			</li>
 
 			{#if loadingProjects}
 				<li class="nav-loading">
@@ -177,6 +230,45 @@
 	</div>
 </aside>
 
+<!-- Create Project Modal -->
+<Modal open={showCreateProjectModal} title="New Project" onclose={() => showCreateProjectModal = false}>
+	<form class="form" onsubmit={(e) => { e.preventDefault(); createProject(); }}>
+		{#if createError}
+			<div class="form-error">{createError}</div>
+		{/if}
+
+		<div class="form-group">
+			<label for="project-name">Name</label>
+			<input
+				id="project-name"
+				type="text"
+				bind:value={newProjectForm.name}
+				required
+				placeholder="Enter project name"
+			/>
+		</div>
+
+		<div class="form-group">
+			<label for="project-description">Description</label>
+			<textarea
+				id="project-description"
+				bind:value={newProjectForm.description}
+				placeholder="Enter project description (optional)"
+				rows="3"
+			></textarea>
+		</div>
+
+		<div class="form-actions">
+			<button type="button" class="btn btn-secondary" onclick={() => showCreateProjectModal = false}>
+				Cancel
+			</button>
+			<button type="submit" class="btn btn-primary">
+				Create Project
+			</button>
+		</div>
+	</form>
+</Modal>
+
 <style>
 	.sidebar {
 		position: fixed;
@@ -237,13 +329,40 @@
 		padding: 0;
 	}
 
+	.nav-section-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 1rem 1rem 0.5rem;
+	}
+
 	.nav-section-title {
 		font-size: 0.75rem;
 		font-weight: 600;
 		text-transform: uppercase;
 		color: #6b7280;
-		padding: 1rem 1rem 0.5rem;
 		letter-spacing: 0.05em;
+	}
+
+	.add-project-btn {
+		background-color: #374151;
+		border: none;
+		color: #9ca3af;
+		width: 20px;
+		height: 20px;
+		border-radius: 4px;
+		font-size: 0.875rem;
+		font-weight: 600;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: background-color 0.2s, color 0.2s;
+	}
+
+	.add-project-btn:hover {
+		background-color: #6366f1;
+		color: #ffffff;
 	}
 
 	.nav-item {
@@ -345,5 +464,91 @@
 
 	.sidebar-nav::-webkit-scrollbar-thumb:hover {
 		background-color: #6b7280;
+	}
+
+	/* Form styles for modal */
+	.form {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.form-error {
+		color: #dc2626;
+		background-color: #fef2f2;
+		padding: 0.75rem;
+		border-radius: 6px;
+		font-size: 0.875rem;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+	}
+
+	.form-group label {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #374151;
+	}
+
+	.form-group input,
+	.form-group textarea {
+		padding: 0.5rem 0.75rem;
+		border: 1px solid #d1d5db;
+		border-radius: 6px;
+		font-size: 0.875rem;
+		transition: border-color 0.2s, box-shadow 0.2s;
+	}
+
+	.form-group input:focus,
+	.form-group textarea:focus {
+		outline: none;
+		border-color: #6366f1;
+		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+	}
+
+	.form-group textarea {
+		resize: vertical;
+		min-height: 80px;
+	}
+
+	.form-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 0.75rem;
+		margin-top: 0.5rem;
+	}
+
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5rem 1rem;
+		border: none;
+		border-radius: 6px;
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: background-color 0.2s, color 0.2s;
+	}
+
+	.btn-primary {
+		background-color: #6366f1;
+		color: white;
+	}
+
+	.btn-primary:hover {
+		background-color: #4f46e5;
+	}
+
+	.btn-secondary {
+		background-color: #e5e7eb;
+		color: #374151;
+	}
+
+	.btn-secondary:hover {
+		background-color: #d1d5db;
 	}
 </style>
