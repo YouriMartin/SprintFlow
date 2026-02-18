@@ -10,6 +10,7 @@ export interface IUserRepository {
     user: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>>,
   ): Promise<User | null>;
   delete(id: string): Promise<void>;
+  count(): Promise<number>;
 }
 
 export const USER_REPOSITORY = Symbol('USER_REPOSITORY');

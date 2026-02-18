@@ -1,3 +1,9 @@
+var ProjectStatus = /* @__PURE__ */ ((ProjectStatus2) => {
+  ProjectStatus2["ACTIVE"] = "active";
+  ProjectStatus2["ARCHIVED"] = "archived";
+  ProjectStatus2["ON_HOLD"] = "on_hold";
+  return ProjectStatus2;
+})(ProjectStatus || {});
 var TaskStatus = /* @__PURE__ */ ((TaskStatus2) => {
   TaskStatus2["TODO"] = "todo";
   TaskStatus2["IN_PROGRESS"] = "in_progress";
@@ -33,6 +39,7 @@ var UserStoryPriority = /* @__PURE__ */ ((UserStoryPriority2) => {
 })(UserStoryPriority || {});
 export {
   EpicStatus as E,
+  ProjectStatus as P,
   TaskPriority as T,
   UserStoryPriority as U,
   TaskStatus as a,

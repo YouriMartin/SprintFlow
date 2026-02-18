@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { page } from '$app/stores';
 	import Sidebar from '$lib/components/Sidebar.svelte';
 
 	interface Props {
@@ -7,6 +8,8 @@
 	}
 
 	let { children }: Props = $props();
+
+	let isSetupPage = $derived($page.url.pathname.startsWith('/setup'));
 </script>
 
 <svelte:head>
@@ -14,12 +17,16 @@
 	<meta name="description" content="SprintFlow - Task Management Application" />
 </svelte:head>
 
-<div class="app-layout">
-	<Sidebar />
-	<main class="main-content">
-		{@render children()}
-	</main>
-</div>
+{#if isSetupPage}
+	{@render children()}
+{:else}
+	<div class="app-layout">
+		<Sidebar />
+		<main class="main-content">
+			{@render children()}
+		</main>
+	</div>
+{/if}
 
 <style>
 	:global(*) {

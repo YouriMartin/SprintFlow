@@ -1,5 +1,15 @@
 {
-	"/": [],
-	"/projects/[id]/backlog": [],
-	"/projects/[id]/sprints": []
+	"/": [
+		"src/routes/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/projects/[id]/backlog": [
+		"src/routes/+layout.ts"
+	],
+	"/projects/[id]/sprints": [
+		"src/routes/+layout.ts"
+	],
+	"/setup": [
+		"src/routes/+layout.ts"
+	]
 }

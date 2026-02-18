@@ -6,6 +6,7 @@
     "isEntry": true,
     "imports": [
       "_shared.js",
+      "_false.js",
       "_environment.js"
     ]
   },
@@ -29,6 +30,7 @@
     "src": "../../node_modules/@sveltejs/kit/src/runtime/server/index.js",
     "isEntry": true,
     "imports": [
+      "_false.js",
       "_environment.js",
       "_shared.js",
       "_exports.js",
@@ -47,6 +49,27 @@
       "_environment.js"
     ]
   },
+  "_Modal.VUgX6Ddw.css": {
+    "file": "_app/immutable/assets/Modal.VUgX6Ddw.css",
+    "src": "_Modal.VUgX6Ddw.css"
+  },
+  "_Modal.js": {
+    "file": "chunks/Modal.js",
+    "name": "Modal",
+    "imports": [
+      "_escaping.js"
+    ],
+    "css": [
+      "_app/immutable/assets/Modal.VUgX6Ddw.css"
+    ]
+  },
+  "_attributes.js": {
+    "file": "chunks/attributes.js",
+    "name": "attributes",
+    "imports": [
+      "_escaping.js"
+    ]
+  },
   "_context.js": {
     "file": "chunks/context.js",
     "name": "context"
@@ -54,10 +77,6 @@
   "_environment.js": {
     "file": "chunks/environment.js",
     "name": "environment"
-  },
-  "_equality.js": {
-    "file": "chunks/equality.js",
-    "name": "equality"
   },
   "_escaping.js": {
     "file": "chunks/escaping.js",
@@ -67,20 +86,27 @@
     "file": "chunks/exports.js",
     "name": "exports"
   },
+  "_false.js": {
+    "file": "chunks/false.js",
+    "name": "false"
+  },
   "_index.js": {
     "file": "chunks/index.js",
     "name": "index",
     "imports": [
       "_utils2.js",
-      "_equality.js"
+      "_context.js"
     ]
   },
   "_index2.js": {
     "file": "chunks/index2.js",
     "name": "index",
     "imports": [
-      "_escaping.js",
-      "_context.js"
+      "_attributes.js",
+      "_false.js",
+      "_utils2.js",
+      "_context.js",
+      "_escaping.js"
     ]
   },
   "_internal.js": {
@@ -88,10 +114,9 @@
     "name": "internal",
     "imports": [
       "_index2.js",
-      "_environment.js",
       "_utils2.js",
-      "_equality.js",
-      "_context.js"
+      "_context.js",
+      "_environment.js"
     ]
   },
   "_shared.js": {
@@ -127,14 +152,24 @@
     "isEntry": true,
     "imports": [
       "_index2.js",
+      "_context.js",
       "_exports.js",
       "_utils.js",
       "_state.svelte.js",
+      "_attributes.js",
+      "_Modal.js",
+      "_types.js",
       "_escaping.js"
     ],
     "css": [
-      "_app/immutable/assets/_layout.DtWCssO-.css"
+      "_app/immutable/assets/_layout.CQr6Sd1B.css"
     ]
+  },
+  "src/routes/+layout.ts": {
+    "file": "entries/pages/_layout.ts.js",
+    "name": "entries/pages/_layout.ts",
+    "src": "src/routes/+layout.ts",
+    "isEntry": true
   },
   "src/routes/+page.svelte": {
     "file": "entries/pages/_page.svelte.js",
@@ -158,12 +193,14 @@
       "_index2.js",
       "_exports.js",
       "_utils.js",
+      "_attributes.js",
       "_state.svelte.js",
-      "_escaping.js",
-      "_types.js"
+      "_Modal.js",
+      "_types.js",
+      "_escaping.js"
     ],
     "css": [
-      "_app/immutable/assets/_page.u_W2vBcy.css"
+      "_app/immutable/assets/_page.wN1dFMWz.css"
     ]
   },
   "src/routes/projects/[id]/sprints/+page.svelte": {
@@ -178,6 +215,21 @@
     ],
     "css": [
       "_app/immutable/assets/_page.CpwQiy-E.css"
+    ]
+  },
+  "src/routes/setup/+page.svelte": {
+    "file": "entries/pages/setup/_page.svelte.js",
+    "name": "entries/pages/setup/_page.svelte",
+    "src": "src/routes/setup/+page.svelte",
+    "isEntry": true,
+    "imports": [
+      "_attributes.js",
+      "_exports.js",
+      "_utils.js",
+      "_state.svelte.js"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.p1iDX_zE.css"
     ]
   }
 }

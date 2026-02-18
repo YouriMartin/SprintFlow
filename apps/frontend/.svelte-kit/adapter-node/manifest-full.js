@@ -10,13 +10,14 @@ return {
 	assets: new Set([]),
 	mimeTypes: {},
 	_: {
-		client: {start:"_app/immutable/entry/start.D8jmpfyq.js",app:"_app/immutable/entry/app.aB_hMxE4.js",imports:["_app/immutable/entry/start.D8jmpfyq.js","_app/immutable/chunks/Q6LpRXnx.js","_app/immutable/chunks/DpUKlOTm.js","_app/immutable/entry/app.aB_hMxE4.js","_app/immutable/chunks/DpUKlOTm.js","_app/immutable/chunks/4Mh_maa4.js","_app/immutable/chunks/DT90_JrZ.js"],stylesheets:[],fonts:[],uses_env_dynamic_public:false},
+		client: {start:"_app/immutable/entry/start.BJnSCQko.js",app:"_app/immutable/entry/app.ley66yuY.js",imports:["_app/immutable/entry/start.BJnSCQko.js","_app/immutable/chunks/C6jZLuX-.js","_app/immutable/chunks/CR4mJNBN.js","_app/immutable/chunks/D61hpZwH.js","_app/immutable/entry/app.ley66yuY.js","_app/immutable/chunks/CR4mJNBN.js","_app/immutable/chunks/paUPhQKv.js","_app/immutable/chunks/CAnKmzBQ.js","_app/immutable/chunks/BaaInQHT.js","_app/immutable/chunks/D61hpZwH.js"],stylesheets:[],fonts:[],uses_env_dynamic_public:false},
 		nodes: [
 			__memo(() => import('./nodes/0.js')),
 			__memo(() => import('./nodes/1.js')),
 			__memo(() => import('./nodes/2.js')),
 			__memo(() => import('./nodes/3.js')),
-			__memo(() => import('./nodes/4.js'))
+			__memo(() => import('./nodes/4.js')),
+			__memo(() => import('./nodes/5.js'))
 		],
 		remotes: {
 			
@@ -41,6 +42,13 @@ return {
 				pattern: /^\/projects\/([^/]+?)\/sprints\/?$/,
 				params: [{"name":"id","optional":false,"rest":false,"chained":false}],
 				page: { layouts: [0,], errors: [1,], leaf: 4 },
+				endpoint: null
+			},
+			{
+				id: "/setup",
+				pattern: /^\/setup\/?$/,
+				params: [],
+				page: { layouts: [0,], errors: [1,], leaf: 5 },
 				endpoint: null
 			}
 		],

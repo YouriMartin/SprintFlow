@@ -1,26 +1,13 @@
-import { y as attr, x as ensure_array_like } from "../../../../../chunks/index2.js";
+import { _ as ensure_array_like } from "../../../../../chunks/index2.js";
 import "@sveltejs/kit/internal";
 import "../../../../../chunks/exports.js";
 import "../../../../../chunks/utils.js";
+import { a as attr } from "../../../../../chunks/attributes.js";
 import "@sveltejs/kit/internal/server";
 import "../../../../../chunks/state.svelte.js";
-import { e as escape_html } from "../../../../../chunks/escaping.js";
-import "clsx";
+import { M as Modal } from "../../../../../chunks/Modal.js";
 import { E as EpicStatus, U as UserStoryPriority, b as UserStoryStatus } from "../../../../../chunks/types.js";
-function Modal($$renderer, $$props) {
-  $$renderer.component(($$renderer2) => {
-    let { open, title, onclose, children } = $$props;
-    if (open) {
-      $$renderer2.push("<!--[-->");
-      $$renderer2.push(`<div class="modal-backdrop svelte-ta60gp" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal svelte-ta60gp"><div class="modal-header svelte-ta60gp"><h2 id="modal-title" class="modal-title svelte-ta60gp">${escape_html(title)}</h2> <button class="modal-close svelte-ta60gp" aria-label="Close modal"><span aria-hidden="true">×</span></button></div> <div class="modal-body svelte-ta60gp">`);
-      children?.($$renderer2);
-      $$renderer2.push(`<!----></div></div></div>`);
-    } else {
-      $$renderer2.push("<!--[!-->");
-    }
-    $$renderer2.push(`<!--]-->`);
-  });
-}
+import { e as escape_html } from "../../../../../chunks/escaping.js";
 function _page($$renderer, $$props) {
   $$renderer.component(($$renderer2) => {
     let epics = [];

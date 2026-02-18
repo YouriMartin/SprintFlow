@@ -83,6 +83,18 @@ export class UserRepository implements IUserRepository {
     await this.db.deleteFrom('users').where('id', '=', id).execute();
   }
 
+  /**
+   * Counts the total number of users in the database
+   * @returns The total number of users
+   */
+  async count(): Promise<number> {
+    const result = await this.db
+      .selectFrom('users')
+      .select(this.db.fn.countAll().as('count'))
+      .executeTakeFirstOrThrow();
+    return Number(result.count);
+  }
+
   private mapToUser(dbUser: UserTable): User {
     return {
       id: dbUser.id,

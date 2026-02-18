@@ -368,5 +368,39 @@ export const api = {
 		if (!response.ok) {
 			throw new Error('Failed to delete user story');
 		}
+	},
+
+	// ==================== SETUP ====================
+
+	/**
+	 * Checks whether initial application setup is required (no users in database)
+	 * @returns Object with required flag set to true if setup is needed
+	 * @throws Error if the request fails
+	 */
+	async getSetupStatus(): Promise<{ required: boolean }> {
+		const response = await fetch(`${API_BASE_URL}/setup/status`);
+		if (!response.ok) {
+			throw new Error('Failed to fetch setup status');
+		}
+		return response.json();
+	},
+
+	/**
+	 * Creates the first superadmin user during initial application setup
+	 * @param data - Setup data with name, email, and password
+	 * @throws Error if setup already completed or request fails
+	 */
+	async createSetup(data: { name: string; email: string; password: string }): Promise<void> {
+		const response = await fetch(`${API_BASE_URL}/setup`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(data)
+		});
+		if (!response.ok) {
+			const error = await response.json().catch(() => ({}));
+			throw new Error(error.message || 'Failed to complete setup');
+		}
 	}
 };
