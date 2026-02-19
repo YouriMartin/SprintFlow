@@ -43,8 +43,8 @@
 <svelte:window onkeydown={handleKeydown} />
 
 {#if open}
-	<div class="modal-backdrop" onclick={handleBackdropClick} role="dialog" aria-modal="true" aria-labelledby="modal-title">
-		<div class="modal">
+	<div class="modal-backdrop" onclick={handleBackdropClick} onkeydown={handleKeydown} role="presentation">
+		<div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
 			<div class="modal-header">
 				<h2 id="modal-title" class="modal-title">{title}</h2>
 				<button class="modal-close" onclick={onclose} aria-label="Close modal">

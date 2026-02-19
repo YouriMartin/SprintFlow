@@ -483,7 +483,7 @@
 			grid-template-columns: 1fr;
 		}
 
-		.header h1 {
+		.page-header h1 {
 			font-size: 2rem;
 		}
 	}
