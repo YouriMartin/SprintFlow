@@ -13,6 +13,7 @@ export interface Database {
   code_repositories: CodeRepositoryTable;
   user_story_code_repositories: UserStoryCodeRepositoryTable;
   refresh_tokens: RefreshTokenTable;
+  schema_migrations: SchemaMigrationTable;
 }
 
 export interface UserTable {
@@ -118,6 +119,11 @@ export interface RefreshTokenTable {
   expires_at: Date;
   created_at: Date;
   revoked_at: Date | null;
+}
+
+export interface SchemaMigrationTable {
+  filename: string;
+  applied_at: Date;
 }
 
 export type KyselyDatabase = Kysely<Database>;

@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "docker compose up -d postgres && concurrently -k -n db,back,front -c blue,green,magenta \"docker compose logs -f postgres\" \"npm run start:dev --workspace=apps/backend\" \"npm run dev --workspace=apps/frontend\"",
     "stop": "docker compose down",
+    "backend:migrate": "npm run migrate --workspace=apps/backend",
     "backend:build": "npm run build --workspace=apps/backend",
     "backend:test": "npm run test --workspace=apps/backend",
     "frontend:build": "npm run build --workspace=apps/frontend"

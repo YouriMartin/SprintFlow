@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { KyselyDatabase } from '../config/kysely.config';
+import { MigrationService } from './migration.service';
 
 @Global()
 @Module({
@@ -16,7 +17,8 @@ import type { KyselyDatabase } from '../config/kysely.config';
       },
       inject: [ConfigService],
     },
+    MigrationService,
   ],
-  exports: ['kysely'],
+  exports: ['kysely', MigrationService],
 })
 export class DatabaseModule {}
