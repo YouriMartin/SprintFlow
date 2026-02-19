@@ -9,7 +9,9 @@
 
 	let { children }: Props = $props();
 
-	let isSetupPage = $derived($page.url.pathname.startsWith('/setup'));
+	let isFullscreenPage = $derived(
+		$page.url.pathname.startsWith('/setup') || $page.url.pathname.startsWith('/login')
+	);
 </script>
 
 <svelte:head>
@@ -17,7 +19,7 @@
 	<meta name="description" content="SprintFlow - Task Management Application" />
 </svelte:head>
 
-{#if isSetupPage}
+{#if isFullscreenPage}
 	{@render children()}
 {:else}
 	<div class="app-layout">

@@ -13,8 +13,46 @@ import type {
 	UpdateUserStoryDto
 } from './types';
 import { PUBLIC_API_URL } from '$env/static/public';
+import { auth } from './auth.svelte';
 
 const API_BASE_URL = PUBLIC_API_URL || 'http://localhost:3000';
+
+/**
+ * Performs an authenticated fetch, automatically injecting the Bearer token.
+ * On a 401 response, attempts a silent token refresh and retries once.
+ * @param input - URL or Request object
+ * @param init - Fetch options (headers will be augmented with Authorization)
+ * @returns The Response after at most one retry
+ */
+async function authFetch(input: string, init: RequestInit = {}): Promise<Response> {
+	const buildHeaders = (token: string | null): HeadersInit => ({
+		...(init.headers as Record<string, string>),
+		...(token ? { Authorization: `Bearer ${token}` } : {})
+	});
+
+	const response = await fetch(input, {
+		...init,
+		credentials: 'include',
+		headers: buildHeaders(auth.token)
+	});
+
+	if (response.status !== 401) {
+		return response;
+	}
+
+	// Attempt silent refresh
+	const refreshed = await auth.refresh();
+	if (!refreshed) {
+		return response;
+	}
+
+	// Retry original request with new token
+	return fetch(input, {
+		...init,
+		credentials: 'include',
+		headers: buildHeaders(auth.token)
+	});
+}
 
 /**
  * API client for communicating with the backend
@@ -26,7 +64,7 @@ export const api = {
 	 * @throws Error if the request fails
 	 */
 	async getTasks(): Promise<Task[]> {
-		const response = await fetch(`${API_BASE_URL}/tasks`);
+		const response = await authFetch(`${API_BASE_URL}/tasks`);
 		if (!response.ok) {
 			throw new Error('Failed to fetch tasks');
 		}
@@ -75,11 +113,9 @@ export const api = {
 	 * @throws Error if task not found or request fails
 	 */
 	async updateTask(id: string, data: UpdateTaskDto): Promise<Task> {
-		const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
+		const response = await authFetch(`${API_BASE_URL}/tasks/${id}`, {
 			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json'
-			},
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(data)
 		});
 		if (!response.ok) {
@@ -94,9 +130,7 @@ export const api = {
 	 * @throws Error if task not found or request fails
 	 */
 	async deleteTask(id: string): Promise<void> {
-		const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
-			method: 'DELETE'
-		});
+		const response = await authFetch(`${API_BASE_URL}/tasks/${id}`, { method: 'DELETE' });
 		if (!response.ok) {
 			throw new Error('Failed to delete task');
 		}
@@ -110,7 +144,7 @@ export const api = {
 	 * @throws Error if the request fails
 	 */
 	async getProjects(): Promise<Project[]> {
-		const response = await fetch(`${API_BASE_URL}/projects`);
+		const response = await authFetch(`${API_BASE_URL}/projects`);
 		if (!response.ok) {
 			throw new Error('Failed to fetch projects');
 		}
@@ -124,7 +158,7 @@ export const api = {
 	 * @throws Error if the project is not found or request fails
 	 */
 	async getProject(id: string): Promise<Project> {
-		const response = await fetch(`${API_BASE_URL}/projects/${id}`);
+		const response = await authFetch(`${API_BASE_URL}/projects/${id}`);
 		if (!response.ok) {
 			throw new Error('Failed to fetch project');
 		}
@@ -138,11 +172,9 @@ export const api = {
 	 * @throws Error if validation fails or request fails
 	 */
 	async createProject(data: CreateProjectDto): Promise<Project> {
-		const response = await fetch(`${API_BASE_URL}/projects`, {
+		const response = await authFetch(`${API_BASE_URL}/projects`, {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(data)
 		});
 		if (!response.ok) {
@@ -159,11 +191,9 @@ export const api = {
 	 * @throws Error if project not found or request fails
 	 */
 	async updateProject(id: string, data: UpdateProjectDto): Promise<Project> {
-		const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
+		const response = await authFetch(`${API_BASE_URL}/projects/${id}`, {
 			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json'
-			},
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(data)
 		});
 		if (!response.ok) {
@@ -178,9 +208,7 @@ export const api = {
 	 * @throws Error if project not found or request fails
 	 */
 	async deleteProject(id: string): Promise<void> {
-		const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
-			method: 'DELETE'
-		});
+		const response = await authFetch(`${API_BASE_URL}/projects/${id}`, { method: 'DELETE' });
 		if (!response.ok) {
 			throw new Error('Failed to delete project');
 		}
@@ -194,7 +222,7 @@ export const api = {
 	 * @throws Error if the request fails
 	 */
 	async getEpics(): Promise<Epic[]> {
-		const response = await fetch(`${API_BASE_URL}/epics`);
+		const response = await authFetch(`${API_BASE_URL}/epics`);
 		if (!response.ok) {
 			throw new Error('Failed to fetch epics');
 		}
@@ -208,7 +236,7 @@ export const api = {
 	 * @throws Error if the epic is not found or request fails
 	 */
 	async getEpic(id: string): Promise<Epic> {
-		const response = await fetch(`${API_BASE_URL}/epics/${id}`);
+		const response = await authFetch(`${API_BASE_URL}/epics/${id}`);
 		if (!response.ok) {
 			throw new Error('Failed to fetch epic');
 		}
@@ -218,17 +246,13 @@ export const api = {
 	/**
 	 * Creates a new epic
 	 * @param data - Epic data to create
-	 * @param userId - UUID of the user creating the epic
 	 * @returns The created epic with generated ID and timestamps
 	 * @throws Error if validation fails or request fails
 	 */
-	async createEpic(data: CreateEpicDto, userId: string): Promise<Epic> {
-		const response = await fetch(`${API_BASE_URL}/epics`, {
+	async createEpic(data: CreateEpicDto): Promise<Epic> {
+		const response = await authFetch(`${API_BASE_URL}/epics`, {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'x-user-id': userId
-			},
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(data)
 		});
 		if (!response.ok) {
@@ -241,17 +265,13 @@ export const api = {
 	 * Updates an existing epic
 	 * @param id - UUID of the epic to update
 	 * @param data - Partial epic data to update
-	 * @param userId - UUID of the user updating the epic
 	 * @returns The updated epic
 	 * @throws Error if epic not found or request fails
 	 */
-	async updateEpic(id: string, data: UpdateEpicDto, userId: string): Promise<Epic> {
-		const response = await fetch(`${API_BASE_URL}/epics/${id}`, {
+	async updateEpic(id: string, data: UpdateEpicDto): Promise<Epic> {
+		const response = await authFetch(`${API_BASE_URL}/epics/${id}`, {
 			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json',
-				'x-user-id': userId
-			},
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(data)
 		});
 		if (!response.ok) {
@@ -263,16 +283,10 @@ export const api = {
 	/**
 	 * Deletes an epic (soft delete)
 	 * @param id - UUID of the epic to delete
-	 * @param userId - UUID of the user deleting the epic
 	 * @throws Error if epic not found or request fails
 	 */
-	async deleteEpic(id: string, userId: string): Promise<void> {
-		const response = await fetch(`${API_BASE_URL}/epics/${id}`, {
-			method: 'DELETE',
-			headers: {
-				'x-user-id': userId
-			}
-		});
+	async deleteEpic(id: string): Promise<void> {
+		const response = await authFetch(`${API_BASE_URL}/epics/${id}`, { method: 'DELETE' });
 		if (!response.ok) {
 			throw new Error('Failed to delete epic');
 		}
@@ -286,7 +300,7 @@ export const api = {
 	 * @throws Error if the request fails
 	 */
 	async getUserStories(): Promise<UserStory[]> {
-		const response = await fetch(`${API_BASE_URL}/user-stories`);
+		const response = await authFetch(`${API_BASE_URL}/user-stories`);
 		if (!response.ok) {
 			throw new Error('Failed to fetch user stories');
 		}
@@ -300,7 +314,7 @@ export const api = {
 	 * @throws Error if the user story is not found or request fails
 	 */
 	async getUserStory(id: string): Promise<UserStory> {
-		const response = await fetch(`${API_BASE_URL}/user-stories/${id}`);
+		const response = await authFetch(`${API_BASE_URL}/user-stories/${id}`);
 		if (!response.ok) {
 			throw new Error('Failed to fetch user story');
 		}
@@ -310,17 +324,13 @@ export const api = {
 	/**
 	 * Creates a new user story
 	 * @param data - User story data to create
-	 * @param userId - UUID of the user creating the user story
 	 * @returns The created user story with generated ID and timestamps
 	 * @throws Error if validation fails or request fails
 	 */
-	async createUserStory(data: CreateUserStoryDto, userId: string): Promise<UserStory> {
-		const response = await fetch(`${API_BASE_URL}/user-stories`, {
+	async createUserStory(data: CreateUserStoryDto): Promise<UserStory> {
+		const response = await authFetch(`${API_BASE_URL}/user-stories`, {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'x-user-id': userId
-			},
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(data)
 		});
 		if (!response.ok) {
@@ -333,17 +343,13 @@ export const api = {
 	 * Updates an existing user story
 	 * @param id - UUID of the user story to update
 	 * @param data - Partial user story data to update
-	 * @param userId - UUID of the user updating the user story
 	 * @returns The updated user story
 	 * @throws Error if user story not found or request fails
 	 */
-	async updateUserStory(id: string, data: UpdateUserStoryDto, userId: string): Promise<UserStory> {
-		const response = await fetch(`${API_BASE_URL}/user-stories/${id}`, {
+	async updateUserStory(id: string, data: UpdateUserStoryDto): Promise<UserStory> {
+		const response = await authFetch(`${API_BASE_URL}/user-stories/${id}`, {
 			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json',
-				'x-user-id': userId
-			},
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(data)
 		});
 		if (!response.ok) {
@@ -355,16 +361,10 @@ export const api = {
 	/**
 	 * Deletes a user story (soft delete)
 	 * @param id - UUID of the user story to delete
-	 * @param userId - UUID of the user deleting the user story
 	 * @throws Error if user story not found or request fails
 	 */
-	async deleteUserStory(id: string, userId: string): Promise<void> {
-		const response = await fetch(`${API_BASE_URL}/user-stories/${id}`, {
-			method: 'DELETE',
-			headers: {
-				'x-user-id': userId
-			}
-		});
+	async deleteUserStory(id: string): Promise<void> {
+		const response = await authFetch(`${API_BASE_URL}/user-stories/${id}`, { method: 'DELETE' });
 		if (!response.ok) {
 			throw new Error('Failed to delete user story');
 		}
@@ -393,14 +393,36 @@ export const api = {
 	async createSetup(data: { name: string; email: string; password: string }): Promise<void> {
 		const response = await fetch(`${API_BASE_URL}/setup`, {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(data)
 		});
 		if (!response.ok) {
 			const error = await response.json().catch(() => ({}));
 			throw new Error(error.message || 'Failed to complete setup');
 		}
+	},
+
+	// ==================== AUTH ====================
+
+	/**
+	 * Authenticates a user with email and password.
+	 * Sets the HTTP-only refresh token cookie on the browser.
+	 * @param email - User email
+	 * @param password - User password
+	 * @returns Access token and public user fields
+	 * @throws Error if credentials are invalid
+	 */
+	async login(email: string, password: string): Promise<{ accessToken: string; user: import('./types').AuthUser }> {
+		const response = await fetch(`${API_BASE_URL}/auth/login`, {
+			method: 'POST',
+			credentials: 'include',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ email, password })
+		});
+		if (!response.ok) {
+			const err = await response.json().catch(() => ({}));
+			throw new Error(err.message || 'Login failed');
+		}
+		return response.json();
 	}
 };

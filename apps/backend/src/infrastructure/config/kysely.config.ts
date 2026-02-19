@@ -12,6 +12,7 @@ export interface Database {
   user_stories: UserStoryTable;
   code_repositories: CodeRepositoryTable;
   user_story_code_repositories: UserStoryCodeRepositoryTable;
+  refresh_tokens: RefreshTokenTable;
 }
 
 export interface UserTable {
@@ -108,6 +109,15 @@ export interface UserStoryCodeRepositoryTable {
   user_story_id: string;
   code_repository_id: string;
   created_at: Date;
+}
+
+export interface RefreshTokenTable {
+  id: string;
+  user_id: string;
+  token_hash: string;
+  expires_at: Date;
+  created_at: Date;
+  revoked_at: Date | null;
 }
 
 export type KyselyDatabase = Kysely<Database>;

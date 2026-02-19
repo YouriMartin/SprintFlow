@@ -165,7 +165,7 @@
 	 */
 	async function createEpic(): Promise<void> {
 		try {
-			await api.createEpic(newEpicForm, TEMP_USER_ID);
+			await api.createEpic(newEpicForm);
 			showCreateEpicModal = false;
 			await fetchData();
 		} catch (err) {
@@ -178,7 +178,7 @@
 	 */
 	async function createUserStory(): Promise<void> {
 		try {
-			await api.createUserStory(newUserStoryForm, TEMP_USER_ID);
+			await api.createUserStory(newUserStoryForm);
 			showCreateUserStoryModal = false;
 			await fetchData();
 		} catch (err) {
@@ -193,7 +193,7 @@
 	async function deleteEpic(epicId: string): Promise<void> {
 		if (!confirm('Are you sure you want to delete this epic?')) return;
 		try {
-			await api.deleteEpic(epicId, TEMP_USER_ID);
+			await api.deleteEpic(epicId);
 			await fetchData();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to delete epic';
@@ -207,7 +207,7 @@
 	async function deleteUserStory(storyId: string): Promise<void> {
 		if (!confirm('Are you sure you want to delete this user story?')) return;
 		try {
-			await api.deleteUserStory(storyId, TEMP_USER_ID);
+			await api.deleteUserStory(storyId);
 			await fetchData();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to delete user story';

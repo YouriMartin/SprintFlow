@@ -1,4 +1,22 @@
 /**
+ * Role enum for users
+ */
+export enum UserRole {
+	SUPERADMIN = 'superadmin',
+	DEV = 'dev'
+}
+
+/**
+ * Authenticated user as returned by the login and /auth/me endpoints
+ */
+export interface AuthUser {
+	id: string;
+	name: string;
+	email: string;
+	role: UserRole;
+}
+
+/**
  * Status enum for projects
  */
 export enum ProjectStatus {

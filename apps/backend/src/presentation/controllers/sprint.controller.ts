@@ -3,15 +3,16 @@ import {
   Controller,
   Delete,
   Get,
-  Headers,
   HttpCode,
   HttpStatus,
   Param,
   Post,
   Put,
+  Req,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import type { Request } from 'express';
 import { CreateSprintDto } from '../../application/dtos/create-sprint.dto';
 import { UpdateSprintDto } from '../../application/dtos/update-sprint.dto';
 import { Sprint } from '../../domain/entities/sprint.entity';
@@ -26,6 +27,7 @@ import {
   GetSprintsByProjectQuery,
   GetActiveSprintByProjectQuery,
 } from '../../application/queries/impl/sprint';
+import type { JwtPayload } from '../../infrastructure/auth/jwt.strategy';
 
 @ApiTags('sprints')
 @Controller('sprints')
@@ -66,13 +68,13 @@ export class SprintController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new sprint' })
-  @ApiHeader({ name: 'x-user-id', description: 'User ID', required: true })
   @ApiResponse({ status: 201, description: 'Sprint created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   async create(
     @Body() createSprintDto: CreateSprintDto,
-    @Headers('x-user-id') userId: string,
+    @Req() req: Request,
   ): Promise<Sprint> {
+    const userId = (req.user as JwtPayload).sub;
     return this.commandBus.execute(
       new CreateSprintCommand(createSprintDto, userId),
     );
@@ -80,14 +82,14 @@ export class SprintController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Update a sprint' })
-  @ApiHeader({ name: 'x-user-id', description: 'User ID', required: true })
   @ApiResponse({ status: 200, description: 'Sprint updated successfully' })
   @ApiResponse({ status: 404, description: 'Sprint not found' })
   async update(
     @Param('id') id: string,
     @Body() updateSprintDto: UpdateSprintDto,
-    @Headers('x-user-id') userId: string,
+    @Req() req: Request,
   ): Promise<Sprint> {
+    const userId = (req.user as JwtPayload).sub;
     return this.commandBus.execute(
       new UpdateSprintCommand(id, updateSprintDto, userId),
     );
@@ -96,13 +98,13 @@ export class SprintController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a sprint' })
-  @ApiHeader({ name: 'x-user-id', description: 'User ID', required: true })
   @ApiResponse({ status: 204, description: 'Sprint deleted successfully' })
   @ApiResponse({ status: 404, description: 'Sprint not found' })
   async delete(
     @Param('id') id: string,
-    @Headers('x-user-id') userId: string,
+    @Req() req: Request,
   ): Promise<void> {
+    const userId = (req.user as JwtPayload).sub;
     return this.commandBus.execute(new DeleteSprintCommand(id, userId));
   }
 }

@@ -3,15 +3,16 @@ import {
   Controller,
   Delete,
   Get,
-  Headers,
   HttpCode,
   HttpStatus,
   Param,
   Post,
   Put,
+  Req,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import type { Request } from 'express';
 import { CreateUserStoryDto } from '../../application/dtos/create-user-story.dto';
 import { UpdateUserStoryDto } from '../../application/dtos/update-user-story.dto';
 import { UserStory } from '../../domain/entities/user-story.entity';
@@ -26,6 +27,7 @@ import {
   GetUserStoryByIdQuery,
   GetUserStoryCodeRepositoriesQuery,
 } from '../../application/queries/impl/user-story';
+import type { JwtPayload } from '../../infrastructure/auth/jwt.strategy';
 
 @ApiTags('user-stories')
 @Controller('user-stories')
@@ -52,17 +54,13 @@ export class UserStoryController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new user story' })
-  @ApiHeader({
-    name: 'x-user-id',
-    description: 'ID of the user creating the user story',
-    required: true,
-  })
   @ApiResponse({ status: 201, description: 'User story created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   async create(
     @Body() createUserStoryDto: CreateUserStoryDto,
-    @Headers('x-user-id') userId: string,
+    @Req() req: Request,
   ): Promise<UserStory> {
+    const userId = (req.user as JwtPayload).sub;
     return this.commandBus.execute(
       new CreateUserStoryCommand(createUserStoryDto, userId),
     );
@@ -70,18 +68,14 @@ export class UserStoryController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Update a user story' })
-  @ApiHeader({
-    name: 'x-user-id',
-    description: 'ID of the user updating the user story',
-    required: true,
-  })
   @ApiResponse({ status: 200, description: 'User story updated successfully' })
   @ApiResponse({ status: 404, description: 'User story not found' })
   async update(
     @Param('id') id: string,
     @Body() updateUserStoryDto: UpdateUserStoryDto,
-    @Headers('x-user-id') userId: string,
+    @Req() req: Request,
   ): Promise<UserStory> {
+    const userId = (req.user as JwtPayload).sub;
     return this.commandBus.execute(
       new UpdateUserStoryCommand(id, updateUserStoryDto, userId),
     );
@@ -90,17 +84,13 @@ export class UserStoryController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a user story (soft delete)' })
-  @ApiHeader({
-    name: 'x-user-id',
-    description: 'ID of the user deleting the user story',
-    required: true,
-  })
   @ApiResponse({ status: 204, description: 'User story deleted successfully' })
   @ApiResponse({ status: 404, description: 'User story not found' })
   async delete(
     @Param('id') id: string,
-    @Headers('x-user-id') userId: string,
+    @Req() req: Request,
   ): Promise<void> {
+    const userId = (req.user as JwtPayload).sub;
     return this.commandBus.execute(new DeleteUserStoryCommand(id, userId));
   }
 

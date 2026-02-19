@@ -3,15 +3,16 @@ import {
   Controller,
   Delete,
   Get,
-  Headers,
   HttpCode,
   HttpStatus,
   Param,
   Post,
   Put,
+  Req,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import type { Request } from 'express';
 import { CreateEpicDto } from '../../application/dtos/create-epic.dto';
 import { UpdateEpicDto } from '../../application/dtos/update-epic.dto';
 import { Epic } from '../../domain/entities/epic.entity';
@@ -24,6 +25,7 @@ import {
   GetAllEpicsQuery,
   GetEpicByIdQuery,
 } from '../../application/queries/impl/epic';
+import type { JwtPayload } from '../../infrastructure/auth/jwt.strategy';
 
 @ApiTags('epics')
 @Controller('epics')
@@ -50,34 +52,26 @@ export class EpicController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new epic' })
-  @ApiHeader({
-    name: 'x-user-id',
-    description: 'ID of the user creating the epic',
-    required: true,
-  })
   @ApiResponse({ status: 201, description: 'Epic created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   async create(
     @Body() createEpicDto: CreateEpicDto,
-    @Headers('x-user-id') userId: string,
+    @Req() req: Request,
   ): Promise<Epic> {
+    const userId = (req.user as JwtPayload).sub;
     return this.commandBus.execute(new CreateEpicCommand(createEpicDto, userId));
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Update an epic' })
-  @ApiHeader({
-    name: 'x-user-id',
-    description: 'ID of the user updating the epic',
-    required: true,
-  })
   @ApiResponse({ status: 200, description: 'Epic updated successfully' })
   @ApiResponse({ status: 404, description: 'Epic not found' })
   async update(
     @Param('id') id: string,
     @Body() updateEpicDto: UpdateEpicDto,
-    @Headers('x-user-id') userId: string,
+    @Req() req: Request,
   ): Promise<Epic> {
+    const userId = (req.user as JwtPayload).sub;
     return this.commandBus.execute(
       new UpdateEpicCommand(id, updateEpicDto, userId),
     );
@@ -86,17 +80,13 @@ export class EpicController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete an epic (soft delete)' })
-  @ApiHeader({
-    name: 'x-user-id',
-    description: 'ID of the user deleting the epic',
-    required: true,
-  })
   @ApiResponse({ status: 204, description: 'Epic deleted successfully' })
   @ApiResponse({ status: 404, description: 'Epic not found' })
   async delete(
     @Param('id') id: string,
-    @Headers('x-user-id') userId: string,
+    @Req() req: Request,
   ): Promise<void> {
+    const userId = (req.user as JwtPayload).sub;
     return this.commandBus.execute(new DeleteEpicCommand(id, userId));
   }
 }

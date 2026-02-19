@@ -4,4 +4,8 @@ export default registerAs('app', () => ({
   port: parseInt(process.env.PORT || '3000', 10),
   environment: process.env.NODE_ENV || 'development',
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3001',
+  jwtAccessSecret:
+    process.env.JWT_ACCESS_SECRET || 'change-me-in-production-access',
+  jwtRefreshSecret:
+    process.env.JWT_REFRESH_SECRET || 'change-me-in-production-refresh',
 }));

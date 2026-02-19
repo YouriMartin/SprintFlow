@@ -4,8 +4,10 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetSetupStatusQuery } from '../../application/queries/impl/setup/get-setup-status.query';
 import { SetupCommand } from '../../application/commands/impl/setup/setup.command';
 import { CreateSetupDto } from '../../application/dtos/create-setup.dto';
+import { Public } from '../../infrastructure/auth/public.decorator';
 
 @ApiTags('setup')
+@Public()
 @Controller('setup')
 export class SetupController {
   constructor(

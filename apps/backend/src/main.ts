@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { createLogger } from './infrastructure/logging/logger.config';
 import { initTelemetry } from './infrastructure/telemetry/telemetry.config';
@@ -14,6 +15,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: createLogger(),
   });
+
+  // Parse cookies (required for HTTP-only refresh token cookie)
+  app.use(cookieParser());
 
   // Enable CORS
   app.enableCors({
