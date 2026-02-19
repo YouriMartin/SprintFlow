@@ -8,16 +8,20 @@ export const load: LayoutLoad = async ({ fetch, url }) => {
 		return {};
 	}
 
+	let setupRequired = false;
+
 	try {
 		const response = await fetch(`${API_BASE_URL}/setup/status`);
 		if (response.ok) {
 			const { required } = await response.json();
-			if (required) {
-				redirect(302, '/setup');
-			}
+			setupRequired = required;
 		}
 	} catch {
 		// Backend unreachable — continue to app without redirecting
+	}
+
+	if (setupRequired) {
+		redirect(302, '/setup');
 	}
 
 	return {};
