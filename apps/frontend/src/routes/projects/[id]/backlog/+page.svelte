@@ -26,7 +26,7 @@
 	/** List of all epics for this project */
 	let epics: Epic[] = $state([]);
 
-	/** List of all user stories for this project */
+	/** List of all user stories belonging to epics of this project */
 	let userStories: UserStory[] = $state([]);
 
 	/** Loading state */
@@ -35,7 +35,7 @@
 	/** Error message */
 	let error: string | null = $state(null);
 
-	/** Collapsed state for each epic */
+	/** Collapsed state for each epic (expanded by default) */
 	let collapsedEpics: Record<string, boolean> = $state({});
 
 	/** Whether the create epic modal is open */
@@ -44,8 +44,8 @@
 	/** Whether the create user story modal is open */
 	let showCreateUserStoryModal: boolean = $state(false);
 
-	/** Selected epic ID for creating a user story */
-	let selectedEpicId: string | null = $state(null);
+	/** Epic ID that is receiving a new user story */
+	let targetEpicId: string = $state('');
 
 	/** Form data for creating a new epic */
 	let newEpicForm: CreateEpicDto = $state({
@@ -68,7 +68,8 @@
 	});
 
 	/**
-	 * Fetches project, epics and user stories from the API
+	 * Fetches project, epics and user stories from the API.
+	 * Only stories that belong to one of this project's epics are loaded.
 	 */
 	async function fetchData(): Promise<void> {
 		try {
@@ -80,13 +81,9 @@
 				api.getUserStories()
 			]);
 			project = projectData;
-			// Filter epics by project
 			epics = epicsData.filter((e) => e.projectId === projectId);
-			// Filter user stories by epics in this project or without epic
 			const epicIds = new Set(epics.map((e) => e.id));
-			userStories = userStoriesData.filter(
-				(s) => s.epicId === null || s.epicId === undefined || epicIds.has(s.epicId)
-			);
+			userStories = userStoriesData.filter((s) => s.epicId != null && epicIds.has(s.epicId));
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to load data';
 		} finally {
@@ -95,33 +92,15 @@
 	}
 
 	/**
-	 * Groups user stories by their epic ID
-	 * @returns Map of epic ID to user stories array
+	 * Returns user stories that belong to a given epic.
+	 * @param epicId - The epic's ID
 	 */
-	function getStoriesByEpic(): Map<string | null, UserStory[]> {
-		const map = new Map<string | null, UserStory[]>();
-
-		// Initialize with null key for stories without an epic
-		map.set(null, []);
-
-		// Initialize with all epic IDs
-		for (const epic of epics) {
-			map.set(epic.id, []);
-		}
-
-		// Group user stories
-		for (const story of userStories) {
-			const epicId = story.epicId ?? null;
-			const existing = map.get(epicId) ?? [];
-			existing.push(story);
-			map.set(epicId, existing);
-		}
-
-		return map;
+	function getStoriesForEpic(epicId: string): UserStory[] {
+		return userStories.filter((s) => s.epicId === epicId);
 	}
 
 	/**
-	 * Toggles the collapsed state of an epic
+	 * Toggles the collapsed/expanded state of an epic card.
 	 * @param epicId - ID of the epic to toggle
 	 */
 	function toggleEpic(epicId: string): void {
@@ -129,7 +108,7 @@
 	}
 
 	/**
-	 * Opens the create epic modal
+	 * Opens the create epic modal with a fresh form.
 	 */
 	function openCreateEpicModal(): void {
 		newEpicForm = {
@@ -139,29 +118,29 @@
 			endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
 			status: EpicStatus.PLANNED,
 			isVisibleInRoadmap: true,
-			projectId: projectId
+			projectId
 		};
 		showCreateEpicModal = true;
 	}
 
 	/**
-	 * Opens the create user story modal
-	 * @param epicId - Optional epic ID to pre-select
+	 * Opens the create user story modal pre-bound to a specific epic.
+	 * @param epicId - The epic the new story will belong to
 	 */
-	function openCreateUserStoryModal(epicId: string | null = null): void {
-		selectedEpicId = epicId;
+	function openCreateUserStoryModal(epicId: string): void {
+		targetEpicId = epicId;
 		newUserStoryForm = {
 			title: '',
 			description: '',
 			status: UserStoryStatus.TODO,
 			priority: UserStoryPriority.MEDIUM,
-			epicId: epicId ?? undefined
+			epicId
 		};
 		showCreateUserStoryModal = true;
 	}
 
 	/**
-	 * Creates a new epic
+	 * Submits the create epic form.
 	 */
 	async function createEpic(): Promise<void> {
 		try {
@@ -174,7 +153,7 @@
 	}
 
 	/**
-	 * Creates a new user story
+	 * Submits the create user story form.
 	 */
 	async function createUserStory(): Promise<void> {
 		try {
@@ -187,11 +166,11 @@
 	}
 
 	/**
-	 * Deletes an epic
+	 * Deletes an epic after user confirmation.
 	 * @param epicId - ID of the epic to delete
 	 */
 	async function deleteEpic(epicId: string): Promise<void> {
-		if (!confirm('Are you sure you want to delete this epic?')) return;
+		if (!confirm('Delete this epic? All its user stories will also be removed.')) return;
 		try {
 			await api.deleteEpic(epicId);
 			await fetchData();
@@ -201,11 +180,11 @@
 	}
 
 	/**
-	 * Deletes a user story
+	 * Deletes a user story after user confirmation.
 	 * @param storyId - ID of the user story to delete
 	 */
 	async function deleteUserStory(storyId: string): Promise<void> {
-		if (!confirm('Are you sure you want to delete this user story?')) return;
+		if (!confirm('Delete this user story?')) return;
 		try {
 			await api.deleteUserStory(storyId);
 			await fetchData();
@@ -215,81 +194,70 @@
 	}
 
 	/**
-	 * Returns the CSS class for a status badge
+	 * Returns the CSS class for a user story status badge.
 	 * @param status - User story status
-	 * @returns CSS class name
 	 */
 	function getStatusClass(status: UserStoryStatus): string {
-		switch (status) {
-			case UserStoryStatus.TODO:
-				return 'status-todo';
-			case UserStoryStatus.IN_PROGRESS:
-				return 'status-in-progress';
-			case UserStoryStatus.DONE:
-				return 'status-done';
-			default:
-				return '';
-		}
+		const map: Record<UserStoryStatus, string> = {
+			[UserStoryStatus.TODO]: 'status-todo',
+			[UserStoryStatus.IN_PROGRESS]: 'status-in-progress',
+			[UserStoryStatus.DONE]: 'status-done'
+		};
+		return map[status] ?? '';
 	}
 
 	/**
-	 * Returns the CSS class for a priority badge
+	 * Returns the CSS class for a user story priority badge.
 	 * @param priority - User story priority
-	 * @returns CSS class name
 	 */
 	function getPriorityClass(priority: UserStoryPriority): string {
-		switch (priority) {
-			case UserStoryPriority.LOW:
-				return 'priority-low';
-			case UserStoryPriority.MEDIUM:
-				return 'priority-medium';
-			case UserStoryPriority.HIGH:
-				return 'priority-high';
-			case UserStoryPriority.URGENT:
-				return 'priority-urgent';
-			default:
-				return '';
-		}
+		const map: Record<UserStoryPriority, string> = {
+			[UserStoryPriority.LOW]: 'priority-low',
+			[UserStoryPriority.MEDIUM]: 'priority-medium',
+			[UserStoryPriority.HIGH]: 'priority-high',
+			[UserStoryPriority.URGENT]: 'priority-urgent'
+		};
+		return map[priority] ?? '';
 	}
 
 	/**
-	 * Returns the CSS class for an epic status
+	 * Returns the CSS class for an epic status badge.
 	 * @param status - Epic status
-	 * @returns CSS class name
 	 */
 	function getEpicStatusClass(status: EpicStatus): string {
-		switch (status) {
-			case EpicStatus.PLANNED:
-				return 'epic-planned';
-			case EpicStatus.IN_PROGRESS:
-				return 'epic-in-progress';
-			case EpicStatus.COMPLETED:
-				return 'epic-completed';
-			case EpicStatus.CANCELLED:
-				return 'epic-cancelled';
-			default:
-				return '';
-		}
+		const map: Record<EpicStatus, string> = {
+			[EpicStatus.PLANNED]: 'epic-planned',
+			[EpicStatus.IN_PROGRESS]: 'epic-in-progress',
+			[EpicStatus.COMPLETED]: 'epic-completed',
+			[EpicStatus.CANCELLED]: 'epic-cancelled'
+		};
+		return map[status] ?? '';
 	}
 
-	// Subscribe to page store for route params
+	/**
+	 * Formats an ISO date string to a short locale date.
+	 * @param iso - ISO 8601 date string
+	 */
+	function formatDate(iso: string | null | undefined): string {
+		if (!iso) return '—';
+		return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+	}
+
+	// Sync projectId from route params and trigger data load
 	$effect(() => {
 		const unsubscribe = page.subscribe((p) => {
 			const newProjectId = p.params.id;
 			if (newProjectId && newProjectId !== projectId) {
 				projectId = newProjectId;
-				fetchData();
+				void fetchData();
 			}
 		});
 		return unsubscribe;
 	});
 
 	onMount(() => {
-		// Initial fetch is triggered by the $effect when projectId is set
+		// Initial fetch is triggered by the $effect above when projectId is set
 	});
-
-	// Derived state for grouped stories
-	let storiesByEpic = $derived(getStoriesByEpic());
 </script>
 
 <div class="backlog-page">
@@ -300,150 +268,138 @@
 				<span class="project-name">{project.name}</span>
 			{/if}
 		</div>
-		<div class="header-actions">
-			<button class="btn btn-secondary" onclick={openCreateEpicModal}>
-				+ New Epic
-			</button>
-			<button class="btn btn-primary" onclick={() => openCreateUserStoryModal(null)}>
-				+ New User Story
-			</button>
-		</div>
+		<button class="btn btn-primary" onclick={openCreateEpicModal}>+ New Epic</button>
 	</header>
 
 	{#if loading}
-		<div class="loading">Loading...</div>
+		<div class="loading">Loading…</div>
 	{:else if error}
-		<div class="error">{error}</div>
+		<div class="error-banner">{error}</div>
+	{:else if epics.length === 0}
+		<div class="empty-state">
+			<div class="empty-icon">📋</div>
+			<p class="empty-title">No epics yet</p>
+			<p class="empty-sub">Create an epic to start organising your backlog.</p>
+			<button class="btn btn-primary" onclick={openCreateEpicModal}>+ New Epic</button>
+		</div>
 	{:else}
-		<div class="backlog-content">
-			<!-- Epics with their user stories -->
+		<div class="epics-list">
 			{#each epics as epic (epic.id)}
-				{@const stories = storiesByEpic.get(epic.id) ?? []}
-				<div class="epic-group">
+				{@const stories = getStoriesForEpic(epic.id)}
+				{@const collapsed = !!collapsedEpics[epic.id]}
+
+				<div class="epic-card">
+					<!-- Epic card header -->
+					<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 					<div class="epic-header" onclick={() => toggleEpic(epic.id)}>
 						<div class="epic-header-left">
-							<span class="collapse-icon">
-								{collapsedEpics[epic.id] ? '>' : 'v'}
-							</span>
-							<h2 class="epic-title">{epic.title}</h2>
-							<span class="epic-status {getEpicStatusClass(epic.status)}">
-								{epic.status.replace('_', ' ')}
-							</span>
-							<span class="story-count">({stories.length})</span>
+							<span class="chevron" class:collapsed>{collapsed ? '▶' : '▼'}</span>
+							<div class="epic-meta">
+								<div class="epic-title-row">
+									<span class="epic-title">{epic.title}</span>
+									<span class="badge {getEpicStatusClass(epic.status)}">
+										{epic.status.replace('_', ' ')}
+									</span>
+								</div>
+								{#if epic.description}
+									<span class="epic-desc">{epic.description}</span>
+								{/if}
+								<div class="epic-dates">
+									<span>{formatDate(epic.startDate)} → {formatDate(epic.endDate)}</span>
+									<span class="story-count">{stories.length} {stories.length === 1 ? 'story' : 'stories'}</span>
+								</div>
+							</div>
 						</div>
+
 						<div class="epic-header-right">
 							<button
 								class="btn btn-sm btn-ghost"
 								onclick={(e) => { e.stopPropagation(); openCreateUserStoryModal(epic.id); }}
 							>
-								+ Story
+								+ Add Story
 							</button>
 							<button
 								class="btn btn-sm btn-danger-ghost"
-								onclick={(e) => { e.stopPropagation(); deleteEpic(epic.id); }}
+								onclick={(e) => { e.stopPropagation(); void deleteEpic(epic.id); }}
 							>
 								Delete
 							</button>
 						</div>
 					</div>
 
-					{#if !collapsedEpics[epic.id]}
-						<div class="stories-list">
+					<!-- Stories table -->
+					{#if !collapsed}
+						<div class="stories-section">
 							{#if stories.length === 0}
-								<p class="no-stories">No user stories in this epic</p>
+								<p class="no-stories">
+									No user stories yet —
+									<button
+										class="inline-link"
+										onclick={() => openCreateUserStoryModal(epic.id)}
+									>add one</button>
+								</p>
 							{:else}
-								{#each stories as story (story.id)}
-									<div class="story-card">
-										<div class="story-info">
-											<span class="story-title">{story.title}</span>
-											{#if story.description}
-												<span class="story-description">{story.description}</span>
-											{/if}
-										</div>
-										<div class="story-meta">
-											<span class="badge {getStatusClass(story.status)}">
-												{story.status.replace('_', ' ')}
-											</span>
-											<span class="badge {getPriorityClass(story.priority)}">
-												{story.priority}
-											</span>
-											<button
-												class="btn btn-sm btn-danger-ghost"
-												onclick={() => deleteUserStory(story.id)}
-											>
-												Delete
-											</button>
-										</div>
-									</div>
-								{/each}
+								<table class="stories-table">
+									<thead>
+										<tr>
+											<th class="col-title">Title</th>
+											<th class="col-desc">Description</th>
+											<th class="col-status">Status</th>
+											<th class="col-priority">Priority</th>
+											<th class="col-actions"></th>
+										</tr>
+									</thead>
+									<tbody>
+										{#each stories as story (story.id)}
+											<tr class="story-row">
+												<td class="col-title">
+													<span class="story-title">{story.title}</span>
+												</td>
+												<td class="col-desc">
+													<span class="story-desc-text">{story.description ?? '—'}</span>
+												</td>
+												<td class="col-status">
+													<span class="badge {getStatusClass(story.status)}">
+														{story.status.replace('_', ' ')}
+													</span>
+												</td>
+												<td class="col-priority">
+													<span class="badge {getPriorityClass(story.priority)}">
+														{story.priority}
+													</span>
+												</td>
+												<td class="col-actions">
+													<button
+														class="btn btn-sm btn-danger-ghost"
+														onclick={() => void deleteUserStory(story.id)}
+													>
+														Delete
+													</button>
+												</td>
+											</tr>
+										{/each}
+									</tbody>
+								</table>
 							{/if}
 						</div>
 					{/if}
 				</div>
 			{/each}
-
-			<!-- User stories without an epic -->
-			{#each [storiesByEpic.get(null) ?? []] as unassignedStories}
-				{#if unassignedStories.length > 0}
-					<div class="epic-group unassigned">
-						<div class="epic-header">
-							<div class="epic-header-left">
-								<h2 class="epic-title">Unassigned Stories</h2>
-								<span class="story-count">({unassignedStories.length})</span>
-							</div>
-						</div>
-						<div class="stories-list">
-							{#each unassignedStories as story (story.id)}
-								<div class="story-card">
-									<div class="story-info">
-										<span class="story-title">{story.title}</span>
-										{#if story.description}
-											<span class="story-description">{story.description}</span>
-										{/if}
-									</div>
-									<div class="story-meta">
-										<span class="badge {getStatusClass(story.status)}">
-											{story.status.replace('_', ' ')}
-										</span>
-										<span class="badge {getPriorityClass(story.priority)}">
-											{story.priority}
-										</span>
-										<button
-											class="btn btn-sm btn-danger-ghost"
-											onclick={() => deleteUserStory(story.id)}
-										>
-											Delete
-										</button>
-									</div>
-								</div>
-						{/each}
-					</div>
-				</div>
-				{/if}
-			{/each}
-
-			<!-- Empty state -->
-			{#if epics.length === 0 && userStories.length === 0}
-				<div class="empty-state">
-					<p>No epics or user stories yet.</p>
-					<p>Create an epic to start organizing your backlog.</p>
-				</div>
-			{/if}
 		</div>
 	{/if}
 </div>
 
 <!-- Create Epic Modal -->
-<Modal open={showCreateEpicModal} title="Create New Epic" onclose={() => showCreateEpicModal = false}>
-	<form class="form" onsubmit={(e) => { e.preventDefault(); createEpic(); }}>
+<Modal open={showCreateEpicModal} title="Create New Epic" onclose={() => (showCreateEpicModal = false)}>
+	<form class="form" onsubmit={(e) => { e.preventDefault(); void createEpic(); }}>
 		<div class="form-group">
-			<label for="epic-title">Title</label>
+			<label for="epic-title">Title <span class="required">*</span></label>
 			<input
 				id="epic-title"
 				type="text"
 				bind:value={newEpicForm.title}
 				required
-				placeholder="Enter epic title"
+				placeholder="Epic title"
 			/>
 		</div>
 
@@ -452,30 +408,19 @@
 			<textarea
 				id="epic-description"
 				bind:value={newEpicForm.description}
-				placeholder="Enter epic description"
+				placeholder="What does this epic cover?"
 				rows="3"
 			></textarea>
 		</div>
 
 		<div class="form-row">
 			<div class="form-group">
-				<label for="epic-start-date">Start Date</label>
-				<input
-					id="epic-start-date"
-					type="date"
-					bind:value={newEpicForm.startDate}
-					required
-				/>
+				<label for="epic-start-date">Start Date <span class="required">*</span></label>
+				<input id="epic-start-date" type="date" bind:value={newEpicForm.startDate} required />
 			</div>
-
 			<div class="form-group">
-				<label for="epic-end-date">End Date</label>
-				<input
-					id="epic-end-date"
-					type="date"
-					bind:value={newEpicForm.endDate}
-					required
-				/>
+				<label for="epic-end-date">End Date <span class="required">*</span></label>
+				<input id="epic-end-date" type="date" bind:value={newEpicForm.endDate} required />
 			</div>
 		</div>
 
@@ -489,27 +434,29 @@
 		</div>
 
 		<div class="form-actions">
-			<button type="button" class="btn btn-secondary" onclick={() => showCreateEpicModal = false}>
+			<button type="button" class="btn btn-secondary" onclick={() => (showCreateEpicModal = false)}>
 				Cancel
 			</button>
-			<button type="submit" class="btn btn-primary">
-				Create Epic
-			</button>
+			<button type="submit" class="btn btn-primary">Create Epic</button>
 		</div>
 	</form>
 </Modal>
 
 <!-- Create User Story Modal -->
-<Modal open={showCreateUserStoryModal} title="Create New User Story" onclose={() => showCreateUserStoryModal = false}>
-	<form class="form" onsubmit={(e) => { e.preventDefault(); createUserStory(); }}>
+<Modal
+	open={showCreateUserStoryModal}
+	title="Add User Story"
+	onclose={() => (showCreateUserStoryModal = false)}
+>
+	<form class="form" onsubmit={(e) => { e.preventDefault(); void createUserStory(); }}>
 		<div class="form-group">
-			<label for="story-title">Title</label>
+			<label for="story-title">Title <span class="required">*</span></label>
 			<input
 				id="story-title"
 				type="text"
 				bind:value={newUserStoryForm.title}
 				required
-				placeholder="As a user, I want to..."
+				placeholder="As a user, I want to…"
 			/>
 		</div>
 
@@ -518,19 +465,9 @@
 			<textarea
 				id="story-description"
 				bind:value={newUserStoryForm.description}
-				placeholder="Enter story description"
+				placeholder="Acceptance criteria, context…"
 				rows="3"
 			></textarea>
-		</div>
-
-		<div class="form-group">
-			<label for="story-epic">Epic</label>
-			<select id="story-epic" bind:value={newUserStoryForm.epicId}>
-				<option value={undefined}>No Epic</option>
-				{#each epics as epic}
-					<option value={epic.id}>{epic.title}</option>
-				{/each}
-			</select>
 		</div>
 
 		<div class="form-row">
@@ -542,7 +479,6 @@
 					{/each}
 				</select>
 			</div>
-
 			<div class="form-group">
 				<label for="story-priority">Priority</label>
 				<select id="story-priority" bind:value={newUserStoryForm.priority}>
@@ -554,17 +490,20 @@
 		</div>
 
 		<div class="form-actions">
-			<button type="button" class="btn btn-secondary" onclick={() => showCreateUserStoryModal = false}>
+			<button
+				type="button"
+				class="btn btn-secondary"
+				onclick={() => (showCreateUserStoryModal = false)}
+			>
 				Cancel
 			</button>
-			<button type="submit" class="btn btn-primary">
-				Create User Story
-			</button>
+			<button type="submit" class="btn btn-primary">Add Story</button>
 		</div>
 	</form>
 </Modal>
 
 <style>
+	/* ── Page shell ── */
 	.backlog-page {
 		padding: 2rem;
 		max-width: 1200px;
@@ -581,7 +520,7 @@
 	.page-title {
 		display: flex;
 		align-items: baseline;
-		gap: 1rem;
+		gap: 0.75rem;
 	}
 
 	.page-title h1 {
@@ -593,50 +532,75 @@
 	.project-name {
 		font-size: 1rem;
 		color: #6b7280;
-		font-weight: 400;
 	}
 
-	.header-actions {
-		display: flex;
-		gap: 0.75rem;
-	}
-
-	.loading,
-	.error {
+	/* ── States ── */
+	.loading {
 		text-align: center;
-		padding: 2rem;
+		padding: 3rem;
 		color: #6b7280;
 	}
 
-	.error {
-		color: #dc2626;
+	.error-banner {
+		padding: 0.875rem 1rem;
 		background-color: #fef2f2;
+		border: 1px solid #fecaca;
 		border-radius: 8px;
+		color: #dc2626;
+		font-size: 0.875rem;
 	}
 
-	/* Epic groups */
-	.epic-group {
-		background-color: #ffffff;
+	.empty-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 4rem 2rem;
+		color: #6b7280;
+		text-align: center;
+	}
+
+	.empty-icon {
+		font-size: 2.5rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.empty-title {
+		margin: 0;
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: #374151;
+	}
+
+	.empty-sub {
+		margin: 0 0 1rem;
+		font-size: 0.875rem;
+	}
+
+	/* ── Epic cards ── */
+	.epics-list {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.epic-card {
+		background: #ffffff;
 		border: 1px solid #e5e7eb;
-		border-radius: 8px;
-		margin-bottom: 1rem;
+		border-radius: 10px;
 		overflow: hidden;
-	}
-
-	.epic-group.unassigned {
-		background-color: #f9fafb;
-		border-style: dashed;
 	}
 
 	.epic-header {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
+		align-items: flex-start;
 		padding: 1rem 1.25rem;
 		background-color: #f9fafb;
 		cursor: pointer;
 		user-select: none;
-		transition: background-color 0.2s;
+		transition: background-color 0.15s;
+		gap: 1rem;
 	}
 
 	.epic-header:hover {
@@ -645,164 +609,170 @@
 
 	.epic-header-left {
 		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-	}
-
-	.epic-header-right {
-		display: flex;
-		gap: 0.5rem;
-	}
-
-	.collapse-icon {
-		font-family: monospace;
-		width: 1rem;
-		color: #6b7280;
-	}
-
-	.epic-title {
-		margin: 0;
-		font-size: 1rem;
-		font-weight: 600;
-		color: #1f2937;
-	}
-
-	.epic-status {
-		font-size: 0.75rem;
-		padding: 0.25rem 0.5rem;
-		border-radius: 4px;
-		text-transform: capitalize;
-	}
-
-	.epic-planned {
-		background-color: #e0e7ff;
-		color: #3730a3;
-	}
-
-	.epic-in-progress {
-		background-color: #fef3c7;
-		color: #92400e;
-	}
-
-	.epic-completed {
-		background-color: #d1fae5;
-		color: #065f46;
-	}
-
-	.epic-cancelled {
-		background-color: #fee2e2;
-		color: #991b1b;
-	}
-
-	.story-count {
-		font-size: 0.875rem;
-		color: #6b7280;
-	}
-
-	/* Stories list */
-	.stories-list {
-		padding: 0.5rem;
-	}
-
-	.no-stories {
-		text-align: center;
-		color: #9ca3af;
-		padding: 1rem;
-		font-style: italic;
-	}
-
-	.story-card {
-		display: flex;
-		justify-content: space-between;
 		align-items: flex-start;
-		padding: 0.875rem 1rem;
-		background-color: #ffffff;
-		border: 1px solid #e5e7eb;
-		border-radius: 6px;
-		margin-bottom: 0.5rem;
-		transition: box-shadow 0.2s;
-	}
-
-	.story-card:hover {
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-	}
-
-	.story-card:last-child {
-		margin-bottom: 0;
-	}
-
-	.story-info {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
+		gap: 0.75rem;
 		flex: 1;
 		min-width: 0;
 	}
 
-	.story-title {
-		font-weight: 500;
+	.chevron {
+		font-size: 0.65rem;
+		color: #9ca3af;
+		margin-top: 0.35rem;
+		flex-shrink: 0;
+		transition: transform 0.15s;
+	}
+
+	.epic-meta {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		min-width: 0;
+	}
+
+	.epic-title-row {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		flex-wrap: wrap;
+	}
+
+	.epic-title {
+		font-weight: 600;
+		font-size: 0.9375rem;
 		color: #1f2937;
 	}
 
-	.story-description {
-		font-size: 0.875rem;
+	.epic-desc {
+		font-size: 0.8125rem;
 		color: #6b7280;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 
-	.story-meta {
+	.epic-dates {
 		display: flex;
-		align-items: center;
+		gap: 1rem;
+		font-size: 0.75rem;
+		color: #9ca3af;
+		margin-top: 0.125rem;
+	}
+
+	.story-count {
+		font-weight: 500;
+		color: #6b7280;
+	}
+
+	.epic-header-right {
+		display: flex;
 		gap: 0.5rem;
 		flex-shrink: 0;
 	}
 
-	/* Badges */
-	.badge {
-		font-size: 0.75rem;
-		padding: 0.25rem 0.5rem;
-		border-radius: 4px;
-		text-transform: capitalize;
+	/* ── Epic status badges ── */
+	.epic-planned { background-color: #e0e7ff; color: #3730a3; }
+	.epic-in-progress { background-color: #fef3c7; color: #92400e; }
+	.epic-completed { background-color: #d1fae5; color: #065f46; }
+	.epic-cancelled { background-color: #fee2e2; color: #991b1b; }
+
+	/* ── Stories table ── */
+	.stories-section {
+		padding: 0.75rem 1.25rem 1rem;
+		border-top: 1px solid #e5e7eb;
 	}
 
-	.status-todo {
-		background-color: #e5e7eb;
+	.no-stories {
+		margin: 0.5rem 0;
+		font-size: 0.875rem;
+		color: #9ca3af;
+		font-style: italic;
+	}
+
+	.inline-link {
+		background: none;
+		border: none;
+		padding: 0;
+		color: #6366f1;
+		font-size: inherit;
+		cursor: pointer;
+		text-decoration: underline;
+		font-style: normal;
+	}
+
+	.stories-table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 0.875rem;
+	}
+
+	.stories-table thead th {
+		text-align: left;
+		padding: 0.5rem 0.75rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: #9ca3af;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.story-row td {
+		padding: 0.625rem 0.75rem;
+		vertical-align: middle;
+		border-bottom: 1px solid #f3f4f6;
 		color: #374151;
 	}
 
-	.status-in-progress {
-		background-color: #dbeafe;
-		color: #1e40af;
+	.story-row:last-child td {
+		border-bottom: none;
 	}
 
-	.status-done {
-		background-color: #d1fae5;
-		color: #065f46;
+	.story-row:hover td {
+		background-color: #fafafa;
 	}
 
-	.priority-low {
-		background-color: #f3f4f6;
+	/* Column widths */
+	.col-title   { width: 28%; }
+	.col-desc    { width: 36%; }
+	.col-status  { width: 12%; }
+	.col-priority{ width: 12%; }
+	.col-actions { width: 12%; text-align: right; }
+
+	.story-title {
+		font-weight: 500;
+		color: #1f2937;
+	}
+
+	.story-desc-text {
 		color: #6b7280;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
 	}
 
-	.priority-medium {
-		background-color: #fef3c7;
-		color: #92400e;
+	/* ── Badges ── */
+	.badge {
+		display: inline-block;
+		font-size: 0.72rem;
+		font-weight: 500;
+		padding: 0.2rem 0.5rem;
+		border-radius: 4px;
+		text-transform: capitalize;
+		white-space: nowrap;
 	}
 
-	.priority-high {
-		background-color: #fed7aa;
-		color: #c2410c;
-	}
+	.status-todo       { background-color: #e5e7eb; color: #374151; }
+	.status-in-progress{ background-color: #dbeafe; color: #1e40af; }
+	.status-done       { background-color: #d1fae5; color: #065f46; }
 
-	.priority-urgent {
-		background-color: #fee2e2;
-		color: #dc2626;
-	}
+	.priority-low    { background-color: #f3f4f6; color: #6b7280; }
+	.priority-medium { background-color: #fef3c7; color: #92400e; }
+	.priority-high   { background-color: #fed7aa; color: #c2410c; }
+	.priority-urgent { background-color: #fee2e2; color: #dc2626; }
 
-	/* Buttons */
+	/* ── Buttons ── */
 	.btn {
 		display: inline-flex;
 		align-items: center;
@@ -813,62 +783,24 @@
 		font-size: 0.875rem;
 		font-weight: 500;
 		cursor: pointer;
-		transition: background-color 0.2s, color 0.2s;
+		transition: background-color 0.15s, color 0.15s;
 	}
 
-	.btn-primary {
-		background-color: #6366f1;
-		color: white;
-	}
+	.btn-sm { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
 
-	.btn-primary:hover {
-		background-color: #4f46e5;
-	}
+	.btn-primary { background-color: #6366f1; color: #fff; }
+	.btn-primary:hover { background-color: #4f46e5; }
 
-	.btn-secondary {
-		background-color: #e5e7eb;
-		color: #374151;
-	}
+	.btn-secondary { background-color: #e5e7eb; color: #374151; }
+	.btn-secondary:hover { background-color: #d1d5db; }
 
-	.btn-secondary:hover {
-		background-color: #d1d5db;
-	}
+	.btn-ghost { background-color: transparent; color: #6366f1; }
+	.btn-ghost:hover { background-color: #eef2ff; }
 
-	.btn-ghost {
-		background-color: transparent;
-		color: #6366f1;
-	}
+	.btn-danger-ghost { background-color: transparent; color: #dc2626; }
+	.btn-danger-ghost:hover { background-color: #fef2f2; }
 
-	.btn-ghost:hover {
-		background-color: #eef2ff;
-	}
-
-	.btn-danger-ghost {
-		background-color: transparent;
-		color: #dc2626;
-	}
-
-	.btn-danger-ghost:hover {
-		background-color: #fef2f2;
-	}
-
-	.btn-sm {
-		padding: 0.25rem 0.5rem;
-		font-size: 0.75rem;
-	}
-
-	/* Empty state */
-	.empty-state {
-		text-align: center;
-		padding: 3rem;
-		color: #6b7280;
-	}
-
-	.empty-state p {
-		margin: 0.5rem 0;
-	}
-
-	/* Form styles */
+	/* ── Form ── */
 	.form {
 		display: flex;
 		flex-direction: column;
@@ -887,6 +819,8 @@
 		color: #374151;
 	}
 
+	.required { color: #dc2626; }
+
 	.form-group input,
 	.form-group select,
 	.form-group textarea {
@@ -894,7 +828,9 @@
 		border: 1px solid #d1d5db;
 		border-radius: 6px;
 		font-size: 0.875rem;
-		transition: border-color 0.2s, box-shadow 0.2s;
+		transition: border-color 0.15s, box-shadow 0.15s;
+		background: #fff;
+		color: #1f2937;
 	}
 
 	.form-group input:focus,
@@ -920,6 +856,6 @@
 		display: flex;
 		justify-content: flex-end;
 		gap: 0.75rem;
-		margin-top: 0.5rem;
+		margin-top: 0.25rem;
 	}
 </style>
