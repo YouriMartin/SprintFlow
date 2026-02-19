@@ -6,9 +6,7 @@ import { USER_STORY_REPOSITORY } from '../../../../domain/repositories/user-stor
 import type { UserStory } from '../../../../domain/entities/user-story.entity';
 
 @QueryHandler(GetAllUserStoriesQuery)
-export class GetAllUserStoriesHandler
-  implements IQueryHandler<GetAllUserStoriesQuery>
-{
+export class GetAllUserStoriesHandler implements IQueryHandler<GetAllUserStoriesQuery> {
   constructor(
     @Inject(USER_STORY_REPOSITORY)
     private readonly userStoryRepository: IUserStoryRepository,

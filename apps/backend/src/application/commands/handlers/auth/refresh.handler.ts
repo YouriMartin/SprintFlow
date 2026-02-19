@@ -14,9 +14,10 @@ export interface RefreshResult {
 }
 
 @CommandHandler(RefreshCommand)
-export class RefreshHandler
-  implements ICommandHandler<RefreshCommand, RefreshResult>
-{
+export class RefreshHandler implements ICommandHandler<
+  RefreshCommand,
+  RefreshResult
+> {
   constructor(
     @Inject(REFRESH_TOKEN_REPOSITORY)
     private readonly refreshTokenRepository: IRefreshTokenRepository,

@@ -5,9 +5,7 @@ import type { IUserRepository } from '../../../../domain/repositories/user.repos
 import { USER_REPOSITORY } from '../../../../domain/repositories/user.repository.interface';
 
 @QueryHandler(GetSetupStatusQuery)
-export class GetSetupStatusHandler
-  implements IQueryHandler<GetSetupStatusQuery>
-{
+export class GetSetupStatusHandler implements IQueryHandler<GetSetupStatusQuery> {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: IUserRepository,

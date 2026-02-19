@@ -54,15 +54,22 @@ export class SprintController {
 
   @Get('project/:projectId')
   @ApiOperation({ summary: 'Get all sprints for a project' })
-  @ApiResponse({ status: 200, description: 'Return all sprints for the project' })
-  async findByProject(@Param('projectId') projectId: string): Promise<Sprint[]> {
+  @ApiResponse({
+    status: 200,
+    description: 'Return all sprints for the project',
+  })
+  async findByProject(
+    @Param('projectId') projectId: string,
+  ): Promise<Sprint[]> {
     return this.queryBus.execute(new GetSprintsByProjectQuery(projectId));
   }
 
   @Get('project/:projectId/active')
   @ApiOperation({ summary: 'Get the active sprint for a project' })
   @ApiResponse({ status: 200, description: 'Return the active sprint' })
-  async findActiveByProject(@Param('projectId') projectId: string): Promise<Sprint | null> {
+  async findActiveByProject(
+    @Param('projectId') projectId: string,
+  ): Promise<Sprint | null> {
     return this.queryBus.execute(new GetActiveSprintByProjectQuery(projectId));
   }
 
@@ -100,10 +107,7 @@ export class SprintController {
   @ApiOperation({ summary: 'Delete a sprint' })
   @ApiResponse({ status: 204, description: 'Sprint deleted successfully' })
   @ApiResponse({ status: 404, description: 'Sprint not found' })
-  async delete(
-    @Param('id') id: string,
-    @Req() req: Request,
-  ): Promise<void> {
+  async delete(@Param('id') id: string, @Req() req: Request): Promise<void> {
     const userId = (req.user as JwtPayload).sub;
     return this.commandBus.execute(new DeleteSprintCommand(id, userId));
   }

@@ -56,7 +56,10 @@ export class SprintRepository implements ISprintRepository {
   }
 
   async create(
-    sprint: Omit<Sprint, 'id' | 'createdAt' | 'updatedAt' | 'updatedBy' | 'deletedBy' | 'deletedAt'>,
+    sprint: Omit<
+      Sprint,
+      'id' | 'createdAt' | 'updatedAt' | 'updatedBy' | 'deletedBy' | 'deletedAt'
+    >,
   ): Promise<Sprint> {
     const now = new Date();
     const newSprint = await this.db
@@ -87,7 +90,17 @@ export class SprintRepository implements ISprintRepository {
 
   async update(
     id: string,
-    sprint: Partial<Omit<Sprint, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'deletedBy' | 'deletedAt'>>,
+    sprint: Partial<
+      Omit<
+        Sprint,
+        | 'id'
+        | 'createdAt'
+        | 'updatedAt'
+        | 'createdBy'
+        | 'deletedBy'
+        | 'deletedAt'
+      >
+    >,
   ): Promise<Sprint | null> {
     const updateData: Partial<SprintTable> = {
       updated_at: new Date(),
@@ -95,14 +108,18 @@ export class SprintRepository implements ISprintRepository {
 
     if (sprint.name !== undefined) updateData.name = sprint.name;
     if (sprint.goal !== undefined) updateData.goal = sprint.goal;
-    if (sprint.sprintNumber !== undefined) updateData.sprint_number = sprint.sprintNumber;
-    if (sprint.startDate !== undefined) updateData.start_date = sprint.startDate;
+    if (sprint.sprintNumber !== undefined)
+      updateData.sprint_number = sprint.sprintNumber;
+    if (sprint.startDate !== undefined)
+      updateData.start_date = sprint.startDate;
     if (sprint.endDate !== undefined) updateData.end_date = sprint.endDate;
     if (sprint.status !== undefined) updateData.status = sprint.status;
     if (sprint.velocity !== undefined) updateData.velocity = sprint.velocity;
     if (sprint.capacity !== undefined) updateData.capacity = sprint.capacity;
-    if (sprint.projectId !== undefined) updateData.project_id = sprint.projectId;
-    if (sprint.updatedBy !== undefined) updateData.updated_by = sprint.updatedBy;
+    if (sprint.projectId !== undefined)
+      updateData.project_id = sprint.projectId;
+    if (sprint.updatedBy !== undefined)
+      updateData.updated_by = sprint.updatedBy;
 
     const updatedSprint = await this.db
       .updateTable('sprints')

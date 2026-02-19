@@ -5,9 +5,7 @@ import type { IProjectRepository } from '../../../../domain/repositories/project
 import { PROJECT_REPOSITORY } from '../../../../domain/repositories/project.repository.interface';
 
 @CommandHandler(DeleteProjectCommand)
-export class DeleteProjectHandler
-  implements ICommandHandler<DeleteProjectCommand>
-{
+export class DeleteProjectHandler implements ICommandHandler<DeleteProjectCommand> {
   constructor(
     @Inject(PROJECT_REPOSITORY)
     private readonly projectRepository: IProjectRepository,

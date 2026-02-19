@@ -7,7 +7,10 @@ export class CreateCodeRepositoryDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ example: 'Sprint planning and task management tool', required: false })
+  @ApiProperty({
+    example: 'Sprint planning and task management tool',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   description?: string;

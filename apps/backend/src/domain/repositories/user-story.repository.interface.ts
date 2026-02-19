@@ -1,4 +1,4 @@
-import {UserStory} from '../entities/user-story.entity';
+import { UserStory } from '../entities/user-story.entity';
 
 export interface IUserStoryRepository {
   findAll(): Promise<UserStory[]>;

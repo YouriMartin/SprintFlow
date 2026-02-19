@@ -1,7 +1,13 @@
-import {Inject, Injectable} from '@nestjs/common';
-import {CodeRepository, RepositoryType,} from '../../domain/entities/code-repository.entity';
-import {CodeRepositoryRepository} from '../../domain/repositories/code-repository.repository.interface';
-import type {CodeRepositoryTable, KyselyDatabase} from '../config/kysely.config';
+import { Inject, Injectable } from '@nestjs/common';
+import {
+  CodeRepository,
+  RepositoryType,
+} from '../../domain/entities/code-repository.entity';
+import { CodeRepositoryRepository } from '../../domain/repositories/code-repository.repository.interface';
+import type {
+  CodeRepositoryTable,
+  KyselyDatabase,
+} from '../config/kysely.config';
 
 @Injectable()
 export class CodeRepositoryRepositoryImpl implements CodeRepositoryRepository {
@@ -15,7 +21,9 @@ export class CodeRepositoryRepositoryImpl implements CodeRepositoryRepository {
       .selectFrom('code_repositories')
       .selectAll()
       .execute();
-    return codeRepositories.map((codeRepository) => this.mapToCodeRepository(codeRepository));
+    return codeRepositories.map((codeRepository) =>
+      this.mapToCodeRepository(codeRepository),
+    );
   }
 
   async findById(id: string): Promise<CodeRepository | null> {
@@ -28,7 +36,9 @@ export class CodeRepositoryRepositoryImpl implements CodeRepositoryRepository {
     return codeRepository ? this.mapToCodeRepository(codeRepository) : null;
   }
 
-  async create(codeRepository: Omit<CodeRepository, 'id' | 'createdAt' | 'updatedAt'>): Promise<CodeRepository> {
+  async create(
+    codeRepository: Omit<CodeRepository, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<CodeRepository> {
     const now = new Date();
     const newCodeRepository = await this.db
       .insertInto('code_repositories')
@@ -48,16 +58,26 @@ export class CodeRepositoryRepositoryImpl implements CodeRepositoryRepository {
     return this.mapToCodeRepository(newCodeRepository);
   }
 
-  async update(id: string, codeRepository: Partial<Omit<CodeRepository, 'id' | 'createdAt' | 'updatedAt'>>): Promise<CodeRepository | null> {
+  async update(
+    id: string,
+    codeRepository: Partial<
+      Omit<CodeRepository, 'id' | 'createdAt' | 'updatedAt'>
+    >,
+  ): Promise<CodeRepository | null> {
     const updateData: Partial<CodeRepositoryTable> = {
       updated_at: new Date(),
     };
 
-    if (codeRepository.name !== undefined) updateData.name = codeRepository.name;
-    if (codeRepository.description !== undefined) updateData.description = codeRepository.description;
-    if (codeRepository.repositoryUrl !== undefined) updateData.repository_url = codeRepository.repositoryUrl;
-    if (codeRepository.repositoryType !== undefined) updateData.repository_type = codeRepository.repositoryType;
-    if (codeRepository.repositoryId !== undefined) updateData.repository_id = codeRepository.repositoryId;
+    if (codeRepository.name !== undefined)
+      updateData.name = codeRepository.name;
+    if (codeRepository.description !== undefined)
+      updateData.description = codeRepository.description;
+    if (codeRepository.repositoryUrl !== undefined)
+      updateData.repository_url = codeRepository.repositoryUrl;
+    if (codeRepository.repositoryType !== undefined)
+      updateData.repository_type = codeRepository.repositoryType;
+    if (codeRepository.repositoryId !== undefined)
+      updateData.repository_id = codeRepository.repositoryId;
 
     const updatedCodeRepository = await this.db
       .updateTable('code_repositories')
@@ -66,7 +86,9 @@ export class CodeRepositoryRepositoryImpl implements CodeRepositoryRepository {
       .returningAll()
       .executeTakeFirst();
 
-    return updatedCodeRepository ? this.mapToCodeRepository(updatedCodeRepository) : null;
+    return updatedCodeRepository
+      ? this.mapToCodeRepository(updatedCodeRepository)
+      : null;
   }
 
   async delete(id: string): Promise<boolean> {
@@ -81,15 +103,24 @@ export class CodeRepositoryRepositoryImpl implements CodeRepositoryRepository {
   async findByUserStoryId(userStoryId: string): Promise<CodeRepository[]> {
     const codeRepositories = await this.db
       .selectFrom('code_repositories')
-      .innerJoin('user_story_code_repositories', 'user_story_code_repositories.code_repository_id', 'code_repositories.id')
+      .innerJoin(
+        'user_story_code_repositories',
+        'user_story_code_repositories.code_repository_id',
+        'code_repositories.id',
+      )
       .selectAll('code_repositories')
       .where('user_story_code_repositories.user_story_id', '=', userStoryId)
       .execute();
 
-    return codeRepositories.map((codeRepository) => this.mapToCodeRepository(codeRepository));
+    return codeRepositories.map((codeRepository) =>
+      this.mapToCodeRepository(codeRepository),
+    );
   }
 
-  async linkToUserStory(codeRepositoryId: string, userStoryId: string): Promise<void> {
+  async linkToUserStory(
+    codeRepositoryId: string,
+    userStoryId: string,
+  ): Promise<void> {
     await this.db
       .insertInto('user_story_code_repositories')
       .values({
@@ -101,7 +132,10 @@ export class CodeRepositoryRepositoryImpl implements CodeRepositoryRepository {
       .execute();
   }
 
-  async unlinkFromUserStory(codeRepositoryId: string, userStoryId: string): Promise<void> {
+  async unlinkFromUserStory(
+    codeRepositoryId: string,
+    userStoryId: string,
+  ): Promise<void> {
     await this.db
       .deleteFrom('user_story_code_repositories')
       .where('code_repository_id', '=', codeRepositoryId)
@@ -109,7 +143,9 @@ export class CodeRepositoryRepositoryImpl implements CodeRepositoryRepository {
       .execute();
   }
 
-  private mapToCodeRepository(dbCodeRepository: CodeRepositoryTable): CodeRepository {
+  private mapToCodeRepository(
+    dbCodeRepository: CodeRepositoryTable,
+  ): CodeRepository {
     return {
       id: dbCodeRepository.id,
       name: dbCodeRepository.name,

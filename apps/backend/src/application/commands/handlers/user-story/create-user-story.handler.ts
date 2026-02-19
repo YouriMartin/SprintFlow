@@ -6,9 +6,7 @@ import { USER_STORY_REPOSITORY } from '../../../../domain/repositories/user-stor
 import type { UserStory } from '../../../../domain/entities/user-story.entity';
 
 @CommandHandler(CreateUserStoryCommand)
-export class CreateUserStoryHandler
-  implements ICommandHandler<CreateUserStoryCommand>
-{
+export class CreateUserStoryHandler implements ICommandHandler<CreateUserStoryCommand> {
   constructor(
     @Inject(USER_STORY_REPOSITORY)
     private readonly userStoryRepository: IUserStoryRepository,

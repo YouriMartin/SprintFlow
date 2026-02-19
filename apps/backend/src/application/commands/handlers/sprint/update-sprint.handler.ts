@@ -23,25 +23,34 @@ export class UpdateSprintHandler implements ICommandHandler<UpdateSprintCommand>
     const updateData: Partial<
       Omit<
         Sprint,
-        'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'deletedBy' | 'deletedAt'
+        | 'id'
+        | 'createdAt'
+        | 'updatedAt'
+        | 'createdBy'
+        | 'deletedBy'
+        | 'deletedAt'
       >
     > = {};
 
     if (dto.name !== undefined) updateData.name = dto.name;
     if (dto.goal !== undefined) updateData.goal = dto.goal ?? null;
-    if (dto.sprintNumber !== undefined) updateData.sprintNumber = dto.sprintNumber;
+    if (dto.sprintNumber !== undefined)
+      updateData.sprintNumber = dto.sprintNumber;
     if (dto.startDate !== undefined) updateData.startDate = dto.startDate;
     if (dto.endDate !== undefined) updateData.endDate = dto.endDate;
     if (dto.status !== undefined) updateData.status = dto.status;
     if (dto.velocity !== undefined) updateData.velocity = dto.velocity ?? null;
     if (dto.capacity !== undefined) updateData.capacity = dto.capacity ?? null;
-    if (dto.projectId !== undefined) updateData.projectId = dto.projectId ?? null;
+    if (dto.projectId !== undefined)
+      updateData.projectId = dto.projectId ?? null;
 
     updateData.updatedBy = userId;
 
     const updated = await this.sprintRepository.update(id, updateData);
     if (!updated) {
-      throw new NotFoundException(`Sprint with ID ${id} not found after update`);
+      throw new NotFoundException(
+        `Sprint with ID ${id} not found after update`,
+      );
     }
 
     return updated;

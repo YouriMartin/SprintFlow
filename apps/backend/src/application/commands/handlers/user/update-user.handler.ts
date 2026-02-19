@@ -29,7 +29,8 @@ export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
       }
     }
 
-    const updateData: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>> = {};
+    const updateData: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>> =
+      {};
     if (dto.email !== undefined) updateData.email = dto.email;
     if (dto.name !== undefined) updateData.name = dto.name;
     if (dto.password !== undefined) updateData.password = dto.password;

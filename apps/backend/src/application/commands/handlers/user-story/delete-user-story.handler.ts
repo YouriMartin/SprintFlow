@@ -5,9 +5,7 @@ import type { IUserStoryRepository } from '../../../../domain/repositories/user-
 import { USER_STORY_REPOSITORY } from '../../../../domain/repositories/user-story.repository.interface';
 
 @CommandHandler(DeleteUserStoryCommand)
-export class DeleteUserStoryHandler
-  implements ICommandHandler<DeleteUserStoryCommand>
-{
+export class DeleteUserStoryHandler implements ICommandHandler<DeleteUserStoryCommand> {
   constructor(
     @Inject(USER_STORY_REPOSITORY)
     private readonly userStoryRepository: IUserStoryRepository,

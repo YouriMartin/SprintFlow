@@ -6,9 +6,7 @@ import { PROJECT_REPOSITORY } from '../../../../domain/repositories/project.repo
 import type { Project } from '../../../../domain/entities/project.entity';
 
 @QueryHandler(GetAllProjectsQuery)
-export class GetAllProjectsHandler
-  implements IQueryHandler<GetAllProjectsQuery>
-{
+export class GetAllProjectsHandler implements IQueryHandler<GetAllProjectsQuery> {
   constructor(
     @Inject(PROJECT_REPOSITORY)
     private readonly projectRepository: IProjectRepository,

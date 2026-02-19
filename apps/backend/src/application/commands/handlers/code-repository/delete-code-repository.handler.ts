@@ -5,9 +5,7 @@ import type { CodeRepositoryRepository } from '../../../../domain/repositories/c
 import { CODE_REPOSITORY_REPOSITORY } from '../../../../domain/repositories/code-repository.repository.interface';
 
 @CommandHandler(DeleteCodeRepositoryCommand)
-export class DeleteCodeRepositoryHandler
-  implements ICommandHandler<DeleteCodeRepositoryCommand>
-{
+export class DeleteCodeRepositoryHandler implements ICommandHandler<DeleteCodeRepositoryCommand> {
   constructor(
     @Inject(CODE_REPOSITORY_REPOSITORY)
     private readonly codeRepositoryRepository: CodeRepositoryRepository,

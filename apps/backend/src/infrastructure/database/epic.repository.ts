@@ -31,7 +31,10 @@ export class EpicRepository implements IEpicRepository {
   }
 
   async create(
-    epic: Omit<Epic, 'id' | 'createdAt' | 'updatedAt' | 'updatedBy' | 'deletedBy' | 'deletedAt'>,
+    epic: Omit<
+      Epic,
+      'id' | 'createdAt' | 'updatedAt' | 'updatedBy' | 'deletedBy' | 'deletedAt'
+    >,
   ): Promise<Epic> {
     const now = new Date();
     const newEpic = await this.db
@@ -60,7 +63,17 @@ export class EpicRepository implements IEpicRepository {
 
   async update(
     id: string,
-    epic: Partial<Omit<Epic, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'deletedBy' | 'deletedAt'>>,
+    epic: Partial<
+      Omit<
+        Epic,
+        | 'id'
+        | 'createdAt'
+        | 'updatedAt'
+        | 'createdBy'
+        | 'deletedBy'
+        | 'deletedAt'
+      >
+    >,
   ): Promise<Epic | null> {
     const updateData: Partial<EpicTable> = {
       updated_at: new Date(),

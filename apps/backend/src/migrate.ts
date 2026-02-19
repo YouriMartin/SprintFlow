@@ -23,7 +23,7 @@ async function main(): Promise<void> {
     log: ['error'],
   });
 
-  const service = new MigrationService(db as any);
+  const service = new MigrationService(db);
   await service.runPendingMigrations();
   await db.destroy();
 }

@@ -4,7 +4,9 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 
 export const initTelemetry = () => {
   const exporterOptions = {
-    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
+    url:
+      process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
+      'http://localhost:4318/v1/traces',
   };
 
   const traceExporter = new OTLPTraceExporter(exporterOptions);

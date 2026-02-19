@@ -7,9 +7,7 @@ import type { IUserStoryRepository } from '../../../../domain/repositories/user-
 import { USER_STORY_REPOSITORY } from '../../../../domain/repositories/user-story.repository.interface';
 
 @CommandHandler(LinkTaskToCodeRepositoryCommand)
-export class LinkTaskToCodeRepositoryHandler
-  implements ICommandHandler<LinkTaskToCodeRepositoryCommand>
-{
+export class LinkTaskToCodeRepositoryHandler implements ICommandHandler<LinkTaskToCodeRepositoryCommand> {
   constructor(
     @Inject(CODE_REPOSITORY_REPOSITORY)
     private readonly codeRepositoryRepository: CodeRepositoryRepository,
@@ -20,9 +18,12 @@ export class LinkTaskToCodeRepositoryHandler
   async execute(command: LinkTaskToCodeRepositoryCommand): Promise<void> {
     const { taskId, codeRepositoryId } = command;
 
-    const codeRepository = await this.codeRepositoryRepository.findById(codeRepositoryId);
+    const codeRepository =
+      await this.codeRepositoryRepository.findById(codeRepositoryId);
     if (!codeRepository) {
-      throw new NotFoundException(`Code repository with id ${codeRepositoryId} not found`);
+      throw new NotFoundException(
+        `Code repository with id ${codeRepositoryId} not found`,
+      );
     }
 
     const userStory = await this.userStoryRepository.findById(taskId);
@@ -30,6 +31,9 @@ export class LinkTaskToCodeRepositoryHandler
       throw new NotFoundException(`User story with id ${taskId} not found`);
     }
 
-    await this.codeRepositoryRepository.linkToUserStory(codeRepositoryId, taskId);
+    await this.codeRepositoryRepository.linkToUserStory(
+      codeRepositoryId,
+      taskId,
+    );
   }
 }

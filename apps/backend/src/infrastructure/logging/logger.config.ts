@@ -16,9 +16,15 @@ export const createLogger = () => {
       new winston.transports.Console({
         format: winston.format.combine(
           winston.format.colorize(),
-          winston.format.printf(({ timestamp, level, message, context, trace }) => {
-            return `${timestamp} [${context || 'Application'}] ${level}: ${message}${trace ? `\n${trace}` : ''}`;
-          }),
+          winston.format.printf(
+            ({ timestamp, level, message, context, trace }) => {
+              const ts = typeof timestamp === 'string' ? timestamp : '';
+              const ctx = typeof context === 'string' ? context : 'Application';
+              const msg = typeof message === 'string' ? message : '';
+              const traceStr = typeof trace === 'string' ? `\n${trace}` : '';
+              return `${ts} [${ctx}] ${level}: ${msg}${traceStr}`;
+            },
+          ),
         ),
       }),
       new winston.transports.File({

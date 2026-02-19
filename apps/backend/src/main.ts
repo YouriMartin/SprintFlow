@@ -37,7 +37,7 @@ async function bootstrap() {
   // Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('SprintFlow API')
-    .setDescription('The SprintFlow API - Jira and Monday\'s Killer')
+    .setDescription("The SprintFlow API - Jira and Monday's Killer")
     .setVersion('1.0')
     .addTag('tasks')
     .build();
@@ -49,4 +49,4 @@ async function bootstrap() {
   console.log(`Application is running on: http://localhost:${port}`);
   console.log(`Swagger documentation: http://localhost:${port}/api`);
 }
-bootstrap();
+void bootstrap();

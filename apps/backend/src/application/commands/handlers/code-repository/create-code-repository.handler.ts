@@ -6,9 +6,7 @@ import { CODE_REPOSITORY_REPOSITORY } from '../../../../domain/repositories/code
 import type { CodeRepository } from '../../../../domain/entities/code-repository.entity';
 
 @CommandHandler(CreateCodeRepositoryCommand)
-export class CreateCodeRepositoryHandler
-  implements ICommandHandler<CreateCodeRepositoryCommand>
-{
+export class CreateCodeRepositoryHandler implements ICommandHandler<CreateCodeRepositoryCommand> {
   constructor(
     @Inject(CODE_REPOSITORY_REPOSITORY)
     private readonly codeRepositoryRepository: CodeRepositoryRepository,

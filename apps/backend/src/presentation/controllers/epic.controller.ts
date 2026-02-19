@@ -59,7 +59,9 @@ export class EpicController {
     @Req() req: Request,
   ): Promise<Epic> {
     const userId = (req.user as JwtPayload).sub;
-    return this.commandBus.execute(new CreateEpicCommand(createEpicDto, userId));
+    return this.commandBus.execute(
+      new CreateEpicCommand(createEpicDto, userId),
+    );
   }
 
   @Put(':id')
@@ -82,10 +84,7 @@ export class EpicController {
   @ApiOperation({ summary: 'Delete an epic (soft delete)' })
   @ApiResponse({ status: 204, description: 'Epic deleted successfully' })
   @ApiResponse({ status: 404, description: 'Epic not found' })
-  async delete(
-    @Param('id') id: string,
-    @Req() req: Request,
-  ): Promise<void> {
+  async delete(@Param('id') id: string, @Req() req: Request): Promise<void> {
     const userId = (req.user as JwtPayload).sub;
     return this.commandBus.execute(new DeleteEpicCommand(id, userId));
   }

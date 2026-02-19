@@ -6,9 +6,7 @@ import { PROJECT_REPOSITORY } from '../../../../domain/repositories/project.repo
 import type { Project } from '../../../../domain/entities/project.entity';
 
 @CommandHandler(UpdateProjectCommand)
-export class UpdateProjectHandler
-  implements ICommandHandler<UpdateProjectCommand>
-{
+export class UpdateProjectHandler implements ICommandHandler<UpdateProjectCommand> {
   constructor(
     @Inject(PROJECT_REPOSITORY)
     private readonly projectRepository: IProjectRepository,

@@ -8,17 +8,27 @@ export class UpdateCodeRepositoryDto {
   @IsString()
   name?: string;
 
-  @ApiProperty({ example: 'Sprint planning and task management tool', required: false })
+  @ApiProperty({
+    example: 'Sprint planning and task management tool',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiProperty({ example: 'https://github.com/username/sprintflow', required: false })
+  @ApiProperty({
+    example: 'https://github.com/username/sprintflow',
+    required: false,
+  })
   @IsOptional()
   @IsUrl()
   repositoryUrl?: string;
 
-  @ApiProperty({ enum: RepositoryType, example: RepositoryType.GITHUB, required: false })
+  @ApiProperty({
+    enum: RepositoryType,
+    example: RepositoryType.GITHUB,
+    required: false,
+  })
   @IsOptional()
   @IsEnum(RepositoryType)
   repositoryType?: RepositoryType;

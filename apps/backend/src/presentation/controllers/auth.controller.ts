@@ -46,7 +46,10 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login with email and password' })
-  @ApiResponse({ status: 200, description: 'Returns access token and user info' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns access token and user info',
+  })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   @ApiResponse({ status: 404, description: 'User not found' })
   async login(
@@ -79,7 +82,7 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ accessToken: string }> {
-    const rawToken: string | undefined = req.cookies?.[COOKIE_NAME];
+    const rawToken = req.cookies?.[COOKIE_NAME] as string | undefined;
     if (!rawToken) {
       throw new UnauthorizedException('No refresh token cookie present');
     }
@@ -106,7 +109,7 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
-    const rawToken: string | undefined = req.cookies?.[COOKIE_NAME];
+    const rawToken = req.cookies?.[COOKIE_NAME] as string | undefined;
 
     await this.commandBus.execute(new LogoutCommand(rawToken ?? ''));
 

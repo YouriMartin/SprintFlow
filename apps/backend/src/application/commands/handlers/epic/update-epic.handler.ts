@@ -23,7 +23,12 @@ export class UpdateEpicHandler implements ICommandHandler<UpdateEpicCommand> {
     const updateData: Partial<
       Omit<
         Epic,
-        'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'deletedBy' | 'deletedAt'
+        | 'id'
+        | 'createdAt'
+        | 'updatedAt'
+        | 'createdBy'
+        | 'deletedBy'
+        | 'deletedAt'
       >
     > = {};
 

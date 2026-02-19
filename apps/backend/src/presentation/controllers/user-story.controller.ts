@@ -86,10 +86,7 @@ export class UserStoryController {
   @ApiOperation({ summary: 'Delete a user story (soft delete)' })
   @ApiResponse({ status: 204, description: 'User story deleted successfully' })
   @ApiResponse({ status: 404, description: 'User story not found' })
-  async delete(
-    @Param('id') id: string,
-    @Req() req: Request,
-  ): Promise<void> {
+  async delete(@Param('id') id: string, @Req() req: Request): Promise<void> {
     const userId = (req.user as JwtPayload).sub;
     return this.commandBus.execute(new DeleteUserStoryCommand(id, userId));
   }

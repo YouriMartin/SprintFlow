@@ -5,9 +5,7 @@ import type { CodeRepositoryRepository } from '../../../../domain/repositories/c
 import { CODE_REPOSITORY_REPOSITORY } from '../../../../domain/repositories/code-repository.repository.interface';
 
 @CommandHandler(UnlinkTaskFromCodeRepositoryCommand)
-export class UnlinkTaskFromCodeRepositoryHandler
-  implements ICommandHandler<UnlinkTaskFromCodeRepositoryCommand>
-{
+export class UnlinkTaskFromCodeRepositoryHandler implements ICommandHandler<UnlinkTaskFromCodeRepositoryCommand> {
   constructor(
     @Inject(CODE_REPOSITORY_REPOSITORY)
     private readonly codeRepositoryRepository: CodeRepositoryRepository,
@@ -16,6 +14,9 @@ export class UnlinkTaskFromCodeRepositoryHandler
   async execute(command: UnlinkTaskFromCodeRepositoryCommand): Promise<void> {
     const { taskId, codeRepositoryId } = command;
 
-    await this.codeRepositoryRepository.unlinkFromUserStory(codeRepositoryId, taskId);
+    await this.codeRepositoryRepository.unlinkFromUserStory(
+      codeRepositoryId,
+      taskId,
+    );
   }
 }

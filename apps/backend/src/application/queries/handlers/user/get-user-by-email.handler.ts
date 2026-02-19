@@ -6,9 +6,7 @@ import { USER_REPOSITORY } from '../../../../domain/repositories/user.repository
 import type { User } from '../../../../domain/entities/user.entity';
 
 @QueryHandler(GetUserByEmailQuery)
-export class GetUserByEmailHandler
-  implements IQueryHandler<GetUserByEmailQuery>
-{
+export class GetUserByEmailHandler implements IQueryHandler<GetUserByEmailQuery> {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: IUserRepository,

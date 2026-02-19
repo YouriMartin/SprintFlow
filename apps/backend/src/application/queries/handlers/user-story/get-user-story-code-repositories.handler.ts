@@ -8,9 +8,7 @@ import { CODE_REPOSITORY_REPOSITORY } from '../../../../domain/repositories/code
 import type { CodeRepository } from '../../../../domain/entities/code-repository.entity';
 
 @QueryHandler(GetUserStoryCodeRepositoriesQuery)
-export class GetUserStoryCodeRepositoriesHandler
-  implements IQueryHandler<GetUserStoryCodeRepositoriesQuery>
-{
+export class GetUserStoryCodeRepositoriesHandler implements IQueryHandler<GetUserStoryCodeRepositoriesQuery> {
   constructor(
     @Inject(USER_STORY_REPOSITORY)
     private readonly userStoryRepository: IUserStoryRepository,
@@ -21,7 +19,9 @@ export class GetUserStoryCodeRepositoriesHandler
   async execute(
     query: GetUserStoryCodeRepositoriesQuery,
   ): Promise<CodeRepository[]> {
-    const userStory = await this.userStoryRepository.findById(query.userStoryId);
+    const userStory = await this.userStoryRepository.findById(
+      query.userStoryId,
+    );
     if (!userStory) {
       throw new NotFoundException(
         `UserStory with ID ${query.userStoryId} not found`,

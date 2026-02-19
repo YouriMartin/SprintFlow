@@ -1,4 +1,9 @@
-import { Injectable, Inject, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  Logger,
+  OnApplicationBootstrap,
+} from '@nestjs/common';
 import { readFileSync, readdirSync } from 'fs';
 import * as path from 'path';
 import { sql } from 'kysely';
@@ -8,7 +13,11 @@ import type { KyselyDatabase } from '../config/kysely.config';
 export class MigrationService implements OnApplicationBootstrap {
   private readonly logger = new Logger(MigrationService.name);
   // __dirname at runtime: dist/infrastructure/database → ../../.. = apps/backend root
-  private readonly migrationsPath = path.resolve(__dirname, '../../..', 'migrations');
+  private readonly migrationsPath = path.resolve(
+    __dirname,
+    '../../..',
+    'migrations',
+  );
 
   constructor(@Inject('kysely') private readonly db: KyselyDatabase) {}
 
