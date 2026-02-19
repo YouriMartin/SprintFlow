@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BadRequestException, Inject } from '@nestjs/common';
-import * as bcrypt from 'bcryptjs';
+import * as argon2 from 'argon2';
 import { SetupCommand } from '../../impl/setup/setup.command';
 import type { IUserRepository } from '../../../../domain/repositories/user.repository.interface';
 import { USER_REPOSITORY } from '../../../../domain/repositories/user.repository.interface';
@@ -27,7 +27,7 @@ export class SetupHandler implements ICommandHandler<SetupCommand> {
       );
     }
 
-    const hashedPassword = await bcrypt.hash(command.dto.password, 10);
+    const hashedPassword = await argon2.hash(command.dto.password);
 
     return this.userRepository.create({
       email: command.dto.email,
