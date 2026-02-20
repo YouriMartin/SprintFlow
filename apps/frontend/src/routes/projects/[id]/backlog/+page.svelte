@@ -384,7 +384,10 @@
 										{#each stories as story (story.id)}
 											<tr class="story-row">
 												<td class="col-title">
-													<span class="story-title">{story.title}</span>
+													<button
+														class="title-link"
+														onclick={() => openStoryDetail(story)}
+													>{story.title}</button>
 												</td>
 												<td class="col-desc">
 													<span class="story-desc-text">{story.description ?? '—'}</span>
