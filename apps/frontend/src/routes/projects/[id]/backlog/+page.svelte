@@ -47,6 +47,12 @@
 	/** Epic ID that is receiving a new user story */
 	let targetEpicId: string = $state('');
 
+	/** Epic currently shown in the detail modal */
+	let selectedEpic: Epic | null = $state(null);
+
+	/** User story currently shown in the detail modal */
+	let selectedStory: UserStory | null = $state(null);
+
 	/** Form data for creating a new epic */
 	let newEpicForm: CreateEpicDto = $state({
 		title: '',
@@ -243,6 +249,22 @@
 		return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 	}
 
+	/**
+	 * Opens the detail modal for an epic.
+	 * @param epic - The epic to display
+	 */
+	function openEpicDetail(epic: Epic): void {
+		selectedEpic = epic;
+	}
+
+	/**
+	 * Opens the detail modal for a user story.
+	 * @param story - The user story to display
+	 */
+	function openStoryDetail(story: UserStory): void {
+		selectedStory = story;
+	}
+
 	// Sync projectId from route params and trigger data load
 	$effect(() => {
 		const unsubscribe = page.subscribe((p) => {
@@ -296,7 +318,10 @@
 							<span class="chevron" class:collapsed>{collapsed ? '▶' : '▼'}</span>
 							<div class="epic-meta">
 								<div class="epic-title-row">
-									<span class="epic-title">{epic.title}</span>
+									<button
+										class="title-link"
+										onclick={(e) => { e.stopPropagation(); openEpicDetail(epic); }}
+									>{epic.title}</button>
 									<span class="badge {getEpicStatusClass(epic.status)}">
 										{epic.status.replace('_', ' ')}
 									</span>
@@ -512,6 +537,109 @@
 			<button type="submit" class="btn btn-primary">Add Story</button>
 		</div>
 	</form>
+</Modal>
+
+<!-- Epic detail modal -->
+<Modal open={!!selectedEpic} title="Epic details" onclose={() => (selectedEpic = null)}>
+	{#if selectedEpic}
+		<div class="detail-body">
+			<div class="detail-header-row">
+				<h3 class="detail-title">{selectedEpic.title}</h3>
+				<span class="badge {getEpicStatusClass(selectedEpic.status)}">
+					{selectedEpic.status.replace('_', ' ')}
+				</span>
+			</div>
+
+			{#if selectedEpic.description}
+				<p class="detail-description">{selectedEpic.description}</p>
+			{/if}
+
+			<dl class="detail-grid">
+				<div class="detail-field">
+					<dt>Start date</dt>
+					<dd>{formatDate(selectedEpic.startDate)}</dd>
+				</div>
+				<div class="detail-field">
+					<dt>End date</dt>
+					<dd>{formatDate(selectedEpic.endDate)}</dd>
+				</div>
+				<div class="detail-field">
+					<dt>Visible in roadmap</dt>
+					<dd>{selectedEpic.isVisibleInRoadmap ? 'Yes' : 'No'}</dd>
+				</div>
+				<div class="detail-field">
+					<dt>Stories</dt>
+					<dd>{getStoriesForEpic(selectedEpic.id).length}</dd>
+				</div>
+				<div class="detail-field">
+					<dt>Created</dt>
+					<dd>{formatDate(selectedEpic.createdAt)}</dd>
+				</div>
+				<div class="detail-field">
+					<dt>Last updated</dt>
+					<dd>{formatDate(selectedEpic.updatedAt)}</dd>
+				</div>
+			</dl>
+		</div>
+	{/if}
+</Modal>
+
+<!-- User story detail modal -->
+<Modal open={!!selectedStory} title="User story details" onclose={() => (selectedStory = null)}>
+	{#if selectedStory}
+		<div class="detail-body">
+			<div class="detail-header-row">
+				<h3 class="detail-title">{selectedStory.title}</h3>
+				<div class="detail-badges">
+					<span class="badge {getStatusClass(selectedStory.status)}">
+						{selectedStory.status.replace('_', ' ')}
+					</span>
+					<span class="badge {getPriorityClass(selectedStory.priority)}">
+						{selectedStory.priority}
+					</span>
+				</div>
+			</div>
+
+			{#if selectedStory.description}
+				<p class="detail-description">{selectedStory.description}</p>
+			{/if}
+
+			<dl class="detail-grid">
+				{#if selectedStory.assignee}
+					<div class="detail-field">
+						<dt>Assignee</dt>
+						<dd>{selectedStory.assignee}</dd>
+					</div>
+				{/if}
+				{#if selectedStory.dueDate}
+					<div class="detail-field">
+						<dt>Due date</dt>
+						<dd>{formatDate(selectedStory.dueDate)}</dd>
+					</div>
+				{/if}
+				{#if selectedStory.epicId}
+					<div class="detail-field">
+						<dt>Epic</dt>
+						<dd>{epics.find((e) => e.id === selectedStory?.epicId)?.title ?? '—'}</dd>
+					</div>
+				{/if}
+				{#if selectedStory.sprintId}
+					<div class="detail-field">
+						<dt>Sprint</dt>
+						<dd>{selectedStory.sprintId}</dd>
+					</div>
+				{/if}
+				<div class="detail-field">
+					<dt>Created</dt>
+					<dd>{formatDate(selectedStory.createdAt)}</dd>
+				</div>
+				<div class="detail-field">
+					<dt>Last updated</dt>
+					<dd>{formatDate(selectedStory.updatedAt)}</dd>
+				</div>
+			</dl>
+		</div>
+	{/if}
 </Modal>
 
 <style>
@@ -813,6 +941,80 @@
 	.btn-danger-ghost:hover { background-color: #fef2f2; }
 
 	.btn-icon { padding: 0.25rem; width: 28px; height: 28px; }
+
+	/* ── Clickable titles ── */
+	.title-link {
+		background: none;
+		border: none;
+		padding: 0;
+		margin: 0;
+		cursor: pointer;
+		font: inherit;
+		color: #1f2937;
+		text-align: left;
+		font-weight: 600;
+	}
+	.title-link:hover {
+		color: #6366f1;
+		text-decoration: underline;
+	}
+
+	/* ── Detail modals ── */
+	.detail-body {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+	.detail-header-row {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
+	.detail-title {
+		margin: 0;
+		font-size: 1.0625rem;
+		font-weight: 600;
+		color: #1f2937;
+		flex: 1;
+	}
+	.detail-badges {
+		display: flex;
+		gap: 0.4rem;
+		flex-wrap: wrap;
+	}
+	.detail-description {
+		margin: 0;
+		font-size: 0.875rem;
+		color: #4b5563;
+		line-height: 1.6;
+		white-space: pre-wrap;
+	}
+	.detail-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.75rem 1.5rem;
+		margin: 0;
+		padding-top: 0.5rem;
+		border-top: 1px solid #f3f4f6;
+	}
+	.detail-field {
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+	}
+	.detail-field dt {
+		font-size: 0.72rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: #9ca3af;
+	}
+	.detail-field dd {
+		margin: 0;
+		font-size: 0.875rem;
+		color: #1f2937;
+	}
 
 	/* ── Form ── */
 	.form {
