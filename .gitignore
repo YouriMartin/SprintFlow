@@ -54,3 +54,4 @@ docker-compose.override.yml
 
 # TypeScript
 *.tsbuildinfo
+/apps/frontend/.svelte-kit/
