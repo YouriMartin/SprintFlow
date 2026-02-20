@@ -319,10 +319,16 @@
 								+ Add Story
 							</button>
 							<button
-								class="btn btn-sm btn-danger-ghost"
+								class="btn btn-sm btn-danger-ghost btn-icon"
+								aria-label="Delete epic"
 								onclick={(e) => { e.stopPropagation(); void deleteEpic(epic.id); }}
 							>
-								Delete
+								<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<polyline points="3 6 5 6 21 6"/>
+									<path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+									<path d="M10 11v6M14 11v6"/>
+									<path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+								</svg>
 							</button>
 						</div>
 					</div>
@@ -370,10 +376,16 @@
 												</td>
 												<td class="col-actions">
 													<button
-														class="btn btn-sm btn-danger-ghost"
+														class="btn btn-sm btn-danger-ghost btn-icon"
+														aria-label="Delete story"
 														onclick={() => void deleteUserStory(story.id)}
 													>
-														Delete
+														<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+															<polyline points="3 6 5 6 21 6"/>
+															<path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+															<path d="M10 11v6M14 11v6"/>
+															<path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+														</svg>
 													</button>
 												</td>
 											</tr>
@@ -799,6 +811,8 @@
 
 	.btn-danger-ghost { background-color: transparent; color: #dc2626; }
 	.btn-danger-ghost:hover { background-color: #fef2f2; }
+
+	.btn-icon { padding: 0.25rem; width: 28px; height: 28px; }
 
 	/* ── Form ── */
 	.form {
