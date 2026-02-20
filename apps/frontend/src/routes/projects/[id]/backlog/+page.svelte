@@ -2,20 +2,10 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { api } from '$lib/api';
-	import Modal from '$lib/components/Modal.svelte';
-	import {
-		type Epic,
-		type UserStory,
-		type Project,
-		type CreateEpicDto,
-		type CreateUserStoryDto,
-		EpicStatus,
-		UserStoryStatus,
-		UserStoryPriority
-	} from '$lib/types';
-
-	/** Temporary user ID for development */
-	const TEMP_USER_ID = '00000000-0000-0000-0000-000000000001';
+	import EpicModal from '$lib/components/EpicModal.svelte';
+	import UserStoryModal from '$lib/components/UserStoryModal.svelte';
+	import DeleteButton from '$lib/components/DeleteButton.svelte';
+	import { type Epic, type UserStory, type Project, EpicStatus, UserStoryStatus, UserStoryPriority } from '$lib/types';
 
 	/** Project ID from route params */
 	let projectId: string = $state('');
@@ -35,43 +25,27 @@
 	/** Error message */
 	let error: string | null = $state(null);
 
-	/** Collapsed state for each epic (expanded by default) */
+	/** Collapsed state per epic (expanded by default) */
 	let collapsedEpics: Record<string, boolean> = $state({});
 
-	/** Whether the create epic modal is open */
-	let showCreateEpicModal: boolean = $state(false);
+	// ── Epic modal state ──
 
-	/** Whether the create user story modal is open */
-	let showCreateUserStoryModal: boolean = $state(false);
+	/** Whether the epic modal is open */
+	let showEpicModal: boolean = $state(false);
 
-	/** Epic ID that is receiving a new user story */
-	let targetEpicId: string = $state('');
-
-	/** Epic currently shown in the detail modal */
+	/** Epic being edited (null = create mode) */
 	let selectedEpic: Epic | null = $state(null);
 
-	/** User story currently shown in the detail modal */
+	// ── User story modal state ──
+
+	/** Whether the user story modal is open */
+	let showStoryModal: boolean = $state(false);
+
+	/** Story being edited (null = create mode) */
 	let selectedStory: UserStory | null = $state(null);
 
-	/** Form data for creating a new epic */
-	let newEpicForm: CreateEpicDto = $state({
-		title: '',
-		description: '',
-		startDate: new Date().toISOString().split('T')[0],
-		endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-		status: EpicStatus.PLANNED,
-		isVisibleInRoadmap: true,
-		projectId: ''
-	});
-
-	/** Form data for creating a new user story */
-	let newUserStoryForm: CreateUserStoryDto = $state({
-		title: '',
-		description: '',
-		status: UserStoryStatus.TODO,
-		priority: UserStoryPriority.MEDIUM,
-		epicId: undefined
-	});
+	/** Pre-selected epic ID when creating a new story */
+	let defaultEpicId: string = $state('');
 
 	/**
 	 * Fetches project, epics and user stories from the API.
@@ -113,63 +87,69 @@
 		collapsedEpics[epicId] = !collapsedEpics[epicId];
 	}
 
-	/**
-	 * Opens the create epic modal with a fresh form.
-	 */
-	function openCreateEpicModal(): void {
-		newEpicForm = {
-			title: '',
-			description: '',
-			startDate: new Date().toISOString().split('T')[0],
-			endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-			status: EpicStatus.PLANNED,
-			isVisibleInRoadmap: true,
-			projectId
-		};
-		showCreateEpicModal = true;
+	// ── Epic modal helpers ──
+
+	/** Opens the epic modal in create mode. */
+	function openCreateEpic(): void {
+		selectedEpic = null;
+		showEpicModal = true;
 	}
 
 	/**
-	 * Opens the create user story modal pre-bound to a specific epic.
+	 * Opens the epic modal in edit mode.
+	 * @param epic - Epic to edit
+	 */
+	function openEditEpic(epic: Epic): void {
+		selectedEpic = epic;
+		showEpicModal = true;
+	}
+
+	/** Closes the epic modal and clears selection. */
+	function closeEpicModal(): void {
+		showEpicModal = false;
+		selectedEpic = null;
+	}
+
+	/** Called by EpicModal after a successful save. */
+	async function handleEpicSaved(): Promise<void> {
+		closeEpicModal();
+		await fetchData();
+	}
+
+	// ── User story modal helpers ──
+
+	/**
+	 * Opens the story modal in create mode, pre-bound to an epic.
 	 * @param epicId - The epic the new story will belong to
 	 */
-	function openCreateUserStoryModal(epicId: string): void {
-		targetEpicId = epicId;
-		newUserStoryForm = {
-			title: '',
-			description: '',
-			status: UserStoryStatus.TODO,
-			priority: UserStoryPriority.MEDIUM,
-			epicId
-		};
-		showCreateUserStoryModal = true;
+	function openCreateStory(epicId: string): void {
+		selectedStory = null;
+		defaultEpicId = epicId;
+		showStoryModal = true;
 	}
 
 	/**
-	 * Submits the create epic form.
+	 * Opens the story modal in edit mode.
+	 * @param story - Story to edit
 	 */
-	async function createEpic(): Promise<void> {
-		try {
-			await api.createEpic(newEpicForm);
-			showCreateEpicModal = false;
-			await fetchData();
-		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to create epic';
-		}
+	function openEditStory(story: UserStory): void {
+		selectedStory = story;
+		showStoryModal = true;
 	}
 
-	/**
-	 * Submits the create user story form.
-	 */
-	async function createUserStory(): Promise<void> {
-		try {
-			await api.createUserStory(newUserStoryForm);
-			showCreateUserStoryModal = false;
-			await fetchData();
-		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to create user story';
-		}
+	/** Closes the story modal and clears selection. */
+	function closeStoryModal(): void {
+		showStoryModal = false;
+		selectedStory = null;
 	}
+
+	/** Called by UserStoryModal after a successful save. */
+	async function handleStorySaved(): Promise<void> {
+		closeStoryModal();
+		await fetchData();
+	}
+
+	// ── Delete handlers ──
 
 	/**
 	 * Deletes an epic after user confirmation.
@@ -198,6 +178,8 @@
 			error = err instanceof Error ? err.message : 'Failed to delete user story';
 		}
 	}
+
+	// ── Badge helpers ──
 
 	/**
 	 * Returns the CSS class for a user story status badge.
@@ -249,22 +231,6 @@
 		return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 	}
 
-	/**
-	 * Opens the detail modal for an epic.
-	 * @param epic - The epic to display
-	 */
-	function openEpicDetail(epic: Epic): void {
-		selectedEpic = epic;
-	}
-
-	/**
-	 * Opens the detail modal for a user story.
-	 * @param story - The user story to display
-	 */
-	function openStoryDetail(story: UserStory): void {
-		selectedStory = story;
-	}
-
 	// Sync projectId from route params and trigger data load
 	$effect(() => {
 		const unsubscribe = page.subscribe((p) => {
@@ -290,7 +256,7 @@
 				<span class="project-name">{project.name}</span>
 			{/if}
 		</div>
-		<button class="btn btn-primary" onclick={openCreateEpicModal}>+ New Epic</button>
+		<button class="btn btn-primary" onclick={openCreateEpic}>+ New Epic</button>
 	</header>
 
 	{#if loading}
@@ -302,7 +268,7 @@
 			<div class="empty-icon">📋</div>
 			<p class="empty-title">No epics yet</p>
 			<p class="empty-sub">Create an epic to start organising your backlog.</p>
-			<button class="btn btn-primary" onclick={openCreateEpicModal}>+ New Epic</button>
+			<button class="btn btn-primary" onclick={openCreateEpic}>+ New Epic</button>
 		</div>
 	{:else}
 		<div class="epics-list">
@@ -311,7 +277,6 @@
 				{@const collapsed = !!collapsedEpics[epic.id]}
 
 				<div class="epic-card">
-					<!-- Epic card header -->
 					<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 					<div class="epic-header" onclick={() => toggleEpic(epic.id)}>
 						<div class="epic-header-left">
@@ -320,7 +285,7 @@
 								<div class="epic-title-row">
 									<button
 										class="title-link"
-										onclick={(e) => { e.stopPropagation(); openEpicDetail(epic); }}
+										onclick={(e) => { e.stopPropagation(); openEditEpic(epic); }}
 									>{epic.title}</button>
 									<span class="badge {getEpicStatusClass(epic.status)}">
 										{epic.status.replace('_', ' ')}
@@ -339,35 +304,23 @@
 						<div class="epic-header-right">
 							<button
 								class="btn btn-sm btn-ghost"
-								onclick={(e) => { e.stopPropagation(); openCreateUserStoryModal(epic.id); }}
+								onclick={(e) => { e.stopPropagation(); openCreateStory(epic.id); }}
 							>
 								+ Add Story
 							</button>
-							<button
-								class="btn btn-sm btn-danger-ghost btn-icon"
-								aria-label="Delete epic"
+							<DeleteButton
+								label="Delete epic"
 								onclick={(e) => { e.stopPropagation(); void deleteEpic(epic.id); }}
-							>
-								<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-									<polyline points="3 6 5 6 21 6"/>
-									<path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-									<path d="M10 11v6M14 11v6"/>
-									<path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-								</svg>
-							</button>
+							/>
 						</div>
 					</div>
 
-					<!-- Stories table -->
 					{#if !collapsed}
 						<div class="stories-section">
 							{#if stories.length === 0}
 								<p class="no-stories">
 									No user stories yet —
-									<button
-										class="inline-link"
-										onclick={() => openCreateUserStoryModal(epic.id)}
-									>add one</button>
+									<button class="inline-link" onclick={() => openCreateStory(epic.id)}>add one</button>
 								</p>
 							{:else}
 								<table class="stories-table">
@@ -383,10 +336,9 @@
 										{#each stories as story (story.id)}
 											<tr class="story-row">
 												<td class="col-title">
-													<button
-														class="title-link"
-														onclick={() => openStoryDetail(story)}
-													>{story.title}</button>
+													<button class="title-link" onclick={() => openEditStory(story)}>
+														{story.title}
+													</button>
 												</td>
 												<td class="col-status">
 													<span class="badge {getStatusClass(story.status)}">
@@ -399,18 +351,10 @@
 													</span>
 												</td>
 												<td class="col-actions">
-													<button
-														class="btn btn-sm btn-danger-ghost btn-icon"
-														aria-label="Delete story"
+													<DeleteButton
+														label="Delete story"
 														onclick={() => void deleteUserStory(story.id)}
-													>
-														<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-															<polyline points="3 6 5 6 21 6"/>
-															<path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-															<path d="M10 11v6M14 11v6"/>
-															<path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-														</svg>
-													</button>
+													/>
 												</td>
 											</tr>
 										{/each}
@@ -425,219 +369,23 @@
 	{/if}
 </div>
 
-<!-- Create Epic Modal -->
-<Modal open={showCreateEpicModal} title="Create New Epic" onclose={() => (showCreateEpicModal = false)}>
-	<form class="form" onsubmit={(e) => { e.preventDefault(); void createEpic(); }}>
-		<div class="form-group">
-			<label for="epic-title">Title <span class="required">*</span></label>
-			<input
-				id="epic-title"
-				type="text"
-				bind:value={newEpicForm.title}
-				required
-				placeholder="Epic title"
-			/>
-		</div>
+<EpicModal
+	open={showEpicModal}
+	epic={selectedEpic}
+	projectId={projectId}
+	storyCount={selectedEpic ? getStoriesForEpic(selectedEpic.id).length : 0}
+	onSave={handleEpicSaved}
+	onClose={closeEpicModal}
+/>
 
-		<div class="form-group">
-			<label for="epic-description">Description</label>
-			<textarea
-				id="epic-description"
-				bind:value={newEpicForm.description}
-				placeholder="What does this epic cover?"
-				rows="3"
-			></textarea>
-		</div>
-
-		<div class="form-row">
-			<div class="form-group">
-				<label for="epic-start-date">Start Date <span class="required">*</span></label>
-				<input id="epic-start-date" type="date" bind:value={newEpicForm.startDate} required />
-			</div>
-			<div class="form-group">
-				<label for="epic-end-date">End Date <span class="required">*</span></label>
-				<input id="epic-end-date" type="date" bind:value={newEpicForm.endDate} required />
-			</div>
-		</div>
-
-		<div class="form-group">
-			<label for="epic-status">Status</label>
-			<select id="epic-status" bind:value={newEpicForm.status}>
-				{#each Object.values(EpicStatus) as status}
-					<option value={status}>{status.replace('_', ' ')}</option>
-				{/each}
-			</select>
-		</div>
-
-		<div class="form-actions">
-			<button type="button" class="btn btn-secondary" onclick={() => (showCreateEpicModal = false)}>
-				Cancel
-			</button>
-			<button type="submit" class="btn btn-primary">Create Epic</button>
-		</div>
-	</form>
-</Modal>
-
-<!-- Create User Story Modal -->
-<Modal
-	open={showCreateUserStoryModal}
-	title="Add User Story"
-	onclose={() => (showCreateUserStoryModal = false)}
->
-	<form class="form" onsubmit={(e) => { e.preventDefault(); void createUserStory(); }}>
-		<div class="form-group">
-			<label for="story-title">Title <span class="required">*</span></label>
-			<input
-				id="story-title"
-				type="text"
-				bind:value={newUserStoryForm.title}
-				required
-				placeholder="As a user, I want to…"
-			/>
-		</div>
-
-		<div class="form-group">
-			<label for="story-description">Description</label>
-			<textarea
-				id="story-description"
-				bind:value={newUserStoryForm.description}
-				placeholder="Acceptance criteria, context…"
-				rows="3"
-			></textarea>
-		</div>
-
-		<div class="form-row">
-			<div class="form-group">
-				<label for="story-status">Status</label>
-				<select id="story-status" bind:value={newUserStoryForm.status}>
-					{#each Object.values(UserStoryStatus) as status}
-						<option value={status}>{status.replace('_', ' ')}</option>
-					{/each}
-				</select>
-			</div>
-			<div class="form-group">
-				<label for="story-priority">Priority</label>
-				<select id="story-priority" bind:value={newUserStoryForm.priority}>
-					{#each Object.values(UserStoryPriority) as priority}
-						<option value={priority}>{priority}</option>
-					{/each}
-				</select>
-			</div>
-		</div>
-
-		<div class="form-actions">
-			<button
-				type="button"
-				class="btn btn-secondary"
-				onclick={() => (showCreateUserStoryModal = false)}
-			>
-				Cancel
-			</button>
-			<button type="submit" class="btn btn-primary">Add Story</button>
-		</div>
-	</form>
-</Modal>
-
-<!-- Epic detail modal -->
-<Modal open={!!selectedEpic} title="Epic details" onclose={() => (selectedEpic = null)}>
-	{#if selectedEpic}
-		<div class="detail-body">
-			<div class="detail-header-row">
-				<h3 class="detail-title">{selectedEpic.title}</h3>
-				<span class="badge {getEpicStatusClass(selectedEpic.status)}">
-					{selectedEpic.status.replace('_', ' ')}
-				</span>
-			</div>
-
-			{#if selectedEpic.description}
-				<p class="detail-description">{selectedEpic.description}</p>
-			{/if}
-
-			<dl class="detail-grid">
-				<div class="detail-field">
-					<dt>Start date</dt>
-					<dd>{formatDate(selectedEpic.startDate)}</dd>
-				</div>
-				<div class="detail-field">
-					<dt>End date</dt>
-					<dd>{formatDate(selectedEpic.endDate)}</dd>
-				</div>
-				<div class="detail-field">
-					<dt>Visible in roadmap</dt>
-					<dd>{selectedEpic.isVisibleInRoadmap ? 'Yes' : 'No'}</dd>
-				</div>
-				<div class="detail-field">
-					<dt>Stories</dt>
-					<dd>{getStoriesForEpic(selectedEpic.id).length}</dd>
-				</div>
-				<div class="detail-field">
-					<dt>Created</dt>
-					<dd>{formatDate(selectedEpic.createdAt)}</dd>
-				</div>
-				<div class="detail-field">
-					<dt>Last updated</dt>
-					<dd>{formatDate(selectedEpic.updatedAt)}</dd>
-				</div>
-			</dl>
-		</div>
-	{/if}
-</Modal>
-
-<!-- User story detail modal -->
-<Modal open={!!selectedStory} title="User story details" onclose={() => (selectedStory = null)}>
-	{#if selectedStory}
-		<div class="detail-body">
-			<div class="detail-header-row">
-				<h3 class="detail-title">{selectedStory.title}</h3>
-				<div class="detail-badges">
-					<span class="badge {getStatusClass(selectedStory.status)}">
-						{selectedStory.status.replace('_', ' ')}
-					</span>
-					<span class="badge {getPriorityClass(selectedStory.priority)}">
-						{selectedStory.priority}
-					</span>
-				</div>
-			</div>
-
-			<p class="detail-description">{selectedStory.description || '—'}</p>
-
-			<dl class="detail-grid">
-				{#if selectedStory.assignee}
-					<div class="detail-field">
-						<dt>Assignee</dt>
-						<dd>{selectedStory.assignee}</dd>
-					</div>
-				{/if}
-				{#if selectedStory.dueDate}
-					<div class="detail-field">
-						<dt>Due date</dt>
-						<dd>{formatDate(selectedStory.dueDate)}</dd>
-					</div>
-				{/if}
-				{#if selectedStory.epicId}
-					<div class="detail-field">
-						<dt>Epic</dt>
-						<dd>{epics.find((e) => e.id === selectedStory?.epicId)?.title ?? '—'}</dd>
-					</div>
-				{/if}
-				{#if selectedStory.sprintId}
-					<div class="detail-field">
-						<dt>Sprint</dt>
-						<dd>{selectedStory.sprintId}</dd>
-					</div>
-				{/if}
-				<div class="detail-field">
-					<dt>Created</dt>
-					<dd>{formatDate(selectedStory.createdAt)}</dd>
-				</div>
-				<div class="detail-field">
-					<dt>Last updated</dt>
-					<dd>{formatDate(selectedStory.updatedAt)}</dd>
-				</div>
-			</dl>
-		</div>
-	{/if}
-</Modal>
+<UserStoryModal
+	open={showStoryModal}
+	story={selectedStory}
+	epics={epics}
+	defaultEpicId={defaultEpicId}
+	onSave={handleStorySaved}
+	onClose={closeStoryModal}
+/>
 
 <style>
 	/* ── Page shell ── */
@@ -697,22 +445,9 @@
 		text-align: center;
 	}
 
-	.empty-icon {
-		font-size: 2.5rem;
-		margin-bottom: 0.5rem;
-	}
-
-	.empty-title {
-		margin: 0;
-		font-size: 1.125rem;
-		font-weight: 600;
-		color: #374151;
-	}
-
-	.empty-sub {
-		margin: 0 0 1rem;
-		font-size: 0.875rem;
-	}
+	.empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+	.empty-title { margin: 0; font-size: 1.125rem; font-weight: 600; color: #374151; }
+	.empty-sub   { margin: 0 0 1rem; font-size: 0.875rem; }
 
 	/* ── Epic cards ── */
 	.epics-list {
@@ -740,9 +475,7 @@
 		gap: 1rem;
 	}
 
-	.epic-header:hover {
-		background-color: #f3f4f6;
-	}
+	.epic-header:hover { background-color: #f3f4f6; }
 
 	.epic-header-left {
 		display: flex;
@@ -774,12 +507,6 @@
 		flex-wrap: wrap;
 	}
 
-	.epic-title {
-		font-weight: 600;
-		font-size: 0.9375rem;
-		color: #1f2937;
-	}
-
 	.epic-desc {
 		font-size: 0.8125rem;
 		color: #6b7280;
@@ -796,22 +523,13 @@
 		margin-top: 0.125rem;
 	}
 
-	.story-count {
-		font-weight: 500;
-		color: #6b7280;
-	}
+	.story-count { font-weight: 500; color: #6b7280; }
 
 	.epic-header-right {
 		display: flex;
 		gap: 0.5rem;
 		flex-shrink: 0;
 	}
-
-	/* ── Epic status badges ── */
-	.epic-planned { background-color: #e0e7ff; color: #3730a3; }
-	.epic-in-progress { background-color: #fef3c7; color: #92400e; }
-	.epic-completed { background-color: #d1fae5; color: #065f46; }
-	.epic-cancelled { background-color: #fee2e2; color: #991b1b; }
 
 	/* ── Stories table ── */
 	.stories-section {
@@ -861,207 +579,11 @@
 		color: #374151;
 	}
 
-	.story-row:last-child td {
-		border-bottom: none;
-	}
+	.story-row:last-child td { border-bottom: none; }
+	.story-row:hover td { background-color: #fafafa; }
 
-	.story-row:hover td {
-		background-color: #fafafa;
-	}
-
-	/* Column widths */
-	.col-title   { width: 52%; }
-	.col-status  { width: 16%; }
-	.col-priority{ width: 16%; }
-	.col-actions { width: 16%; text-align: right; }
-
-	.story-title {
-		font-weight: 500;
-		color: #1f2937;
-	}
-
-
-
-	/* ── Badges ── */
-	.badge {
-		display: inline-block;
-		font-size: 0.72rem;
-		font-weight: 500;
-		padding: 0.2rem 0.5rem;
-		border-radius: 4px;
-		text-transform: capitalize;
-		white-space: nowrap;
-	}
-
-	.status-todo       { background-color: #e5e7eb; color: #374151; }
-	.status-in-progress{ background-color: #dbeafe; color: #1e40af; }
-	.status-done       { background-color: #d1fae5; color: #065f46; }
-
-	.priority-low    { background-color: #f3f4f6; color: #6b7280; }
-	.priority-medium { background-color: #fef3c7; color: #92400e; }
-	.priority-high   { background-color: #fed7aa; color: #c2410c; }
-	.priority-urgent { background-color: #fee2e2; color: #dc2626; }
-
-	/* ── Buttons ── */
-	.btn {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.5rem 1rem;
-		border: none;
-		border-radius: 6px;
-		font-size: 0.875rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: background-color 0.15s, color 0.15s;
-	}
-
-	.btn-sm { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
-
-	.btn-primary { background-color: #6366f1; color: #fff; }
-	.btn-primary:hover { background-color: #4f46e5; }
-
-	.btn-secondary { background-color: #e5e7eb; color: #374151; }
-	.btn-secondary:hover { background-color: #d1d5db; }
-
-	.btn-ghost { background-color: transparent; color: #6366f1; }
-	.btn-ghost:hover { background-color: #eef2ff; }
-
-	.btn-danger-ghost { background-color: transparent; color: #dc2626; }
-	.btn-danger-ghost:hover { background-color: #fef2f2; }
-
-	.btn-icon { padding: 0.25rem; width: 28px; height: 28px; }
-
-	/* ── Clickable titles ── */
-	.title-link {
-		background: none;
-		border: none;
-		padding: 0;
-		margin: 0;
-		cursor: pointer;
-		font: inherit;
-		color: #1f2937;
-		text-align: left;
-		font-weight: 600;
-	}
-	.title-link:hover {
-		color: #6366f1;
-		text-decoration: underline;
-	}
-
-	/* ── Detail modals ── */
-	.detail-body {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-	.detail-header-row {
-		display: flex;
-		align-items: flex-start;
-		gap: 0.75rem;
-		flex-wrap: wrap;
-	}
-	.detail-title {
-		margin: 0;
-		font-size: 1.0625rem;
-		font-weight: 600;
-		color: #1f2937;
-		flex: 1;
-	}
-	.detail-badges {
-		display: flex;
-		gap: 0.4rem;
-		flex-wrap: wrap;
-	}
-	.detail-description {
-		margin: 0;
-		font-size: 0.875rem;
-		color: #4b5563;
-		line-height: 1.6;
-		white-space: pre-wrap;
-	}
-	.detail-grid {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 0.75rem 1.5rem;
-		margin: 0;
-		padding-top: 0.5rem;
-		border-top: 1px solid #f3f4f6;
-	}
-	.detail-field {
-		display: flex;
-		flex-direction: column;
-		gap: 0.15rem;
-	}
-	.detail-field dt {
-		font-size: 0.72rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: #9ca3af;
-	}
-	.detail-field dd {
-		margin: 0;
-		font-size: 0.875rem;
-		color: #1f2937;
-	}
-
-	/* ── Form ── */
-	.form {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	.form-group {
-		display: flex;
-		flex-direction: column;
-		gap: 0.375rem;
-	}
-
-	.form-group label {
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: #374151;
-	}
-
-	.required { color: #dc2626; }
-
-	.form-group input,
-	.form-group select,
-	.form-group textarea {
-		padding: 0.5rem 0.75rem;
-		border: 1px solid #d1d5db;
-		border-radius: 6px;
-		font-size: 0.875rem;
-		transition: border-color 0.15s, box-shadow 0.15s;
-		background: #fff;
-		color: #1f2937;
-	}
-
-	.form-group input:focus,
-	.form-group select:focus,
-	.form-group textarea:focus {
-		outline: none;
-		border-color: #6366f1;
-		box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-	}
-
-	.form-group textarea {
-		resize: vertical;
-		min-height: 80px;
-	}
-
-	.form-row {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 1rem;
-	}
-
-	.form-actions {
-		display: flex;
-		justify-content: flex-end;
-		gap: 0.75rem;
-		margin-top: 0.25rem;
-	}
+	.col-title    { width: 52%; }
+	.col-status   { width: 16%; }
+	.col-priority { width: 16%; }
+	.col-actions  { width: 16%; text-align: right; }
 </style>
