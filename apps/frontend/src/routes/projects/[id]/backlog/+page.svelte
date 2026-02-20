@@ -374,7 +374,6 @@
 									<thead>
 										<tr>
 											<th class="col-title">Title</th>
-											<th class="col-desc">Description</th>
 											<th class="col-status">Status</th>
 											<th class="col-priority">Priority</th>
 											<th class="col-actions"></th>
@@ -388,9 +387,6 @@
 														class="title-link"
 														onclick={() => openStoryDetail(story)}
 													>{story.title}</button>
-												</td>
-												<td class="col-desc">
-													<span class="story-desc-text">{story.description ?? '—'}</span>
 												</td>
 												<td class="col-status">
 													<span class="badge {getStatusClass(story.status)}">
@@ -603,9 +599,7 @@
 				</div>
 			</div>
 
-			{#if selectedStory.description}
-				<p class="detail-description">{selectedStory.description}</p>
-			{/if}
+			<p class="detail-description">{selectedStory.description || '—'}</p>
 
 			<dl class="detail-grid">
 				{#if selectedStory.assignee}
@@ -876,24 +870,17 @@
 	}
 
 	/* Column widths */
-	.col-title   { width: 28%; }
-	.col-desc    { width: 36%; }
-	.col-status  { width: 12%; }
-	.col-priority{ width: 12%; }
-	.col-actions { width: 12%; text-align: right; }
+	.col-title   { width: 52%; }
+	.col-status  { width: 16%; }
+	.col-priority{ width: 16%; }
+	.col-actions { width: 16%; text-align: right; }
 
 	.story-title {
 		font-weight: 500;
 		color: #1f2937;
 	}
 
-	.story-desc-text {
-		color: #6b7280;
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-	}
+
 
 	/* ── Badges ── */
 	.badge {
