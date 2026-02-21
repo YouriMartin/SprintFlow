@@ -1,11 +1,11 @@
+-- Drop the old status check constraint first (so the UPDATE below is allowed)
+ALTER TABLE user_stories
+    DROP CONSTRAINT IF EXISTS user_stories_status_check;
+
 -- Migrate existing 'todo' records to the new 'draft' status
 UPDATE user_stories
 SET status = 'draft'
 WHERE status = 'todo';
-
--- Drop the old status check constraint (auto-named by PostgreSQL)
-ALTER TABLE user_stories
-    DROP CONSTRAINT IF EXISTS user_stories_status_check;
 
 -- Add new constraint with all 14 status values
 ALTER TABLE user_stories
