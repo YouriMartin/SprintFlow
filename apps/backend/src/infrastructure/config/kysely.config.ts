@@ -82,19 +82,22 @@ export interface UserStoryTable {
   title: string;
   description: string | null;
   status:
-    | 'draft'
-    | 'analysis'
-    | 'ready_for_dev'
-    | 'acceptance'
+    | 'to_specify'
+    | 'writing'
+    | 'to_validate'
+    | 'ready'
+    | 'todo'
     | 'in_progress'
     | 'code_review'
+    | 'dev_done'
+    | 'to_test'
     | 'testing'
-    | 'ready_to_deploy'
+    | 'test_passed'
+    | 'test_failed'
+    | 'to_deploy'
     | 'staging'
-    | 'deployed'
-    | 'done'
-    | 'on_hold'
-    | 'blocked'
+    | 'pre_prod'
+    | 'in_production'
     | 'cancelled';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   assignee: string | null;

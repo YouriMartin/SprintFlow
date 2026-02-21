@@ -22,7 +22,7 @@ export class CreateUserStoryDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ enum: UserStoryStatus, default: UserStoryStatus.DRAFT })
+  @ApiProperty({ enum: UserStoryStatus, default: UserStoryStatus.TO_SPECIFY })
   @IsOptional()
   @IsEnum(UserStoryStatus)
   status?: UserStoryStatus;
