@@ -10,7 +10,10 @@ import type {
 	UpdateEpicDto,
 	UserStory,
 	CreateUserStoryDto,
-	UpdateUserStoryDto
+	UpdateUserStoryDto,
+	Sprint,
+	CreateSprintDto,
+	UpdateSprintDto
 } from './types';
 import { PUBLIC_API_URL } from '$env/static/public';
 import { auth } from './auth.svelte';
@@ -368,6 +371,86 @@ export const api = {
 		if (!response.ok) {
 			throw new Error('Failed to delete user story');
 		}
+	},
+
+	// ==================== SPRINTS ====================
+
+	/**
+	 * Fetches all sprints from the backend
+	 * @returns Array of sprints
+	 * @throws Error if the request fails
+	 */
+	async getSprints(): Promise<Sprint[]> {
+		const response = await authFetch(`${API_BASE_URL}/sprints`);
+		if (!response.ok) throw new Error('Failed to fetch sprints');
+		return response.json();
+	},
+
+	/**
+	 * Fetches all sprints for a given project
+	 * @param projectId - UUID of the project
+	 * @returns Array of sprints ordered by sprint number
+	 * @throws Error if the request fails
+	 */
+	async getSprintsByProject(projectId: string): Promise<Sprint[]> {
+		const response = await authFetch(`${API_BASE_URL}/sprints/project/${projectId}`);
+		if (!response.ok) throw new Error('Failed to fetch sprints for project');
+		return response.json();
+	},
+
+	/**
+	 * Fetches a single sprint by ID
+	 * @param id - UUID of the sprint
+	 * @returns The sprint object
+	 * @throws Error if the sprint is not found or request fails
+	 */
+	async getSprint(id: string): Promise<Sprint> {
+		const response = await authFetch(`${API_BASE_URL}/sprints/${id}`);
+		if (!response.ok) throw new Error('Failed to fetch sprint');
+		return response.json();
+	},
+
+	/**
+	 * Creates a new sprint
+	 * @param data - Sprint data to create
+	 * @returns The created sprint
+	 * @throws Error if validation fails or request fails
+	 */
+	async createSprint(data: CreateSprintDto): Promise<Sprint> {
+		const response = await authFetch(`${API_BASE_URL}/sprints`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(data)
+		});
+		if (!response.ok) throw new Error('Failed to create sprint');
+		return response.json();
+	},
+
+	/**
+	 * Updates an existing sprint
+	 * @param id - UUID of the sprint to update
+	 * @param data - Partial sprint data to update
+	 * @returns The updated sprint
+	 * @throws Error if sprint not found or request fails
+	 */
+	async updateSprint(id: string, data: UpdateSprintDto): Promise<Sprint> {
+		const response = await authFetch(`${API_BASE_URL}/sprints/${id}`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(data)
+		});
+		if (!response.ok) throw new Error('Failed to update sprint');
+		return response.json();
+	},
+
+	/**
+	 * Deletes a sprint (soft delete)
+	 * @param id - UUID of the sprint to delete
+	 * @throws Error if sprint not found or request fails
+	 */
+	async deleteSprint(id: string): Promise<void> {
+		const response = await authFetch(`${API_BASE_URL}/sprints/${id}`, { method: 'DELETE' });
+		if (!response.ok) throw new Error('Failed to delete sprint');
 	},
 
 	// ==================== SETUP ====================
