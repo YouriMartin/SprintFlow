@@ -5,7 +5,7 @@
 	import EpicModal from '$lib/components/EpicModal.svelte';
 	import UserStoryModal from '$lib/components/UserStoryModal.svelte';
 	import DeleteButton from '$lib/components/DeleteButton.svelte';
-	import { type Epic, type UserStory, type Project, EpicStatus, UserStoryStatus, UserStoryPriority } from '$lib/types';
+	import { type Epic, type UserStory, type Project, EpicStatus, UserStoryStatus, UserStoryPriority, STATUS_META } from '$lib/types';
 
 	/** Project ID from route params */
 	let projectId: string = $state('');
@@ -182,31 +182,19 @@
 	// ── Badge helpers ──
 
 	/**
-	 * Returns the CSS class for a user story status badge.
+	 * Returns the CSS class for a user story status badge based on its phase group.
 	 * @param status - User story status
 	 */
 	function getStatusClass(status: UserStoryStatus): string {
-		const map: Record<UserStoryStatus, string> = {
-			// Functional
-			[UserStoryStatus.DRAFT]: 'status-draft',
-			[UserStoryStatus.ANALYSIS]: 'status-analysis',
-			[UserStoryStatus.READY_FOR_DEV]: 'status-ready-for-dev',
-			[UserStoryStatus.ACCEPTANCE]: 'status-acceptance',
-			// Development
-			[UserStoryStatus.IN_PROGRESS]: 'status-in-progress',
-			[UserStoryStatus.CODE_REVIEW]: 'status-code-review',
-			[UserStoryStatus.TESTING]: 'status-testing',
-			// Deployment
-			[UserStoryStatus.READY_TO_DEPLOY]: 'status-ready-to-deploy',
-			[UserStoryStatus.STAGING]: 'status-staging',
-			[UserStoryStatus.DEPLOYED]: 'status-deployed',
-			[UserStoryStatus.DONE]: 'status-done',
-			// Transversal
-			[UserStoryStatus.ON_HOLD]: 'status-on-hold',
-			[UserStoryStatus.BLOCKED]: 'status-blocked',
-			[UserStoryStatus.CANCELLED]: 'status-cancelled'
+		const group = STATUS_META[status].group;
+		if (!group) return 'status-cancelled';
+		const map: Record<string, string> = {
+			SPECIFICATION: 'status-spec',
+			DEVELOPMENT:   'status-dev',
+			QA:            'status-qa',
+			DEPLOYMENT:    'status-deploy'
 		};
-		return map[status] ?? '';
+		return map[group] ?? '';
 	}
 
 	/**
@@ -357,7 +345,7 @@
 												</td>
 												<td class="col-status">
 													<span class="badge {getStatusClass(story.status)}">
-														{story.status.replaceAll('_', ' ')}
+														{STATUS_META[story.status].label}
 													</span>
 												</td>
 												<td class="col-priority">

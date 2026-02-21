@@ -7,7 +7,10 @@
 		type CreateUserStoryDto,
 		type UpdateUserStoryDto,
 		UserStoryStatus,
-		UserStoryPriority
+		UserStoryPriority,
+		UserStoryGroup,
+		STATUSES_BY_GROUP,
+		STATUS_META
 	} from '$lib/types';
 
 	/**
@@ -57,7 +60,7 @@
 		return {
 			title: '',
 			description: '',
-			status: UserStoryStatus.DRAFT,
+			status: UserStoryStatus.TO_SPECIFY,
 			priority: UserStoryPriority.MEDIUM,
 			assignee: '',
 			dueDate: '',
@@ -135,9 +138,16 @@
 			<div class="form-group">
 				<label for="story-status">Status</label>
 				<select id="story-status" bind:value={form.status}>
-					{#each Object.values(UserStoryStatus) as status}
-						<option value={status}>{status.replaceAll('_', ' ')}</option>
+					{#each Object.values(UserStoryGroup) as group}
+						<optgroup label={group}>
+							{#each STATUSES_BY_GROUP[group] as status}
+								<option value={status}>{STATUS_META[status].label}</option>
+							{/each}
+						</optgroup>
 					{/each}
+					<optgroup label="TERMINAL">
+						<option value={UserStoryStatus.CANCELLED}>{STATUS_META[UserStoryStatus.CANCELLED].label}</option>
+					</optgroup>
 				</select>
 			</div>
 			<div class="form-group">
