@@ -36,8 +36,10 @@ export class UpdateEpicHandler implements ICommandHandler<UpdateEpicCommand> {
     if (dto.description !== undefined)
       updateData.description = dto.description ?? null;
     if (dto.status !== undefined) updateData.status = dto.status;
-    if (dto.startDate !== undefined) updateData.startDate = dto.startDate;
-    if (dto.endDate !== undefined) updateData.endDate = dto.endDate;
+    if (dto.startDate !== undefined)
+      updateData.startDate = new Date(`${dto.startDate}-01T00:00:00.000Z`);
+    if (dto.endDate !== undefined)
+      updateData.endDate = new Date(`${dto.endDate}-01T00:00:00.000Z`);
     if (dto.projectId !== undefined)
       updateData.projectId = dto.projectId ?? null;
     if (dto.isVisibleInRoadmap !== undefined)

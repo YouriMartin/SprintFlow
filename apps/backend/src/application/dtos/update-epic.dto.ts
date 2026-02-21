@@ -1,9 +1,9 @@
 import {
   IsBoolean,
-  IsDateString,
   IsEnum,
   IsOptional,
   IsString,
+  Matches,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { EpicStatus } from '../../domain/entities/epic.entity';
@@ -27,15 +27,15 @@ export class UpdateEpicDto {
   @IsEnum(EpicStatus)
   status?: EpicStatus;
 
-  @ApiProperty({ example: '2024-01-01T00:00:00.000Z', required: false })
+  @ApiProperty({ example: '2024-01', description: 'Start month in YYYY-MM format', required: false })
   @IsOptional()
-  @IsDateString()
-  startDate?: Date;
+  @Matches(/^\d{4}-(0[1-9]|1[0-2])$/, { message: 'startDate must be in YYYY-MM format' })
+  startDate?: string;
 
-  @ApiProperty({ example: '2024-03-31T23:59:59.000Z', required: false })
+  @ApiProperty({ example: '2024-03', description: 'End month in YYYY-MM format', required: false })
   @IsOptional()
-  @IsDateString()
-  endDate?: Date;
+  @Matches(/^\d{4}-(0[1-9]|1[0-2])$/, { message: 'endDate must be in YYYY-MM format' })
+  endDate?: string;
 
   @ApiProperty({
     example: '550e8400-e29b-41d4-a716-446655440000',

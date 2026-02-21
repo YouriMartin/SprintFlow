@@ -228,7 +228,7 @@
 	 */
 	function formatDate(iso: string | null | undefined): string {
 		if (!iso) return '—';
-		return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+		return new Date(iso).toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
 	}
 
 	// Sync projectId from route params and trigger data load

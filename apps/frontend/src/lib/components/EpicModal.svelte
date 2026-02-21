@@ -41,17 +41,19 @@
 				title: epic.title,
 				description: epic.description ?? '',
 				status: epic.status,
-				startDate: epic.startDate?.split('T')[0] ?? '',
-				endDate: epic.endDate?.split('T')[0] ?? '',
+				startDate: epic.startDate?.substring(0, 7) ?? '',
+				endDate: epic.endDate?.substring(0, 7) ?? '',
 				isVisibleInRoadmap: epic.isVisibleInRoadmap
 			} satisfies UpdateEpicDto;
 		}
+		const now = new Date();
+		const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 		return {
 			title: '',
 			description: '',
 			status: EpicStatus.PLANNED,
-			startDate: new Date().toISOString().split('T')[0],
-			endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+			startDate: now.toISOString().substring(0, 7),
+			endDate: nextMonth.toISOString().substring(0, 7),
 			isVisibleInRoadmap: true,
 			projectId
 		} satisfies CreateEpicDto;
@@ -90,7 +92,6 @@
 		if (!iso) return '—';
 		return new Date(iso).toLocaleDateString(undefined, {
 			month: 'short',
-			day: 'numeric',
 			year: 'numeric'
 		});
 	}
@@ -128,12 +129,12 @@
 
 		<div class="form-row">
 			<div class="form-group">
-				<label for="epic-start">Start date <span class="required">*</span></label>
-				<input id="epic-start" type="date" bind:value={form.startDate} required />
+				<label for="epic-start">Start month <span class="required">*</span></label>
+				<input id="epic-start" type="month" bind:value={form.startDate} required />
 			</div>
 			<div class="form-group">
-				<label for="epic-end">End date <span class="required">*</span></label>
-				<input id="epic-end" type="date" bind:value={form.endDate} required />
+				<label for="epic-end">End month <span class="required">*</span></label>
+				<input id="epic-end" type="month" bind:value={form.endDate} required />
 			</div>
 		</div>
 
