@@ -39,9 +39,24 @@
 	white-space: nowrap;
 }
 
-.status-todo        { background-color: #e5e7eb; color: #374151; }
-.status-in-progress { background-color: #dbeafe; color: #1e40af; }
-.status-done        { background-color: #d1fae5; color: #065f46; }
+/* Functional */
+.status-draft        { background-color: #f3f4f6; color: #6b7280; }
+.status-analysis     { background-color: #dbeafe; color: #1d4ed8; }
+.status-ready-for-dev { background-color: #e0e7ff; color: #3730a3; }
+.status-acceptance   { background-color: #fef3c7; color: #92400e; }
+/* Development */
+.status-in-progress  { background-color: #ede9fe; color: #5b21b6; }
+.status-code-review  { background-color: #f3e8ff; color: #7e22ce; }
+.status-testing      { background-color: #fef9c3; color: #713f12; }
+/* Deployment */
+.status-ready-to-deploy { background-color: #ccfbf1; color: #0f766e; }
+.status-staging      { background-color: #cffafe; color: #0e7490; }
+.status-deployed     { background-color: #dcfce7; color: #15803d; }
+.status-done         { background-color: #d1fae5; color: #065f46; }
+/* Transversal */
+.status-on-hold      { background-color: #f3f4f6; color: #9ca3af; }
+.status-blocked      { background-color: #fee2e2; color: #dc2626; }
+.status-cancelled    { background-color: #f1f5f9; color: #94a3b8; text-decoration: line-through; }
 
 .priority-low    { background-color: #f3f4f6; color: #6b7280; }
 .priority-medium { background-color: #fef3c7; color: #92400e; }

@@ -127,9 +127,24 @@ export enum EpicStatus {
  * Status enum for user stories
  */
 export enum UserStoryStatus {
-	TODO = 'todo',
+	// Functional view
+	DRAFT = 'draft',
+	ANALYSIS = 'analysis',
+	READY_FOR_DEV = 'ready_for_dev',
+	ACCEPTANCE = 'acceptance',
+	// Development view
 	IN_PROGRESS = 'in_progress',
-	DONE = 'done'
+	CODE_REVIEW = 'code_review',
+	TESTING = 'testing',
+	// Deployment view
+	READY_TO_DEPLOY = 'ready_to_deploy',
+	STAGING = 'staging',
+	DEPLOYED = 'deployed',
+	DONE = 'done',
+	// Transversal
+	ON_HOLD = 'on_hold',
+	BLOCKED = 'blocked',
+	CANCELLED = 'cancelled'
 }
 
 /**

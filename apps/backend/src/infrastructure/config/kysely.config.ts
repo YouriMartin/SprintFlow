@@ -81,7 +81,21 @@ export interface UserStoryTable {
   id: string;
   title: string;
   description: string | null;
-  status: 'todo' | 'in_progress' | 'done';
+  status:
+    | 'draft'
+    | 'analysis'
+    | 'ready_for_dev'
+    | 'acceptance'
+    | 'in_progress'
+    | 'code_review'
+    | 'testing'
+    | 'ready_to_deploy'
+    | 'staging'
+    | 'deployed'
+    | 'done'
+    | 'on_hold'
+    | 'blocked'
+    | 'cancelled';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   assignee: string | null;
   due_date: Date | null;

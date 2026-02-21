@@ -187,9 +187,24 @@
 	 */
 	function getStatusClass(status: UserStoryStatus): string {
 		const map: Record<UserStoryStatus, string> = {
-			[UserStoryStatus.TODO]: 'status-todo',
+			// Functional
+			[UserStoryStatus.DRAFT]: 'status-draft',
+			[UserStoryStatus.ANALYSIS]: 'status-analysis',
+			[UserStoryStatus.READY_FOR_DEV]: 'status-ready-for-dev',
+			[UserStoryStatus.ACCEPTANCE]: 'status-acceptance',
+			// Development
 			[UserStoryStatus.IN_PROGRESS]: 'status-in-progress',
-			[UserStoryStatus.DONE]: 'status-done'
+			[UserStoryStatus.CODE_REVIEW]: 'status-code-review',
+			[UserStoryStatus.TESTING]: 'status-testing',
+			// Deployment
+			[UserStoryStatus.READY_TO_DEPLOY]: 'status-ready-to-deploy',
+			[UserStoryStatus.STAGING]: 'status-staging',
+			[UserStoryStatus.DEPLOYED]: 'status-deployed',
+			[UserStoryStatus.DONE]: 'status-done',
+			// Transversal
+			[UserStoryStatus.ON_HOLD]: 'status-on-hold',
+			[UserStoryStatus.BLOCKED]: 'status-blocked',
+			[UserStoryStatus.CANCELLED]: 'status-cancelled'
 		};
 		return map[status] ?? '';
 	}
@@ -342,7 +357,7 @@
 												</td>
 												<td class="col-status">
 													<span class="badge {getStatusClass(story.status)}">
-														{story.status.replace('_', ' ')}
+														{story.status.replaceAll('_', ' ')}
 													</span>
 												</td>
 												<td class="col-priority">

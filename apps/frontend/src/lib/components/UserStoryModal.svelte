@@ -57,7 +57,7 @@
 		return {
 			title: '',
 			description: '',
-			status: UserStoryStatus.TODO,
+			status: UserStoryStatus.DRAFT,
 			priority: UserStoryPriority.MEDIUM,
 			assignee: '',
 			dueDate: '',
@@ -136,7 +136,7 @@
 				<label for="story-status">Status</label>
 				<select id="story-status" bind:value={form.status}>
 					{#each Object.values(UserStoryStatus) as status}
-						<option value={status}>{status.replace('_', ' ')}</option>
+						<option value={status}>{status.replaceAll('_', ' ')}</option>
 					{/each}
 				</select>
 			</div>
