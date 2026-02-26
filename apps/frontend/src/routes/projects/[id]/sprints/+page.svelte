@@ -4,6 +4,7 @@
 	import { api } from '$lib/api';
 	import KanbanBoard from '$lib/components/KanbanBoard.svelte';
 	import UserStoryModal from '$lib/components/UserStoryModal.svelte';
+	import SprintModal from '$lib/components/SprintModal.svelte';
 	import {
 		type UserStory,
 		type Sprint,
@@ -26,7 +27,16 @@
 	let loading: boolean = $state(true);
 	let error: string | null = $state(null);
 
-	// Modal state
+	// Sprint modal state
+	let showSprintModal: boolean = $state(false);
+	let editingSprint: Sprint | null = $state(null);
+
+	/** Next sprint number to pre-fill in the create modal */
+	const nextSprintNumber = $derived(
+		sprints.length > 0 ? Math.max(...sprints.map((s) => s.sprintNumber)) + 1 : 1
+	);
+
+	// Story modal state
 	let showStoryModal: boolean = $state(false);
 	let selectedStory: UserStory | null = $state(null);
 
@@ -95,6 +105,19 @@
 		}
 	}
 
+	/** Opens the sprint modal in create mode. */
+	function openCreateSprint(): void {
+		editingSprint = null;
+		showSprintModal = true;
+	}
+
+	/** Called after sprint modal save. */
+	async function handleSprintSaved(): Promise<void> {
+		showSprintModal = false;
+		editingSprint = null;
+		await fetchData();
+	}
+
 	/** Opens the edit modal for a story. */
 	function openEdit(story: UserStory): void {
 		selectedStory = story;
@@ -138,6 +161,9 @@
 				<span class="project-name">{project.name}</span>
 			{/if}
 		</div>
+		{#if sprints.length > 0}
+			<button class="btn btn-primary" onclick={openCreateSprint}>+ Nouveau sprint</button>
+		{/if}
 	</header>
 
 	{#if loading}
@@ -148,7 +174,8 @@
 		<div class="empty-state">
 			<div class="empty-icon">🏃</div>
 			<p class="empty-title">Aucun sprint</p>
-			<p class="empty-sub">Créez un sprint via le backlog pour commencer à assigner des stories.</p>
+			<p class="empty-sub">Créez votre premier sprint pour commencer à organiser le développement.</p>
+			<button class="btn btn-primary" onclick={openCreateSprint}>+ Créer le premier sprint</button>
 		</div>
 	{:else}
 		<!-- Sprint selector -->
@@ -193,6 +220,15 @@
 		{/if}
 	{/if}
 </div>
+
+<SprintModal
+	open={showSprintModal}
+	sprint={editingSprint}
+	{projectId}
+	{nextSprintNumber}
+	onSave={handleSprintSaved}
+	onClose={() => { showSprintModal = false; editingSprint = null; }}
+/>
 
 <UserStoryModal
 	open={showStoryModal}
