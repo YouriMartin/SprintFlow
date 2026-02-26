@@ -62,7 +62,7 @@
 	.modal-backdrop {
 		position: fixed;
 		top: 0;
-		left: 0;
+		left: var(--sidebar-width, 0px);
 		right: 0;
 		bottom: 0;
 		background-color: rgba(0, 0, 0, 0.5);

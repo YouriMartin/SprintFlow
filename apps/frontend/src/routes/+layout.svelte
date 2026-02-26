@@ -47,6 +47,7 @@
 	}
 
 	.app-layout {
+		--sidebar-width: 240px;
 		display: flex;
 		min-height: 100vh;
 	}
