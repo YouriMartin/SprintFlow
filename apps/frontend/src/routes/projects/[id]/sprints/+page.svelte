@@ -80,15 +80,17 @@
 	}
 
 	/**
-	 * Updates a story's status.
+	 * Updates a story's status optimistically (local state first), then persists via API.
+	 * On error, reverts by reloading data from the server.
 	 * @param story - The story to update
 	 * @param newStatus - Target status
 	 */
 	async function handleStatusChange(story: UserStory, newStatus: UserStoryStatus): Promise<void> {
+		allStories = allStories.map((s) => (s.id === story.id ? { ...s, status: newStatus } : s));
 		try {
 			await api.updateUserStory(story.id, { status: newStatus });
-			await fetchData();
 		} catch (err) {
+			await fetchData();
 			error = err instanceof Error ? err.message : 'Erreur lors du changement de statut';
 		}
 	}
