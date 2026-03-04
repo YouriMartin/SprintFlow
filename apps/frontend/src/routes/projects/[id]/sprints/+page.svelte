@@ -43,12 +43,13 @@
 	let showStoryModal: boolean = $state(false);
 	let selectedStory: UserStory | null = $state(null);
 
-	/** Stories belonging to the selected sprint, in DEVELOPMENT group */
+	/** Stories belonging to the selected sprint: DEVELOPMENT group + TEST_FAILED */
 	const sprintStories = $derived(
 		allStories.filter(
 			(s) =>
 				s.sprintId === selectedSprintId &&
-				STATUS_META[s.status].group === UserStoryGroup.DEVELOPMENT
+				(STATUS_META[s.status].group === UserStoryGroup.DEVELOPMENT ||
+					s.status === UserStoryStatus.TEST_FAILED)
 		)
 	);
 
@@ -66,6 +67,7 @@
 		{ label: 'In Progress', statuses: [UserStoryStatus.IN_PROGRESS], accent: '#8b5cf6' },
 		{ label: 'In Review',   statuses: [UserStoryStatus.CODE_REVIEW], accent: '#7c3aed' },
 		{ label: 'Dev Done',    statuses: [UserStoryStatus.DEV_DONE],    accent: '#6d28d9' },
+		{ label: 'Test Failed', statuses: [UserStoryStatus.TEST_FAILED], accent: '#fca5a5' },
 	];
 
 	/**
@@ -166,6 +168,14 @@
 			await fetchData();
 			error = err instanceof Error ? err.message : 'Failed to assign to sprint';
 		}
+	}
+
+	/**
+	 * Sends a test-failed story back to TODO in this sprint.
+	 * @param story - The TEST_FAILED story to reopen
+	 */
+	async function sendToTodo(story: UserStory): Promise<void> {
+		await handleStatusChange(story, UserStoryStatus.TODO);
 	}
 
 	/** Opens the sprint modal in create mode. */
@@ -301,6 +311,10 @@
 					stories={sprintStories}
 					onEdit={openEdit}
 					onStatusChange={handleStatusChange}
+					extraAction={(story) =>
+						story.status === UserStoryStatus.TEST_FAILED
+							? { label: '↩ To TODO', onClick: () => sendToTodo(story) }
+							: null}
 				/>
 			{/if}
 

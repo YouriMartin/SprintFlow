@@ -40,9 +40,16 @@
 		stories.filter((s) => STATUS_META[s.status].group === UserStoryGroup.SPECIFICATION)
 	);
 
-	/** Stories visible on the QA board (QA group only) */
+	/** Stories visible on the QA board: per-stage testing statuses + TEST_FAILED */
+	const QA_STATUSES = [
+		UserStoryStatus.TESTING_STAGING,
+		UserStoryStatus.TESTING_PRE_PROD,
+		UserStoryStatus.TESTING_PROD,
+		UserStoryStatus.TEST_FAILED,
+	] as const;
+
 	const qaStories = $derived(
-		stories.filter((s) => STATUS_META[s.status].group === UserStoryGroup.QA)
+		stories.filter((s) => (QA_STATUSES as readonly UserStoryStatus[]).includes(s.status))
 	);
 
 	// Column definitions
@@ -54,10 +61,10 @@
 	];
 
 	const qaColumns: KanbanColumn[] = [
-		{ label: 'To Test',     statuses: [UserStoryStatus.TO_TEST],     accent: '#fef3c7' },
-		{ label: 'Testing',     statuses: [UserStoryStatus.TESTING],     accent: '#fde68a' },
-		{ label: 'Test Passed', statuses: [UserStoryStatus.TEST_PASSED], accent: '#6ee7b7' },
-		{ label: 'Test Failed', statuses: [UserStoryStatus.TEST_FAILED], accent: '#fca5a5' },
+		{ label: 'Testing (Staging)',  statuses: [UserStoryStatus.TESTING_STAGING],  accent: '#fef3c7' },
+		{ label: 'Testing (Pre-Prod)', statuses: [UserStoryStatus.TESTING_PRE_PROD], accent: '#fde68a' },
+		{ label: 'Testing (Prod)',     statuses: [UserStoryStatus.TESTING_PROD],     accent: '#bbf7d0' },
+		{ label: 'Test Failed',        statuses: [UserStoryStatus.TEST_FAILED],       accent: '#fca5a5' },
 	];
 
 	/**
@@ -199,7 +206,7 @@
 				onStatusChange={handleStatusChange}
 				extraAction={(story) =>
 					story.status === UserStoryStatus.TEST_FAILED
-						? { label: '↩ Send back to dev', onClick: () => sendBackToDev(story) }
+						? { label: '↩ To sprint (TODO)', onClick: () => sendBackToDev(story) }
 						: null}
 			/>
 		</section>

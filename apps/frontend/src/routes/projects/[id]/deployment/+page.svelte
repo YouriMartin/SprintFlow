@@ -31,10 +31,14 @@
 	let showStoryModal: boolean = $state(false);
 	let selectedStory: UserStory | null = $state(null);
 
-	/** Stories in DEV_DONE or the DEPLOYMENT group, with optional epic/sprint filter */
+	/** Stories in DEV_DONE, DEPLOYMENT group, or TEST_FAILED — with optional epic/sprint filter */
 	const deployStories = $derived(
 		stories.filter((s) => {
-			if (s.status !== UserStoryStatus.DEV_DONE && STATUS_META[s.status].group !== UserStoryGroup.DEPLOYMENT) return false;
+			if (
+				s.status !== UserStoryStatus.DEV_DONE &&
+				s.status !== UserStoryStatus.TEST_FAILED &&
+				STATUS_META[s.status].group !== UserStoryGroup.DEPLOYMENT
+			) return false;
 			if (filterEpicId && s.epicId !== filterEpicId) return false;
 			if (filterSprintId && s.sprintId !== filterSprintId) return false;
 			return true;
@@ -42,11 +46,12 @@
 	);
 
 	const deployColumns: KanbanColumn[] = [
-		{ label: 'Dev Done',     statuses: [UserStoryStatus.DEV_DONE],     accent: '#c4b5fd' },
-		{ label: 'To Deploy',    statuses: [UserStoryStatus.TO_DEPLOY],    accent: '#d1fae5' },
-		{ label: 'Staging',      statuses: [UserStoryStatus.STAGING],      accent: '#6ee7b7' },
-		{ label: 'Pre-Prod',     statuses: [UserStoryStatus.PRE_PROD],     accent: '#34d399' },
-		{ label: 'In Production',statuses: [UserStoryStatus.IN_PRODUCTION],accent: '#059669' },
+		{ label: 'Dev Done',           statuses: [UserStoryStatus.DEV_DONE],                                           accent: '#c4b5fd' },
+		{ label: 'To Deploy',          statuses: [UserStoryStatus.TO_DEPLOY],                                          accent: '#dbeafe' },
+		{ label: 'Staging',            statuses: [UserStoryStatus.STAGING, UserStoryStatus.TESTING_STAGING],            accent: '#6ee7b7' },
+		{ label: 'Pre-Prod',           statuses: [UserStoryStatus.PRE_PROD, UserStoryStatus.TESTING_PRE_PROD],          accent: '#34d399' },
+		{ label: 'In Production',      statuses: [UserStoryStatus.TESTING_PROD, UserStoryStatus.IN_PRODUCTION],         accent: '#059669' },
+		{ label: 'Test Failed',        statuses: [UserStoryStatus.TEST_FAILED],                                         accent: '#fca5a5' },
 	];
 
 	/**
@@ -88,6 +93,14 @@
 			await fetchData();
 			error = err instanceof Error ? err.message : 'Failed to update status';
 		}
+	}
+
+	/**
+	 * Sends a test-failed story back to TODO in its sprint.
+	 * @param story - The TEST_FAILED story to reopen
+	 */
+	async function sendToTodo(story: UserStory): Promise<void> {
+		await handleStatusChange(story, UserStoryStatus.TODO);
 	}
 
 	/** Opens the edit modal for a story. */
@@ -154,6 +167,10 @@
 				stories={deployStories}
 				onEdit={openEdit}
 				onStatusChange={handleStatusChange}
+				extraAction={(story) =>
+					story.status === UserStoryStatus.TEST_FAILED
+						? { label: '↩ To sprint (TODO)', onClick: () => sendToTodo(story) }
+						: null}
 			/>
 		</div>
 

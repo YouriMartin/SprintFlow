@@ -128,7 +128,7 @@ export enum EpicStatus {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Status enum for user stories — 17 values across 4 phases
+ * Status enum for user stories — 4 spec + 4 dev + 7 deployment + 1 cross-cutting + 1 terminal
  */
 export enum UserStoryStatus {
 	// SPECIFICATION
@@ -141,16 +141,16 @@ export enum UserStoryStatus {
 	IN_PROGRESS = 'in_progress',
 	CODE_REVIEW = 'code_review',
 	DEV_DONE    = 'dev_done',
-	// QA / RECETTE
-	TO_TEST     = 'to_test',
-	TESTING     = 'testing',
-	TEST_PASSED = 'test_passed',
+	// DEPLOYMENT (incl. per-stage testing)
+	TO_DEPLOY        = 'to_deploy',
+	STAGING          = 'staging',
+	TESTING_STAGING  = 'testing_staging',
+	PRE_PROD         = 'pre_prod',
+	TESTING_PRE_PROD = 'testing_pre_prod',
+	TESTING_PROD     = 'testing_prod',
+	IN_PRODUCTION    = 'in_production',
+	// CROSS-CUTTING (visible in dev, deployment & QA views)
 	TEST_FAILED = 'test_failed',
-	// DEPLOYMENT
-	TO_DEPLOY   = 'to_deploy',
-	STAGING     = 'staging',
-	PRE_PROD    = 'pre_prod',
-	IN_PRODUCTION = 'in_production',
 	// TERMINAL
 	CANCELLED   = 'cancelled',
 }
@@ -169,23 +169,23 @@ export enum UserStoryGroup {
  * Metadata for each status: human-readable label and phase group.
  */
 export const STATUS_META: Record<UserStoryStatus, { label: string; group: UserStoryGroup | null; order: number }> = {
-	[UserStoryStatus.TO_SPECIFY]:   { label: 'To Specify',     group: UserStoryGroup.SPECIFICATION, order: 1 },
-	[UserStoryStatus.WRITING]:      { label: 'Writing',        group: UserStoryGroup.SPECIFICATION, order: 2 },
-	[UserStoryStatus.TO_VALIDATE]:  { label: 'To Validate',   group: UserStoryGroup.SPECIFICATION, order: 3 },
-	[UserStoryStatus.READY]:        { label: 'Ready',          group: UserStoryGroup.SPECIFICATION, order: 4 },
-	[UserStoryStatus.TODO]:         { label: 'To Do',          group: UserStoryGroup.DEVELOPMENT,   order: 1 },
-	[UserStoryStatus.IN_PROGRESS]:  { label: 'In Progress',   group: UserStoryGroup.DEVELOPMENT,   order: 2 },
-	[UserStoryStatus.CODE_REVIEW]:  { label: 'In Review',     group: UserStoryGroup.DEVELOPMENT,   order: 3 },
-	[UserStoryStatus.DEV_DONE]:     { label: 'Dev Done',      group: UserStoryGroup.DEVELOPMENT,   order: 4 },
-	[UserStoryStatus.TO_TEST]:      { label: 'To Test',        group: UserStoryGroup.QA,            order: 1 },
-	[UserStoryStatus.TESTING]:      { label: 'Testing',        group: UserStoryGroup.QA,            order: 2 },
-	[UserStoryStatus.TEST_PASSED]:  { label: 'Test Passed',   group: UserStoryGroup.QA,            order: 3 },
-	[UserStoryStatus.TEST_FAILED]:  { label: 'Test Failed',   group: UserStoryGroup.QA,            order: 4 },
-	[UserStoryStatus.TO_DEPLOY]:    { label: 'To Deploy',      group: UserStoryGroup.DEPLOYMENT,    order: 1 },
-	[UserStoryStatus.STAGING]:      { label: 'Staging',        group: UserStoryGroup.DEPLOYMENT,    order: 2 },
-	[UserStoryStatus.PRE_PROD]:     { label: 'Pre-Prod',       group: UserStoryGroup.DEPLOYMENT,    order: 3 },
-	[UserStoryStatus.IN_PRODUCTION]:{ label: 'In Production',  group: UserStoryGroup.DEPLOYMENT,    order: 4 },
-	[UserStoryStatus.CANCELLED]:    { label: 'Cancelled',      group: null,                         order: 0 },
+	[UserStoryStatus.TO_SPECIFY]:      { label: 'To Specify',         group: UserStoryGroup.SPECIFICATION, order: 1 },
+	[UserStoryStatus.WRITING]:         { label: 'Writing',            group: UserStoryGroup.SPECIFICATION, order: 2 },
+	[UserStoryStatus.TO_VALIDATE]:     { label: 'To Validate',        group: UserStoryGroup.SPECIFICATION, order: 3 },
+	[UserStoryStatus.READY]:           { label: 'Ready',              group: UserStoryGroup.SPECIFICATION, order: 4 },
+	[UserStoryStatus.TODO]:            { label: 'To Do',              group: UserStoryGroup.DEVELOPMENT,   order: 1 },
+	[UserStoryStatus.IN_PROGRESS]:     { label: 'In Progress',        group: UserStoryGroup.DEVELOPMENT,   order: 2 },
+	[UserStoryStatus.CODE_REVIEW]:     { label: 'In Review',          group: UserStoryGroup.DEVELOPMENT,   order: 3 },
+	[UserStoryStatus.DEV_DONE]:        { label: 'Dev Done',           group: UserStoryGroup.DEVELOPMENT,   order: 4 },
+	[UserStoryStatus.TO_DEPLOY]:       { label: 'To Deploy',          group: UserStoryGroup.DEPLOYMENT,    order: 1 },
+	[UserStoryStatus.STAGING]:         { label: 'Staging',            group: UserStoryGroup.DEPLOYMENT,    order: 2 },
+	[UserStoryStatus.TESTING_STAGING]: { label: 'Testing (Staging)',  group: UserStoryGroup.DEPLOYMENT,    order: 3 },
+	[UserStoryStatus.PRE_PROD]:        { label: 'Pre-Prod',           group: UserStoryGroup.DEPLOYMENT,    order: 4 },
+	[UserStoryStatus.TESTING_PRE_PROD]:{ label: 'Testing (Pre-Prod)', group: UserStoryGroup.DEPLOYMENT,    order: 5 },
+	[UserStoryStatus.TESTING_PROD]:    { label: 'Testing (Prod)',     group: UserStoryGroup.DEPLOYMENT,    order: 6 },
+	[UserStoryStatus.IN_PRODUCTION]:   { label: 'In Production',      group: UserStoryGroup.DEPLOYMENT,    order: 7 },
+	[UserStoryStatus.TEST_FAILED]:     { label: 'Test Failed',        group: null,                         order: 0 },
+	[UserStoryStatus.CANCELLED]:       { label: 'Cancelled',          group: null,                         order: 0 },
 };
 
 /**
@@ -200,13 +200,16 @@ export const STATUSES_BY_GROUP: Record<UserStoryGroup, UserStoryStatus[]> = {
 		UserStoryStatus.TODO, UserStoryStatus.IN_PROGRESS,
 		UserStoryStatus.CODE_REVIEW, UserStoryStatus.DEV_DONE,
 	],
-	[UserStoryGroup.QA]: [
-		UserStoryStatus.TO_TEST, UserStoryStatus.TESTING,
-		UserStoryStatus.TEST_PASSED, UserStoryStatus.TEST_FAILED,
-	],
+	/** QA testing is now embedded in the DEPLOYMENT group per stage — this list is intentionally empty. */
+	[UserStoryGroup.QA]: [],
 	[UserStoryGroup.DEPLOYMENT]: [
-		UserStoryStatus.TO_DEPLOY, UserStoryStatus.STAGING,
-		UserStoryStatus.PRE_PROD, UserStoryStatus.IN_PRODUCTION,
+		UserStoryStatus.TO_DEPLOY,
+		UserStoryStatus.STAGING,
+		UserStoryStatus.TESTING_STAGING,
+		UserStoryStatus.PRE_PROD,
+		UserStoryStatus.TESTING_PRE_PROD,
+		UserStoryStatus.TESTING_PROD,
+		UserStoryStatus.IN_PRODUCTION,
 	],
 };
 
