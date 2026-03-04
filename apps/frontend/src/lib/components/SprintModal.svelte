@@ -79,12 +79,12 @@
 			}
 			onSave();
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Erreur lors de la sauvegarde';
+			error = err instanceof Error ? err.message : 'Error saving sprint';
 		}
 	}
 </script>
 
-<Modal open={open} title={isEdit ? 'Modifier le sprint' : 'Nouveau sprint'} onclose={onClose}>
+<Modal open={open} title={isEdit ? 'Edit Sprint' : 'New Sprint'} onclose={onClose}>
 	<form class="form" onsubmit={(e) => { e.preventDefault(); void submit(); }}>
 		{#if error}
 			<p class="form-error">{error}</p>
@@ -92,12 +92,12 @@
 
 		<div class="form-row">
 			<div class="form-group" style="flex: 2">
-				<label for="sprint-name">Nom <span class="required">*</span></label>
+				<label for="sprint-name">Name <span class="required">*</span></label>
 				<input id="sprint-name" type="text" bind:value={form.name} required placeholder="Sprint 1" />
 			</div>
 			{#if !isEdit}
 				<div class="form-group" style="flex: 0 0 100px">
-					<label for="sprint-number">N° <span class="required">*</span></label>
+					<label for="sprint-number">No. <span class="required">*</span></label>
 					<input
 						id="sprint-number"
 						type="number"
@@ -110,22 +110,22 @@
 		</div>
 
 		<div class="form-group">
-			<label for="sprint-goal">Objectif</label>
+			<label for="sprint-goal">Goal</label>
 			<textarea
 				id="sprint-goal"
 				bind:value={form.goal}
-				placeholder="Quel est l'objectif de ce sprint ?"
+				placeholder="What is the goal of this sprint?"
 				rows="2"
 			></textarea>
 		</div>
 
 		<div class="form-row">
 			<div class="form-group">
-				<label for="sprint-start">Date de début <span class="required">*</span></label>
+				<label for="sprint-start">Start date <span class="required">*</span></label>
 				<input id="sprint-start" type="date" bind:value={form.startDate} required />
 			</div>
 			<div class="form-group">
-				<label for="sprint-end">Date de fin <span class="required">*</span></label>
+				<label for="sprint-end">End date <span class="required">*</span></label>
 				<input id="sprint-end" type="date" bind:value={form.endDate} required />
 			</div>
 		</div>
@@ -143,18 +143,18 @@
 
 		<div class="form-row">
 			<div class="form-group">
-				<label for="sprint-capacity">Capacité (pts)</label>
+				<label for="sprint-capacity">Capacity (pts)</label>
 				<input id="sprint-capacity" type="number" min="0" bind:value={form.capacity} placeholder="—" />
 			</div>
 			<div class="form-group">
-				<label for="sprint-velocity">Vélocité (pts)</label>
+				<label for="sprint-velocity">Velocity (pts)</label>
 				<input id="sprint-velocity" type="number" min="0" bind:value={form.velocity} placeholder="—" />
 			</div>
 		</div>
 
 		<div class="form-actions">
-			<button type="button" class="btn btn-secondary" onclick={onClose}>Annuler</button>
-			<button type="submit" class="btn btn-primary">{isEdit ? 'Enregistrer' : 'Créer le sprint'}</button>
+			<button type="button" class="btn btn-secondary" onclick={onClose}>Cancel</button>
+			<button type="submit" class="btn btn-primary">{isEdit ? 'Save' : 'Create Sprint'}</button>
 		</div>
 	</form>
 </Modal>

@@ -62,10 +62,10 @@
 	);
 
 	const devColumns: KanbanColumn[] = [
-		{ label: 'À faire',     statuses: [UserStoryStatus.TODO],        accent: '#e0e7ff' },
-		{ label: 'En cours',    statuses: [UserStoryStatus.IN_PROGRESS], accent: '#8b5cf6' },
-		{ label: 'En revue',    statuses: [UserStoryStatus.CODE_REVIEW], accent: '#7c3aed' },
-		{ label: 'Dev terminé', statuses: [UserStoryStatus.DEV_DONE],    accent: '#6d28d9' },
+		{ label: 'To Do',       statuses: [UserStoryStatus.TODO],        accent: '#e0e7ff' },
+		{ label: 'In Progress', statuses: [UserStoryStatus.IN_PROGRESS], accent: '#8b5cf6' },
+		{ label: 'In Review',   statuses: [UserStoryStatus.CODE_REVIEW], accent: '#7c3aed' },
+		{ label: 'Dev Done',    statuses: [UserStoryStatus.DEV_DONE],    accent: '#6d28d9' },
 	];
 
 	/**
@@ -96,10 +96,10 @@
 	 */
 	function priorityLabel(priority: UserStoryPriority): string {
 		return {
-			[UserStoryPriority.LOW]:    'Faible',
-			[UserStoryPriority.MEDIUM]: 'Moyenne',
-			[UserStoryPriority.HIGH]:   'Haute',
-			[UserStoryPriority.URGENT]: 'Urgente',
+			[UserStoryPriority.LOW]:    'Low',
+			[UserStoryPriority.MEDIUM]: 'Medium',
+			[UserStoryPriority.HIGH]:   'High',
+			[UserStoryPriority.URGENT]: 'Urgent',
 		}[priority] ?? priority;
 	}
 
@@ -128,7 +128,7 @@
 				selectedSprintId = active?.id ?? sprints[0]?.id ?? '';
 			}
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Erreur de chargement';
+			error = err instanceof Error ? err.message : 'Failed to load';
 		} finally {
 			loading = false;
 		}
@@ -146,7 +146,7 @@
 			await api.updateUserStory(story.id, { status: newStatus });
 		} catch (err) {
 			await fetchData();
-			error = err instanceof Error ? err.message : 'Erreur lors du changement de statut';
+			error = err instanceof Error ? err.message : 'Failed to update status';
 		}
 	}
 
@@ -164,7 +164,7 @@
 			await api.updateUserStory(story.id, { sprintId, status: UserStoryStatus.TODO });
 		} catch (err) {
 			await fetchData();
-			error = err instanceof Error ? err.message : "Erreur lors de l'assignation au sprint";
+			error = err instanceof Error ? err.message : 'Failed to assign to sprint';
 		}
 	}
 
@@ -225,20 +225,20 @@
 			{/if}
 		</div>
 		{#if sprints.length > 0}
-			<button class="btn btn-primary" onclick={openCreateSprint}>+ Nouveau sprint</button>
+			<button class="btn btn-primary" onclick={openCreateSprint}>+ New sprint</button>
 		{/if}
 	</header>
 
 	{#if loading}
-		<div class="loading">Chargement…</div>
+		<div class="loading">Loading…</div>
 	{:else if error}
 		<div class="error-banner">{error}</div>
 	{:else if sprints.length === 0}
 		<div class="empty-state">
 			<div class="empty-icon">🏃</div>
-			<p class="empty-title">Aucun sprint</p>
-			<p class="empty-sub">Créez votre premier sprint pour commencer à organiser le développement.</p>
-			<button class="btn btn-primary" onclick={openCreateSprint}>+ Créer le premier sprint</button>
+			<p class="empty-title">No sprints</p>
+			<p class="empty-sub">Create your first sprint to start organizing development.</p>
+			<button class="btn btn-primary" onclick={openCreateSprint}>+ Create first sprint</button>
 		</div>
 	{:else}
 		<!-- View tabs -->
@@ -248,7 +248,7 @@
 				class:active={activeTab === 'kanban'}
 				onclick={() => (activeTab = 'kanban')}
 			>
-				Sprint actuel
+				Current Sprint
 			</button>
 			<button
 				class="view-tab"
@@ -274,7 +274,7 @@
 					>
 						<span class="sprint-name">{sprint.name}</span>
 						{#if sprint.status === SprintStatus.ACTIVE}
-							<span class="sprint-active-dot" title="Sprint actif"></span>
+							<span class="sprint-active-dot" title="Active sprint"></span>
 						{/if}
 					</button>
 				{/each}
@@ -293,7 +293,7 @@
 			<!-- Dev Kanban -->
 			{#if sprintStories.length === 0 && selectedSprintId}
 				<div class="empty-state">
-					<p class="empty-sub">Aucune story en développement dans ce sprint.</p>
+					<p class="empty-sub">No stories in development for this sprint.</p>
 				</div>
 			{:else}
 				<KanbanBoard
@@ -309,19 +309,19 @@
 			{#if backlogStories.length === 0}
 				<div class="empty-state">
 					<div class="empty-icon">✅</div>
-					<p class="empty-title">Backlog vide</p>
-					<p class="empty-sub">Aucune story au statut « Prête » en attente d'un sprint.</p>
+					<p class="empty-title">Backlog is empty</p>
+					<p class="empty-sub">No ready stories waiting to be assigned to a sprint.</p>
 				</div>
 			{:else}
 				<div class="backlog-header">
 					<p class="backlog-desc">
-						{backlogStories.length} story{backlogStories.length > 1 ? 's' : ''} prête{backlogStories.length > 1 ? 's' : ''} à planifier
+						{backlogStories.length} ready {backlogStories.length > 1 ? 'stories' : 'story'} to plan
 					</p>
 				</div>
 				<div class="backlog-list">
 					{#each backlogStories as story (story.id)}
 						<div class="backlog-card">
-							<span class="priority-badge {priorityClass(story.priority)}" title="Priorité {priorityLabel(story.priority)}">
+							<span class="priority-badge {priorityClass(story.priority)}" title="Priority: {priorityLabel(story.priority)}">
 								{priorityLabel(story.priority)}
 							</span>
 							<div class="backlog-card-info">
@@ -338,10 +338,10 @@
 										if (val) assignToSprint(story, val);
 									}}
 								>
-									<option value="">Assigner à un sprint…</option>
+									<option value="">Assign to a sprint…</option>
 									{#each sprints as sprint}
 										<option value={sprint.id}>
-											{sprint.name}{sprint.status === SprintStatus.ACTIVE ? ' (actif)' : ''}
+											{sprint.name}{sprint.status === SprintStatus.ACTIVE ? ' (active)' : ''}
 										</option>
 									{/each}
 								</select>

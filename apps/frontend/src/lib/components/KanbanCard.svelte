@@ -92,16 +92,16 @@
 				class="nav-arrow"
 				disabled={!prev}
 				onclick={() => prev && onStatusChange(story, prev)}
-				title={prev ? `← ${STATUS_META[prev].label}` : 'Premier statut du groupe'}
-				aria-label="Statut précédent"
+				title={prev ? `← ${STATUS_META[prev].label}` : 'First status in group'}
+				aria-label="Previous status"
 			>◀</button>
 			<span class="status-label">{statusLabel}</span>
 			<button
 				class="nav-arrow"
 				disabled={!next}
 				onclick={() => next && onStatusChange(story, next)}
-				title={next ? `→ ${STATUS_META[next].label}` : 'Dernier statut du groupe'}
-				aria-label="Statut suivant"
+				title={next ? `→ ${STATUS_META[next].label}` : 'Last status in group'}
+				aria-label="Next status"
 			>▶</button>
 		</div>
 	</div>

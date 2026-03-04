@@ -22,11 +22,11 @@
 	});
 
 	function validate(): string {
-		if (!name.trim()) return 'Le nom complet est requis.';
-		if (!email.trim()) return "L'adresse email est requise.";
-		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "L'adresse email est invalide.";
-		if (password.length < 8) return 'Le mot de passe doit contenir au moins 8 caractères.';
-		if (password !== confirmPassword) return 'Les mots de passe ne correspondent pas.';
+		if (!name.trim()) return 'Full name is required.';
+		if (!email.trim()) return 'Email address is required.';
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Email address is invalid.';
+		if (password.length < 8) return 'Password must be at least 8 characters.';
+		if (password !== confirmPassword) return 'Passwords do not match.';
 		return '';
 	}
 
@@ -45,7 +45,7 @@
 			await api.createSetup({ name: name.trim(), email: email.trim(), password });
 			goto('/');
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Une erreur est survenue.';
+			error = err instanceof Error ? err.message : 'An error occurred.';
 		} finally {
 			submitting = false;
 		}
@@ -59,9 +59,9 @@
 				<div class="logo-icon">SF</div>
 				<span class="logo-text">SprintFlow</span>
 			</div>
-			<h1>Bienvenue sur SprintFlow</h1>
+			<h1>Welcome to SprintFlow</h1>
 			<p class="subtitle">
-				Créez votre compte administrateur pour commencer à utiliser l'application.
+				Create your admin account to get started.
 			</p>
 		</div>
 
@@ -71,12 +71,12 @@
 			{/if}
 
 			<div class="field">
-				<label for="name">Nom complet</label>
+				<label for="name">Full name</label>
 				<input
 					id="name"
 					type="text"
 					bind:value={name}
-					placeholder="Jean Dupont"
+					placeholder="Jane Smith"
 					autocomplete="name"
 					disabled={submitting}
 					required
@@ -84,7 +84,7 @@
 			</div>
 
 			<div class="field">
-				<label for="email">Adresse email</label>
+				<label for="email">Email address</label>
 				<input
 					id="email"
 					type="email"
@@ -97,12 +97,12 @@
 			</div>
 
 			<div class="field">
-				<label for="password">Mot de passe</label>
+				<label for="password">Password</label>
 				<input
 					id="password"
 					type="password"
 					bind:value={password}
-					placeholder="Minimum 8 caractères"
+					placeholder="At least 8 characters"
 					autocomplete="new-password"
 					disabled={submitting}
 					required
@@ -110,12 +110,12 @@
 			</div>
 
 			<div class="field">
-				<label for="confirmPassword">Confirmer le mot de passe</label>
+				<label for="confirmPassword">Confirm password</label>
 				<input
 					id="confirmPassword"
 					type="password"
 					bind:value={confirmPassword}
-					placeholder="Répétez votre mot de passe"
+					placeholder="Repeat your password"
 					autocomplete="new-password"
 					disabled={submitting}
 					required
@@ -124,9 +124,9 @@
 
 			<button type="submit" class="submit-btn" disabled={submitting}>
 				{#if submitting}
-					Création en cours…
+					Creating…
 				{:else}
-					Créer le compte administrateur
+					Create admin account
 				{/if}
 			</button>
 		</form>

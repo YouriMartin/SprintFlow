@@ -47,17 +47,17 @@
 
 	// Column definitions
 	const specColumns: KanbanColumn[] = [
-		{ label: 'À spécifier',  statuses: [UserStoryStatus.TO_SPECIFY],  accent: '#e0e7ff' },
-		{ label: 'En rédaction', statuses: [UserStoryStatus.WRITING],      accent: '#c7d2fe' },
-		{ label: 'À valider',    statuses: [UserStoryStatus.TO_VALIDATE],  accent: '#a5b4fc' },
-		{ label: 'Prête',        statuses: [UserStoryStatus.READY],        accent: '#6366f1' },
+		{ label: 'To Specify',  statuses: [UserStoryStatus.TO_SPECIFY],  accent: '#e0e7ff' },
+		{ label: 'Writing',     statuses: [UserStoryStatus.WRITING],      accent: '#c7d2fe' },
+		{ label: 'To Validate', statuses: [UserStoryStatus.TO_VALIDATE],  accent: '#a5b4fc' },
+		{ label: 'Ready',       statuses: [UserStoryStatus.READY],        accent: '#6366f1' },
 	];
 
 	const qaColumns: KanbanColumn[] = [
-		{ label: 'À recetter', statuses: [UserStoryStatus.TO_TEST],     accent: '#fef3c7' },
-		{ label: 'En recette', statuses: [UserStoryStatus.TESTING],     accent: '#fde68a' },
-		{ label: 'Recette OK', statuses: [UserStoryStatus.TEST_PASSED], accent: '#6ee7b7' },
-		{ label: 'Recette KO', statuses: [UserStoryStatus.TEST_FAILED], accent: '#fca5a5' },
+		{ label: 'To Test',     statuses: [UserStoryStatus.TO_TEST],     accent: '#fef3c7' },
+		{ label: 'Testing',     statuses: [UserStoryStatus.TESTING],     accent: '#fde68a' },
+		{ label: 'Test Passed', statuses: [UserStoryStatus.TEST_PASSED], accent: '#6ee7b7' },
+		{ label: 'Test Failed', statuses: [UserStoryStatus.TEST_FAILED], accent: '#fca5a5' },
 	];
 
 	/**
@@ -79,7 +79,7 @@
 				(s) => s.epicId != null && epicIds.has(s.epicId) && s.status !== UserStoryStatus.CANCELLED
 			);
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Erreur de chargement';
+			error = err instanceof Error ? err.message : 'Failed to load';
 		} finally {
 			loading = false;
 		}
@@ -97,7 +97,7 @@
 			await api.updateUserStory(story.id, { status: newStatus });
 		} catch (err) {
 			await fetchData();
-			error = err instanceof Error ? err.message : 'Erreur lors du changement de statut';
+			error = err instanceof Error ? err.message : 'Failed to update status';
 		}
 	}
 
@@ -139,7 +139,7 @@
 <div class="page">
 	<header class="page-header">
 		<div class="page-title">
-			<h1>Spécification & QA</h1>
+			<h1>Spec & QA</h1>
 			{#if project}
 				<span class="project-name">{project.name}</span>
 			{/if}
@@ -147,7 +147,7 @@
 	</header>
 
 	{#if loading}
-		<div class="loading">Chargement…</div>
+		<div class="loading">Loading…</div>
 	{:else if error}
 		<div class="error-banner">{error}</div>
 	{:else}
@@ -155,7 +155,7 @@
 		<section class="board-section">
 			<div class="section-label spec-label">
 				<span class="section-icon">📋</span>
-				Spécification
+				Specification
 				<span class="section-count">{specStories.length}</span>
 			</div>
 			<KanbanBoard
@@ -170,9 +170,9 @@
 		<section class="dev-summary">
 			<div class="summary-label">
 				<span class="section-icon">🏃</span>
-				Développement
+				Development
 				<span class="section-count">{totalDev}</span>
-				<a href="/projects/{projectId}/sprints" class="summary-link">Voir les sprints →</a>
+				<a href="/projects/{projectId}/sprints" class="summary-link">View sprints →</a>
 			</div>
 			<div class="dev-counts">
 				{#each devStatuses as status}
@@ -189,7 +189,7 @@
 		<section class="board-section">
 			<div class="section-label qa-label">
 				<span class="section-icon">✅</span>
-				QA / Recette
+				QA / Testing
 				<span class="section-count">{qaStories.length}</span>
 			</div>
 			<KanbanBoard
@@ -199,7 +199,7 @@
 				onStatusChange={handleStatusChange}
 				extraAction={(story) =>
 					story.status === UserStoryStatus.TEST_FAILED
-						? { label: '↩ Renvoyer en dev', onClick: () => sendBackToDev(story) }
+						? { label: '↩ Send back to dev', onClick: () => sendBackToDev(story) }
 						: null}
 			/>
 		</section>

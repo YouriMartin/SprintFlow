@@ -42,10 +42,10 @@
 	);
 
 	const deployColumns: KanbanColumn[] = [
-		{ label: 'À déployer',   statuses: [UserStoryStatus.TO_DEPLOY],    accent: '#d1fae5' },
-		{ label: 'Staging',      statuses: [UserStoryStatus.STAGING],       accent: '#6ee7b7' },
-		{ label: 'Pré-prod',     statuses: [UserStoryStatus.PRE_PROD],      accent: '#34d399' },
-		{ label: 'En production',statuses: [UserStoryStatus.IN_PRODUCTION], accent: '#059669' },
+		{ label: 'To Deploy',    statuses: [UserStoryStatus.TO_DEPLOY],    accent: '#d1fae5' },
+		{ label: 'Staging',      statuses: [UserStoryStatus.STAGING],      accent: '#6ee7b7' },
+		{ label: 'Pre-Prod',     statuses: [UserStoryStatus.PRE_PROD],     accent: '#34d399' },
+		{ label: 'In Production',statuses: [UserStoryStatus.IN_PRODUCTION],accent: '#059669' },
 	];
 
 	/**
@@ -67,7 +67,7 @@
 			const epicIds = new Set(epics.map((e) => e.id));
 			stories = storiesData.filter((s) => s.epicId != null && epicIds.has(s.epicId));
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Erreur de chargement';
+			error = err instanceof Error ? err.message : 'Failed to load';
 		} finally {
 			loading = false;
 		}
@@ -85,7 +85,7 @@
 			await api.updateUserStory(story.id, { status: newStatus });
 		} catch (err) {
 			await fetchData();
-			error = err instanceof Error ? err.message : 'Erreur lors du changement de statut';
+			error = err instanceof Error ? err.message : 'Failed to update status';
 		}
 	}
 
@@ -119,7 +119,7 @@
 <div class="page">
 	<header class="page-header">
 		<div class="page-title">
-			<h1>Déploiement</h1>
+			<h1>Deployment</h1>
 			{#if project}
 				<span class="project-name">{project.name}</span>
 			{/if}
@@ -128,13 +128,13 @@
 		<!-- Filters -->
 		<div class="filters">
 			<select bind:value={filterEpicId} class="filter-select">
-				<option value="">Tous les epics</option>
+				<option value="">All epics</option>
 				{#each epics as epic}
 					<option value={epic.id}>{epic.title}</option>
 				{/each}
 			</select>
 			<select bind:value={filterSprintId} class="filter-select">
-				<option value="">Tous les sprints</option>
+				<option value="">All sprints</option>
 				{#each sprints as sprint}
 					<option value={sprint.id}>{sprint.name}</option>
 				{/each}
@@ -143,7 +143,7 @@
 	</header>
 
 	{#if loading}
-		<div class="loading">Chargement…</div>
+		<div class="loading">Loading…</div>
 	{:else if error}
 		<div class="error-banner">{error}</div>
 	{:else}
@@ -159,8 +159,8 @@
 		{#if deployStories.length === 0}
 			<div class="empty-state">
 				<div class="empty-icon">🚀</div>
-				<p class="empty-title">Aucune story en déploiement</p>
-				<p class="empty-sub">Les stories passant la recette apparaîtront ici automatiquement.</p>
+				<p class="empty-title">No stories in deployment</p>
+				<p class="empty-sub">Stories passing QA will appear here automatically.</p>
 			</div>
 		{/if}
 	{/if}

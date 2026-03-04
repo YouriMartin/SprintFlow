@@ -281,7 +281,7 @@
 												<path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
 											</svg>
 										</span>
-										<span class="nav-label">Déploiement</span>
+										<span class="nav-label">Deployment</span>
 									</a>
 								</li>
 							</ul>

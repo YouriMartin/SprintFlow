@@ -53,7 +53,7 @@
 
 			<div class="column-body">
 				{#if colStories.length === 0}
-					<p class="column-empty">Aucune story</p>
+					<p class="column-empty">No stories</p>
 				{:else}
 					{#each colStories as story (story.id)}
 						{@const extra = extraAction ? extraAction(story) : null}
