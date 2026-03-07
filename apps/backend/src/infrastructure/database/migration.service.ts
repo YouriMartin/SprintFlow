@@ -4,7 +4,7 @@ import {
   Logger,
   OnApplicationBootstrap,
 } from '@nestjs/common';
-import { readFileSync, readdirSync } from 'fs';
+import { existsSync, readFileSync, readdirSync } from 'fs';
 import * as path from 'path';
 import { sql } from 'kysely';
 import type { KyselyDatabase } from '../config/kysely.config';
@@ -12,12 +12,22 @@ import type { KyselyDatabase } from '../config/kysely.config';
 @Injectable()
 export class MigrationService implements OnApplicationBootstrap {
   private readonly logger = new Logger(MigrationService.name);
-  // __dirname at runtime: dist/infrastructure/database → ../../.. = apps/backend root
-  private readonly migrationsPath = path.resolve(
-    __dirname,
-    '../../..',
-    'migrations',
-  );
+  /**
+   * Resolves the migrations folder by walking up from __dirname until the
+   * directory containing package.json is found. Works regardless of whether
+   * the code runs from src/ (ts-node/watch) or dist/ (compiled).
+   */
+  private readonly migrationsPath = MigrationService.resolveMigrationsPath();
+
+  private static resolveMigrationsPath(): string {
+    let dir = __dirname;
+    while (!existsSync(path.join(dir, 'package.json'))) {
+      const parent = path.dirname(dir);
+      if (parent === dir) break; // filesystem root — should never happen
+      dir = parent;
+    }
+    return path.join(dir, 'migrations');
+  }
 
   constructor(@Inject('kysely') private readonly db: KyselyDatabase) {}
 
