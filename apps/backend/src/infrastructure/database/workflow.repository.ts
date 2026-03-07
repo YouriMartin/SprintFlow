@@ -24,27 +24,197 @@ const DEFAULT_STATUSES: Array<{
   posY: number;
 }> = [
   // SPECIFICATION
-  { key: 'to_specify',       label: 'To Specify',         groupNames: ['SPECIFICATION'],              sortOrder: 1, color: '#3b82f6', isInitial: true,  isTerminal: false, posX: 50,   posY: 50  },
-  { key: 'writing',          label: 'Writing',            groupNames: ['SPECIFICATION'],              sortOrder: 2, color: '#3b82f6', isInitial: false, isTerminal: false, posX: 250,  posY: 50  },
-  { key: 'to_validate',      label: 'To Validate',        groupNames: ['SPECIFICATION'],              sortOrder: 3, color: '#3b82f6', isInitial: false, isTerminal: false, posX: 450,  posY: 50  },
-  { key: 'ready',            label: 'Ready',              groupNames: ['SPECIFICATION'],              sortOrder: 4, color: '#3b82f6', isInitial: false, isTerminal: false, posX: 650,  posY: 50  },
+  {
+    key: 'to_specify',
+    label: 'To Specify',
+    groupNames: ['SPECIFICATION'],
+    sortOrder: 1,
+    color: '#3b82f6',
+    isInitial: true,
+    isTerminal: false,
+    posX: 50,
+    posY: 50,
+  },
+  {
+    key: 'writing',
+    label: 'Writing',
+    groupNames: ['SPECIFICATION'],
+    sortOrder: 2,
+    color: '#3b82f6',
+    isInitial: false,
+    isTerminal: false,
+    posX: 250,
+    posY: 50,
+  },
+  {
+    key: 'to_validate',
+    label: 'To Validate',
+    groupNames: ['SPECIFICATION'],
+    sortOrder: 3,
+    color: '#3b82f6',
+    isInitial: false,
+    isTerminal: false,
+    posX: 450,
+    posY: 50,
+  },
+  {
+    key: 'ready',
+    label: 'Ready',
+    groupNames: ['SPECIFICATION'],
+    sortOrder: 4,
+    color: '#3b82f6',
+    isInitial: false,
+    isTerminal: false,
+    posX: 650,
+    posY: 50,
+  },
   // DEVELOPMENT
-  { key: 'todo',             label: 'To Do',              groupNames: ['DEVELOPMENT'],                sortOrder: 1, color: '#8b5cf6', isInitial: false, isTerminal: false, posX: 50,   posY: 180 },
-  { key: 'in_progress',      label: 'In Progress',        groupNames: ['DEVELOPMENT'],                sortOrder: 2, color: '#8b5cf6', isInitial: false, isTerminal: false, posX: 250,  posY: 180 },
-  { key: 'code_review',      label: 'In Review',          groupNames: ['DEVELOPMENT'],                sortOrder: 3, color: '#8b5cf6', isInitial: false, isTerminal: false, posX: 450,  posY: 180 },
-  { key: 'dev_done',         label: 'Dev Done',           groupNames: ['DEVELOPMENT'],                sortOrder: 4, color: '#8b5cf6', isInitial: false, isTerminal: false, posX: 650,  posY: 180 },
+  {
+    key: 'todo',
+    label: 'To Do',
+    groupNames: ['DEVELOPMENT'],
+    sortOrder: 1,
+    color: '#8b5cf6',
+    isInitial: false,
+    isTerminal: false,
+    posX: 50,
+    posY: 180,
+  },
+  {
+    key: 'in_progress',
+    label: 'In Progress',
+    groupNames: ['DEVELOPMENT'],
+    sortOrder: 2,
+    color: '#8b5cf6',
+    isInitial: false,
+    isTerminal: false,
+    posX: 250,
+    posY: 180,
+  },
+  {
+    key: 'code_review',
+    label: 'In Review',
+    groupNames: ['DEVELOPMENT'],
+    sortOrder: 3,
+    color: '#8b5cf6',
+    isInitial: false,
+    isTerminal: false,
+    posX: 450,
+    posY: 180,
+  },
+  {
+    key: 'dev_done',
+    label: 'Dev Done',
+    groupNames: ['DEVELOPMENT'],
+    sortOrder: 4,
+    color: '#8b5cf6',
+    isInitial: false,
+    isTerminal: false,
+    posX: 650,
+    posY: 180,
+  },
   // DEPLOYMENT
-  { key: 'to_deploy',        label: 'To Deploy',          groupNames: ['DEPLOYMENT'],                 sortOrder: 1, color: '#22c55e', isInitial: false, isTerminal: false, posX: 50,   posY: 310 },
-  { key: 'staging',          label: 'Staging',            groupNames: ['DEPLOYMENT'],                 sortOrder: 2, color: '#22c55e', isInitial: false, isTerminal: false, posX: 250,  posY: 310 },
-  { key: 'testing_staging',  label: 'Testing (Staging)',  groupNames: ['DEPLOYMENT'],                 sortOrder: 3, color: '#22c55e', isInitial: false, isTerminal: false, posX: 450,  posY: 310 },
-  { key: 'pre_prod',         label: 'Pre-Prod',           groupNames: ['DEPLOYMENT'],                 sortOrder: 4, color: '#22c55e', isInitial: false, isTerminal: false, posX: 650,  posY: 310 },
-  { key: 'testing_pre_prod', label: 'Testing (Pre-Prod)', groupNames: ['DEPLOYMENT'],                 sortOrder: 5, color: '#22c55e', isInitial: false, isTerminal: false, posX: 850,  posY: 310 },
-  { key: 'testing_prod',     label: 'Testing (Prod)',     groupNames: ['DEPLOYMENT'],                 sortOrder: 6, color: '#22c55e', isInitial: false, isTerminal: false, posX: 1050, posY: 310 },
-  { key: 'in_production',    label: 'In Production',      groupNames: ['DEPLOYMENT'],                 sortOrder: 7, color: '#22c55e', isInitial: false, isTerminal: true,  posX: 1250, posY: 310 },
+  {
+    key: 'to_deploy',
+    label: 'To Deploy',
+    groupNames: ['DEPLOYMENT'],
+    sortOrder: 1,
+    color: '#22c55e',
+    isInitial: false,
+    isTerminal: false,
+    posX: 50,
+    posY: 310,
+  },
+  {
+    key: 'staging',
+    label: 'Staging',
+    groupNames: ['DEPLOYMENT'],
+    sortOrder: 2,
+    color: '#22c55e',
+    isInitial: false,
+    isTerminal: false,
+    posX: 250,
+    posY: 310,
+  },
+  {
+    key: 'testing_staging',
+    label: 'Testing (Staging)',
+    groupNames: ['DEPLOYMENT'],
+    sortOrder: 3,
+    color: '#22c55e',
+    isInitial: false,
+    isTerminal: false,
+    posX: 450,
+    posY: 310,
+  },
+  {
+    key: 'pre_prod',
+    label: 'Pre-Prod',
+    groupNames: ['DEPLOYMENT'],
+    sortOrder: 4,
+    color: '#22c55e',
+    isInitial: false,
+    isTerminal: false,
+    posX: 650,
+    posY: 310,
+  },
+  {
+    key: 'testing_pre_prod',
+    label: 'Testing (Pre-Prod)',
+    groupNames: ['DEPLOYMENT'],
+    sortOrder: 5,
+    color: '#22c55e',
+    isInitial: false,
+    isTerminal: false,
+    posX: 850,
+    posY: 310,
+  },
+  {
+    key: 'testing_prod',
+    label: 'Testing (Prod)',
+    groupNames: ['DEPLOYMENT'],
+    sortOrder: 6,
+    color: '#22c55e',
+    isInitial: false,
+    isTerminal: false,
+    posX: 1050,
+    posY: 310,
+  },
+  {
+    key: 'in_production',
+    label: 'In Production',
+    groupNames: ['DEPLOYMENT'],
+    sortOrder: 7,
+    color: '#22c55e',
+    isInitial: false,
+    isTerminal: true,
+    posX: 1250,
+    posY: 310,
+  },
   // CROSS-CUTTING: visible in both DEVELOPMENT and DEPLOYMENT views
-  { key: 'test_failed',      label: 'Test Failed',        groupNames: ['DEVELOPMENT', 'DEPLOYMENT'],  sortOrder: 0, color: '#ef4444', isInitial: false, isTerminal: false, posX: 850,  posY: 180 },
+  {
+    key: 'test_failed',
+    label: 'Test Failed',
+    groupNames: ['DEVELOPMENT', 'DEPLOYMENT'],
+    sortOrder: 0,
+    color: '#ef4444',
+    isInitial: false,
+    isTerminal: false,
+    posX: 850,
+    posY: 180,
+  },
   // TERMINAL: no group (shown everywhere as a terminal option)
-  { key: 'cancelled',        label: 'Cancelled',          groupNames: [],                             sortOrder: 0, color: '#6b7280', isInitial: false, isTerminal: true,  posX: 1050, posY: 50  },
+  {
+    key: 'cancelled',
+    label: 'Cancelled',
+    groupNames: [],
+    sortOrder: 0,
+    color: '#6b7280',
+    isInitial: false,
+    isTerminal: true,
+    posX: 1050,
+    posY: 50,
+  },
 ];
 
 /**
@@ -168,7 +338,9 @@ export class WorkflowRepository implements IWorkflowRepository {
    */
   async updateStatus(
     id: string,
-    data: Partial<Omit<WorkflowStatus, 'id' | 'projectId' | 'createdAt' | 'updatedAt'>>,
+    data: Partial<
+      Omit<WorkflowStatus, 'id' | 'projectId' | 'createdAt' | 'updatedAt'>
+    >,
   ): Promise<WorkflowStatus> {
     const updateData: Partial<WorkflowStatusTable> = { updated_at: new Date() };
 
@@ -273,8 +445,8 @@ export class WorkflowRepository implements IWorkflowRepository {
     );
 
     // Insert all default transitions (skip any pair where a key is missing)
-    const transitionValues = DEFAULT_TRANSITION_PAIRS
-      .map(([fromKey, toKey]) => {
+    const transitionValues = DEFAULT_TRANSITION_PAIRS.map(
+      ([fromKey, toKey]) => {
         const fromId = keyToId.get(fromKey);
         const toId = keyToId.get(toKey);
         if (!fromId || !toId) return null;
@@ -285,8 +457,8 @@ export class WorkflowRepository implements IWorkflowRepository {
           to_status_id: toId,
           created_at: now,
         };
-      })
-      .filter((v): v is NonNullable<typeof v> => v !== null);
+      },
+    ).filter((v): v is NonNullable<typeof v> => v !== null);
 
     if (transitionValues.length > 0) {
       await this.db
