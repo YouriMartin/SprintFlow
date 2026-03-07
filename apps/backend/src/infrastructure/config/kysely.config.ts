@@ -14,6 +14,8 @@ export interface Database {
   user_story_code_repositories: UserStoryCodeRepositoryTable;
   refresh_tokens: RefreshTokenTable;
   schema_migrations: SchemaMigrationTable;
+  workflow_statuses: WorkflowStatusTable;
+  workflow_transitions: WorkflowTransitionTable;
 }
 
 export interface UserTable {
@@ -81,29 +83,13 @@ export interface UserStoryTable {
   id: string;
   title: string;
   description: string | null;
-  status:
-    | 'to_specify'
-    | 'writing'
-    | 'to_validate'
-    | 'ready'
-    | 'todo'
-    | 'in_progress'
-    | 'code_review'
-    | 'dev_done'
-    | 'to_test'
-    | 'testing'
-    | 'test_passed'
-    | 'test_failed'
-    | 'to_deploy'
-    | 'staging'
-    | 'pre_prod'
-    | 'in_production'
-    | 'cancelled';
+  status: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
   assignee: string | null;
   due_date: Date | null;
   epic_id: string | null;
   sprint_id: string | null;
+  project_id: string | null;
   created_by: string;
   updated_by: string | null;
   deleted_by: string | null;
@@ -141,6 +127,30 @@ export interface RefreshTokenTable {
 export interface SchemaMigrationTable {
   filename: string;
   applied_at: Date;
+}
+
+export interface WorkflowStatusTable {
+  id: string;
+  project_id: string;
+  key: string;
+  label: string;
+  group_names: string[];
+  sort_order: number;
+  color: string;
+  is_initial: boolean;
+  is_terminal: boolean;
+  pos_x: number;
+  pos_y: number;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface WorkflowTransitionTable {
+  id: string;
+  project_id: string;
+  from_status_id: string;
+  to_status_id: string;
+  created_at: Date;
 }
 
 export type KyselyDatabase = Kysely<Database>;

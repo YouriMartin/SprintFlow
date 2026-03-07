@@ -416,3 +416,81 @@ export interface UpdateSprintDto {
 	velocity?: number;
 	capacity?: number;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Workflow
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * A single status in a project's workflow.
+ * A status can belong to multiple groups and will appear in each group's view.
+ */
+export interface WorkflowStatus {
+	id: string;
+	projectId: string;
+	key: string;
+	label: string;
+	/** Phase groups this status belongs to — empty array means no specific group (e.g. Cancelled) */
+	groupNames: string[];
+	sortOrder: number;
+	color: string;
+	isInitial: boolean;
+	isTerminal: boolean;
+	posX: number;
+	posY: number;
+}
+
+/**
+ * An allowed transition between two workflow statuses
+ */
+export interface WorkflowTransition {
+	id: string;
+	projectId: string;
+	fromStatusId: string;
+	toStatusId: string;
+}
+
+/**
+ * Complete workflow for a project: statuses + transitions
+ */
+export interface Workflow {
+	statuses: WorkflowStatus[];
+	transitions: WorkflowTransition[];
+}
+
+/**
+ * DTO for creating a new workflow status
+ */
+export interface CreateWorkflowStatusDto {
+	key: string;
+	label: string;
+	groupNames?: string[];
+	sortOrder?: number;
+	color?: string;
+	isInitial?: boolean;
+	isTerminal?: boolean;
+	posX?: number;
+	posY?: number;
+}
+
+/**
+ * DTO for updating a workflow status
+ */
+export interface UpdateWorkflowStatusDto {
+	label?: string;
+	groupNames?: string[];
+	sortOrder?: number;
+	color?: string;
+	isInitial?: boolean;
+	isTerminal?: boolean;
+	posX?: number;
+	posY?: number;
+}
+
+/**
+ * DTO for creating a workflow transition
+ */
+export interface CreateWorkflowTransitionDto {
+	fromStatusId: string;
+	toStatusId: string;
+}

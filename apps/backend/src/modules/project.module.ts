@@ -5,9 +5,10 @@ import { PROJECT_REPOSITORY } from '../domain/repositories/project.repository.in
 import { ProjectController } from '../presentation/controllers/project.controller';
 import { ProjectCommandHandlers } from '../application/commands/handlers/project';
 import { ProjectQueryHandlers } from '../application/queries/handlers/project';
+import { WorkflowModule } from './workflow.module';
 
 @Module({
-  imports: [CqrsModule],
+  imports: [CqrsModule, WorkflowModule],
   controllers: [ProjectController],
   providers: [
     {

@@ -284,6 +284,24 @@
 										<span class="nav-label">Deployment</span>
 									</a>
 								</li>
+								<li>
+									<a
+										href="/projects/{project.id}/workflow"
+										class="nav-item subnav-item"
+										class:active={isActive(`/projects/${project.id}/workflow`)}
+									>
+										<span class="nav-icon subnav-icon">
+											<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+												<rect x="2" y="4" width="6" height="5" rx="1.5"/>
+												<rect x="16" y="4" width="6" height="5" rx="1.5"/>
+												<rect x="9" y="15" width="6" height="5" rx="1.5"/>
+												<path d="M5 9v2a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4V9"/>
+												<line x1="12" y1="11" x2="12" y2="15"/>
+											</svg>
+										</span>
+										<span class="nav-label">Workflow</span>
+									</a>
+								</li>
 							</ul>
 						{/if}
 					</li>

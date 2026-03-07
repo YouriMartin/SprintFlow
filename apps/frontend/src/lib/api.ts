@@ -13,7 +13,13 @@ import type {
 	UpdateUserStoryDto,
 	Sprint,
 	CreateSprintDto,
-	UpdateSprintDto
+	UpdateSprintDto,
+	Workflow,
+	WorkflowStatus,
+	WorkflowTransition,
+	CreateWorkflowStatusDto,
+	UpdateWorkflowStatusDto,
+	CreateWorkflowTransitionDto
 } from './types';
 import { PUBLIC_API_URL } from '$env/static/public';
 import { auth } from './auth.svelte';
@@ -451,6 +457,100 @@ export const api = {
 	async deleteSprint(id: string): Promise<void> {
 		const response = await authFetch(`${API_BASE_URL}/sprints/${id}`, { method: 'DELETE' });
 		if (!response.ok) throw new Error('Failed to delete sprint');
+	},
+
+	// ==================== WORKFLOW ====================
+
+	/**
+	 * Fetches the full workflow (statuses + transitions) for a project.
+	 * @param projectId - UUID of the project
+	 * @returns Workflow with all statuses and transitions
+	 * @throws Error if the request fails
+	 */
+	async getWorkflow(projectId: string): Promise<Workflow> {
+		const response = await authFetch(`${API_BASE_URL}/projects/${projectId}/workflow`);
+		if (!response.ok) throw new Error('Failed to fetch workflow');
+		return response.json();
+	},
+
+	/**
+	 * Creates a new workflow status for a project.
+	 * @param projectId - UUID of the project
+	 * @param data - Status data to create
+	 * @returns The created workflow status
+	 * @throws Error if validation fails or request fails
+	 */
+	async createWorkflowStatus(projectId: string, data: CreateWorkflowStatusDto): Promise<WorkflowStatus> {
+		const response = await authFetch(`${API_BASE_URL}/projects/${projectId}/workflow/statuses`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(data)
+		});
+		if (!response.ok) throw new Error('Failed to create workflow status');
+		return response.json();
+	},
+
+	/**
+	 * Updates an existing workflow status (including canvas position for drag).
+	 * @param projectId - UUID of the project
+	 * @param statusId - UUID of the status to update
+	 * @param data - Partial status data to update
+	 * @returns The updated workflow status
+	 * @throws Error if status not found or request fails
+	 */
+	async updateWorkflowStatus(projectId: string, statusId: string, data: UpdateWorkflowStatusDto): Promise<WorkflowStatus> {
+		const response = await authFetch(`${API_BASE_URL}/projects/${projectId}/workflow/statuses/${statusId}`, {
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(data)
+		});
+		if (!response.ok) throw new Error('Failed to update workflow status');
+		return response.json();
+	},
+
+	/**
+	 * Deletes a workflow status.
+	 * @param projectId - UUID of the project
+	 * @param statusId - UUID of the status to delete
+	 * @throws Error if status not found or request fails
+	 */
+	async deleteWorkflowStatus(projectId: string, statusId: string): Promise<void> {
+		const response = await authFetch(
+			`${API_BASE_URL}/projects/${projectId}/workflow/statuses/${statusId}`,
+			{ method: 'DELETE' }
+		);
+		if (!response.ok) throw new Error('Failed to delete workflow status');
+	},
+
+	/**
+	 * Creates an allowed workflow transition between two statuses.
+	 * @param projectId - UUID of the project
+	 * @param data - Transition data with fromStatusId and toStatusId
+	 * @returns The created workflow transition
+	 * @throws Error if validation fails or request fails
+	 */
+	async createWorkflowTransition(projectId: string, data: CreateWorkflowTransitionDto): Promise<WorkflowTransition> {
+		const response = await authFetch(`${API_BASE_URL}/projects/${projectId}/workflow/transitions`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(data)
+		});
+		if (!response.ok) throw new Error('Failed to create workflow transition');
+		return response.json();
+	},
+
+	/**
+	 * Deletes a workflow transition.
+	 * @param projectId - UUID of the project
+	 * @param transitionId - UUID of the transition to delete
+	 * @throws Error if request fails
+	 */
+	async deleteWorkflowTransition(projectId: string, transitionId: string): Promise<void> {
+		const response = await authFetch(
+			`${API_BASE_URL}/projects/${projectId}/workflow/transitions/${transitionId}`,
+			{ method: 'DELETE' }
+		);
+		if (!response.ok) throw new Error('Failed to delete workflow transition');
 	},
 
 	// ==================== SETUP ====================

@@ -11,6 +11,7 @@ import { UserStoryModule } from './modules/user-story.module';
 import { CodeRepositoryModule } from './modules/code-repository.module';
 import { SetupModule } from './modules/setup.module';
 import { AuthModule } from './modules/auth.module';
+import { WorkflowModule } from './modules/workflow.module';
 import { DatabaseModule } from './infrastructure/database/database.module';
 import { JwtAuthGuard } from './infrastructure/auth/jwt-auth.guard';
 import kyselyConfig from './infrastructure/config/kysely.config';
@@ -31,6 +32,7 @@ import appConfig from './infrastructure/config/app.config';
     UserStoryModule,
     CodeRepositoryModule,
     SetupModule,
+    WorkflowModule,
   ],
   controllers: [AppController],
   providers: [
