@@ -36,6 +36,8 @@
 	let dragging: string | null = $state(null);
 	let dragOffsetX = $state(0);
 	let dragOffsetY = $state(0);
+	/** True if the mouse actually moved during the current drag — suppresses the click event */
+	let didDrag = $state(false);
 
 	// ── Edit panel form ───────────────────────────────────────────────
 	let editLabel = $state('');
@@ -157,6 +159,7 @@
 		if (connectMode) return; // handled by click, not drag
 		e.stopPropagation();
 		dragging = statusId;
+		didDrag = false;
 		const s = statusById(statusId)!;
 		dragOffsetX = e.clientX - s.posX;
 		dragOffsetY = e.clientY - s.posY;
@@ -172,6 +175,7 @@
 		if (!s) return;
 		s.posX = Math.max(0, e.clientX - dragOffsetX);
 		s.posY = Math.max(0, e.clientY - dragOffsetY);
+		didDrag = true;
 	}
 
 	/**
@@ -199,6 +203,11 @@
 	 * @param status - The status that was clicked
 	 */
 	async function onBoxClick(status: WorkflowStatus): Promise<void> {
+		if (didDrag) {
+			didDrag = false;
+			return;
+		}
+
 		if (!connectMode) {
 			openEditPanel(status);
 			return;
