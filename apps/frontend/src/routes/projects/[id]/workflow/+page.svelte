@@ -328,8 +328,118 @@
 
 	// ── SVG arrow helpers ─────────────────────────────────────────────
 
+	/** px: horizontal stub out of/into a box before the first bend */
+	const STUB = 30;
+	/** px: corner rounding radius */
+	const CORNER_R = 8;
+	/** px: clearance between the routed corridor and obstacle box edges */
+	const LANE_PAD = 16;
+
 	/**
-	 * Computes the SVG path for a curved arrow between two status boxes.
+	 * Returns all statuses (excluding from/to) whose bounding box overlaps
+	 * the rectangular region spanning the two connected boxes.
+	 * @param from - Source status
+	 * @param to - Target status
+	 */
+	function obstaclesInBand(from: WorkflowStatus, to: WorkflowStatus): WorkflowStatus[] {
+		const xMin = Math.min(from.posX + BOX_W, to.posX);
+		const xMax = Math.max(from.posX + BOX_W, to.posX);
+		const yMin = Math.min(from.posY, to.posY);
+		const yMax = Math.max(from.posY + BOX_H, to.posY + BOX_H);
+		return workflow.statuses.filter((s) => {
+			if (s.id === from.id || s.id === to.id) return false;
+			return s.posX < xMax && s.posX + BOX_W > xMin && s.posY < yMax && s.posY + BOX_H > yMin;
+		});
+	}
+
+	/**
+	 * Picks a horizontal corridor Y that clears all obstacle boxes,
+	 * preferring the option (above or below) closest to the midpoint of y1/y2.
+	 * @param obstacles - Boxes to avoid
+	 * @param y1 - Source center Y
+	 * @param y2 - Target center Y
+	 */
+	function findCorridorY(obstacles: WorkflowStatus[], y1: number, y2: number): number {
+		const topY = Math.min(...obstacles.map((s) => s.posY)) - LANE_PAD;
+		const botY = Math.max(...obstacles.map((s) => s.posY + BOX_H)) + LANE_PAD;
+		const mid = (y1 + y2) / 2;
+		return Math.abs(topY - mid) <= Math.abs(botY - mid) ? topY : botY;
+	}
+
+	/**
+	 * Builds an orthogonal SVG path with right-angle bends and rounded corners,
+	 * routing from (x1, y1) through a horizontal corridor at cy to (x2, y2).
+	 * Works for both forward (x2 > x1) and backward (x2 < x1) transitions.
+	 * @param x1 - Source exit X
+	 * @param y1 - Source exit Y
+	 * @param x2 - Target entry X
+	 * @param y2 - Target entry Y
+	 * @param cy - Corridor Y to route through
+	 */
+	function buildOrthogonalPath(
+		x1: number,
+		y1: number,
+		x2: number,
+		y2: number,
+		cy: number
+	): string {
+		const lx = x1 + STUB; // X after exit stub
+		const rx = x2 - STUB; // X before entry stub
+		const r = Math.min(CORNER_R, Math.abs(cy - y1) / 2, Math.abs(y2 - cy) / 2);
+		if (r < 1) {
+			// Degenerate: fall back to bezier
+			const cx = (x1 + x2) / 2;
+			return `M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}`;
+		}
+		const v1 = cy >= y1 ? 1 : -1; // direction: source Y → corridor
+		const v2 = y2 >= cy ? 1 : -1; // direction: corridor → target Y
+		return [
+			`M ${x1} ${y1}`,
+			`H ${lx - r}`,
+			`Q ${lx} ${y1} ${lx} ${y1 + v1 * r}`,      // corner A: right → vertical
+			`V ${cy - v1 * r}`,
+			`Q ${lx} ${cy} ${lx + r} ${cy}`,             // corner B: vertical → corridor
+			`H ${rx - r}`,
+			`Q ${rx} ${cy} ${rx} ${cy + v2 * r}`,        // corner C: corridor → vertical
+			`V ${y2 - v2 * r}`,
+			`Q ${rx} ${y2} ${rx + r} ${y2}`,             // corner D: vertical → right
+			`H ${x2}`,
+		].join(' ');
+	}
+
+	/**
+	 * Builds a C-shape path: exit right → vertical segment → enter left.
+	 * Used when the target is to the left but at a different vertical position.
+	 * The rightmost X of the C is x1 + STUB (just past the source box).
+	 * @param x1 - Source exit X (right edge of source)
+	 * @param y1 - Source exit Y (center of source)
+	 * @param x2 - Target entry X (left edge of target)
+	 * @param y2 - Target entry Y (center of target)
+	 */
+	function buildCShapePath(x1: number, y1: number, x2: number, y2: number): string {
+		const lx = x1 + STUB; // rightmost X of the C
+		const v = y2 > y1 ? 1 : -1;
+		const r = Math.min(CORNER_R, Math.abs(y2 - y1) / 2, (lx - x2) / 2);
+		if (r < 1) {
+			const cx = (x1 + x2) / 2;
+			return `M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}`;
+		}
+		return [
+			`M ${x1} ${y1}`,
+			`H ${lx - r}`,
+			`Q ${lx} ${y1} ${lx} ${y1 + v * r}`, // corner: right → vertical
+			`V ${y2 - v * r}`,
+			`Q ${lx} ${y2} ${lx - r} ${y2}`,      // corner: vertical → left
+			`H ${x2}`,
+		].join(' ');
+	}
+
+	/**
+	 * Decides which routing strategy to use and returns the SVG path.
+	 *
+	 * - Forward (target to the right): horizontal corridor routing, avoiding obstacles.
+	 * - Backward + vertical offset (target left and below/above): C-shape routing.
+	 * - Backward + same row (target left, similar Y): loop below both boxes.
 	 * @param from - Source status
 	 * @param to - Target status
 	 */
@@ -338,12 +448,32 @@
 		const y1 = from.posY + BOX_H / 2;
 		const x2 = to.posX;
 		const y2 = to.posY + BOX_H / 2;
-		const cx = (x1 + x2) / 2;
-		return `M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}`;
+
+		// Backward (target is to the left of source exit)
+		if (x2 < x1 - STUB * 2) {
+			if (Math.abs(y2 - y1) > STUB * 2) {
+				// Vertically offset: C-shape (right → vertical → left)
+				return buildCShapePath(x1, y1, x2, y2);
+			}
+			// Same row: loop below both boxes
+			const loopY = Math.max(from.posY + BOX_H, to.posY + BOX_H) + LANE_PAD + 10;
+			return buildOrthogonalPath(x1, y1, x2, y2, loopY);
+		}
+
+		// Forward: check for obstacles and route around them
+		const obstacles = obstaclesInBand(from, to);
+		if (obstacles.length === 0) {
+			if (Math.abs(y1 - y2) < 4) return `M ${x1} ${y1} H ${x2}`;
+			const cx = (x1 + x2) / 2;
+			return `M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}`;
+		}
+		const cy = findCorridorY(obstacles, y1, y2);
+		return buildOrthogonalPath(x1, y1, x2, y2, cy);
 	}
 
 	/**
-	 * Returns the midpoint of a bezier path for placing a click target.
+	 * Returns the midpoint of the arrow path for placing the delete button,
+	 * using the same routing decision as arrowPath.
 	 * @param from - Source status
 	 * @param to - Target status
 	 */
@@ -352,6 +482,22 @@
 		const y1 = from.posY + BOX_H / 2;
 		const x2 = to.posX;
 		const y2 = to.posY + BOX_H / 2;
+
+		if (x2 < x1 - STUB * 2) {
+			if (Math.abs(y2 - y1) > STUB * 2) {
+				// C-shape: midpoint is at the rightmost X, halfway vertically
+				return { x: x1 + STUB, y: (y1 + y2) / 2 };
+			}
+			// Loop: midpoint is at the bottom of the loop
+			const loopY = Math.max(from.posY + BOX_H, to.posY + BOX_H) + LANE_PAD + 10;
+			return { x: (x1 + x2) / 2, y: loopY };
+		}
+
+		const obstacles = obstaclesInBand(from, to);
+		if (obstacles.length > 0) {
+			const cy = findCorridorY(obstacles, y1, y2);
+			return { x: (x1 + STUB + (x2 - STUB)) / 2, y: cy };
+		}
 		return { x: (x1 + x2) / 2, y: (y1 + y2) / 2 };
 	}
 </script>
