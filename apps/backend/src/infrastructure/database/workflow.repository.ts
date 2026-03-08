@@ -58,39 +58,39 @@ const DEFAULT_STATUSES: Array<{
     posX: 650,
     posY: 50,
   },
-  //QA
+  // QA
   {
     key: 'testing_in_stage',
     label: 'Testing (Stage)',
-    groupNames: [WorkflowGroupEnum.SPECIFICATION],
+    groupNames: [WorkflowGroupEnum.QA],
     sortOrder: 1,
-    color: '#3b82f6',
+    color: '#f59e0b',
     isInitial: false,
     isTerminal: false,
-    posX: 650,
-    posY: 50,
+    posX: 250,
+    posY: 440,
   },
   {
     key: 'testing_in_pre_prod',
     label: 'Testing (Pre-Prod)',
-    groupNames: [WorkflowGroupEnum.SPECIFICATION],
+    groupNames: [WorkflowGroupEnum.QA],
     sortOrder: 2,
-    color: '#3b82f6',
+    color: '#f59e0b',
     isInitial: false,
     isTerminal: false,
     posX: 650,
-    posY: 50,
+    posY: 440,
   },
   {
     key: 'testing_in_prod',
     label: 'Testing (Prod)',
-    groupNames: [WorkflowGroupEnum.SPECIFICATION],
+    groupNames: [WorkflowGroupEnum.QA],
     sortOrder: 3,
-    color: '#3b82f6',
+    color: '#f59e0b',
     isInitial: false,
     isTerminal: false,
-    posX: 650,
-    posY: 50,
+    posX: 850,
+    posY: 440,
   },
   // DEVELOPMENT
   {
@@ -184,7 +184,7 @@ const DEFAULT_STATUSES: Array<{
   },
   {
     key: 'to_deploy_prod',
-    label: 'Testing (Pre-Prod)',
+    label: 'To Deploy on Prod',
     groupNames: [WorkflowGroupEnum.DEPLOYMENT],
     sortOrder: 5,
     color: '#22c55e',
@@ -194,25 +194,14 @@ const DEFAULT_STATUSES: Array<{
     posY: 310,
   },
   {
-    key: 'testing_prod',
-    label: 'Testing (Prod)',
+    key: 'in_production',
+    label: 'In Production',
     groupNames: [WorkflowGroupEnum.DEPLOYMENT],
     sortOrder: 6,
     color: '#22c55e',
     isInitial: false,
-    isTerminal: false,
-    posX: 1050,
-    posY: 310,
-  },
-  {
-    key: 'in_production',
-    label: 'In Production',
-    groupNames: [WorkflowGroupEnum.DEPLOYMENT],
-    sortOrder: 7,
-    color: '#22c55e',
-    isInitial: false,
     isTerminal: true,
-    posX: 1250,
+    posX: 1050,
     posY: 310,
   },
   // CROSS-CUTTING
@@ -253,26 +242,27 @@ const DEFAULT_STATUSES: Array<{
  */
 const DEFAULT_TRANSITION_PAIRS: [string, string][] = [
   // SPECIFICATION flow
-  ['to_specify', 'writing'],
-  ['writing', 'to_validate'],
+  ['to_specify', 'to_validate'],
   ['to_validate', 'ready'],
   // DEVELOPMENT flow
   ['ready', 'todo'],
   ['todo', 'in_progress'],
   ['in_progress', 'code_review'],
   ['code_review', 'dev_done'],
-  // DEPLOYMENT flow
-  ['dev_done', 'to_deploy'],
-  ['to_deploy', 'staging'],
-  ['staging', 'testing_staging'],
-  ['testing_staging', 'pre_prod'],
-  ['pre_prod', 'testing_pre_prod'],
-  ['testing_pre_prod', 'testing_prod'],
-  ['testing_prod', 'in_production'],
+  // DEPLOYMENT + QA flow
+  ['dev_done', 'to_deploy_stage'],
+  ['to_deploy_stage', 'staging'],
+  ['staging', 'testing_in_stage'],
+  ['testing_in_stage', 'to_deploy_pre_prod'],
+  ['to_deploy_pre_prod', 'pre_prod'],
+  ['pre_prod', 'testing_in_pre_prod'],
+  ['testing_in_pre_prod', 'to_deploy_prod'],
+  ['to_deploy_prod', 'testing_in_prod'],
+  ['testing_in_prod', 'in_production'],
   // Test failure loops (from any testing stage)
-  ['testing_staging', 'test_failed'],
-  ['testing_pre_prod', 'test_failed'],
-  ['testing_prod', 'test_failed'],
+  ['testing_in_stage', 'test_failed'],
+  ['testing_in_pre_prod', 'test_failed'],
+  ['testing_in_prod', 'test_failed'],
   ['test_failed', 'in_progress'],
   // Cancellation from any key stage
   ['to_specify', 'cancelled'],
@@ -439,7 +429,7 @@ export class WorkflowRepository implements IWorkflowRepository {
   }
 
   /**
-   * Seeds the default 17-status workflow for a project.
+   * Seeds the default 18-status workflow for a project.
    * Inserts all statuses and default sequential transitions.
    * @param projectId - UUID of the project to seed
    */
