@@ -10,6 +10,7 @@ import type {
   WorkflowTransitionTable,
   KyselyDatabase,
 } from '../config/kysely.config';
+import { WorkflowGroupEnum } from '../../common/enums/workflow/workflow-group.enum';
 
 /** Default statuses seeded for every new project */
 const DEFAULT_STATUSES: Array<{
@@ -27,7 +28,7 @@ const DEFAULT_STATUSES: Array<{
   {
     key: 'to_specify',
     label: 'To Specify',
-    groupNames: ['SPECIFICATION'],
+    groupNames: [WorkflowGroupEnum.SPECIFICATION],
     sortOrder: 1,
     color: '#3b82f6',
     isInitial: true,
@@ -36,21 +37,10 @@ const DEFAULT_STATUSES: Array<{
     posY: 50,
   },
   {
-    key: 'writing',
-    label: 'Writing',
-    groupNames: ['SPECIFICATION'],
-    sortOrder: 2,
-    color: '#3b82f6',
-    isInitial: false,
-    isTerminal: false,
-    posX: 250,
-    posY: 50,
-  },
-  {
     key: 'to_validate',
     label: 'To Validate',
-    groupNames: ['SPECIFICATION'],
-    sortOrder: 3,
+    groupNames: [WorkflowGroupEnum.SPECIFICATION],
+    sortOrder: 2,
     color: '#3b82f6',
     isInitial: false,
     isTerminal: false,
@@ -60,8 +50,42 @@ const DEFAULT_STATUSES: Array<{
   {
     key: 'ready',
     label: 'Ready',
-    groupNames: ['SPECIFICATION'],
-    sortOrder: 4,
+    groupNames: [WorkflowGroupEnum.SPECIFICATION],
+    sortOrder: 3,
+    color: '#3b82f6',
+    isInitial: false,
+    isTerminal: false,
+    posX: 650,
+    posY: 50,
+  },
+  //QA
+  {
+    key: 'testing_in_stage',
+    label: 'Testing (Stage)',
+    groupNames: [WorkflowGroupEnum.SPECIFICATION],
+    sortOrder: 1,
+    color: '#3b82f6',
+    isInitial: false,
+    isTerminal: false,
+    posX: 650,
+    posY: 50,
+  },
+  {
+    key: 'testing_in_pre_prod',
+    label: 'Testing (Pre-Prod)',
+    groupNames: [WorkflowGroupEnum.SPECIFICATION],
+    sortOrder: 2,
+    color: '#3b82f6',
+    isInitial: false,
+    isTerminal: false,
+    posX: 650,
+    posY: 50,
+  },
+  {
+    key: 'testing_in_prod',
+    label: 'Testing (Prod)',
+    groupNames: [WorkflowGroupEnum.SPECIFICATION],
+    sortOrder: 3,
     color: '#3b82f6',
     isInitial: false,
     isTerminal: false,
@@ -72,7 +96,7 @@ const DEFAULT_STATUSES: Array<{
   {
     key: 'todo',
     label: 'To Do',
-    groupNames: ['DEVELOPMENT'],
+    groupNames: [WorkflowGroupEnum.DEVELOPMENT],
     sortOrder: 1,
     color: '#8b5cf6',
     isInitial: false,
@@ -83,7 +107,7 @@ const DEFAULT_STATUSES: Array<{
   {
     key: 'in_progress',
     label: 'In Progress',
-    groupNames: ['DEVELOPMENT'],
+    groupNames: [WorkflowGroupEnum.DEVELOPMENT],
     sortOrder: 2,
     color: '#8b5cf6',
     isInitial: false,
@@ -94,7 +118,7 @@ const DEFAULT_STATUSES: Array<{
   {
     key: 'code_review',
     label: 'In Review',
-    groupNames: ['DEVELOPMENT'],
+    groupNames: [WorkflowGroupEnum.DEVELOPMENT],
     sortOrder: 3,
     color: '#8b5cf6',
     isInitial: false,
@@ -105,7 +129,7 @@ const DEFAULT_STATUSES: Array<{
   {
     key: 'dev_done',
     label: 'Dev Done',
-    groupNames: ['DEVELOPMENT'],
+    groupNames: [WorkflowGroupEnum.DEVELOPMENT],
     sortOrder: 4,
     color: '#8b5cf6',
     isInitial: false,
@@ -115,9 +139,9 @@ const DEFAULT_STATUSES: Array<{
   },
   // DEPLOYMENT
   {
-    key: 'to_deploy',
-    label: 'To Deploy',
-    groupNames: ['DEPLOYMENT'],
+    key: 'to_deploy_stage',
+    label: 'To Deploy on Stage',
+    groupNames: [WorkflowGroupEnum.DEPLOYMENT],
     sortOrder: 1,
     color: '#22c55e',
     isInitial: false,
@@ -128,7 +152,7 @@ const DEFAULT_STATUSES: Array<{
   {
     key: 'staging',
     label: 'Staging',
-    groupNames: ['DEPLOYMENT'],
+    groupNames: [WorkflowGroupEnum.DEPLOYMENT],
     sortOrder: 2,
     color: '#22c55e',
     isInitial: false,
@@ -137,9 +161,9 @@ const DEFAULT_STATUSES: Array<{
     posY: 310,
   },
   {
-    key: 'testing_staging',
-    label: 'Testing (Staging)',
-    groupNames: ['DEPLOYMENT'],
+    key: 'to_deploy_pre_prod',
+    label: 'To Deploy on Pre Prod',
+    groupNames: [WorkflowGroupEnum.DEPLOYMENT],
     sortOrder: 3,
     color: '#22c55e',
     isInitial: false,
@@ -150,7 +174,7 @@ const DEFAULT_STATUSES: Array<{
   {
     key: 'pre_prod',
     label: 'Pre-Prod',
-    groupNames: ['DEPLOYMENT'],
+    groupNames: [WorkflowGroupEnum.DEPLOYMENT],
     sortOrder: 4,
     color: '#22c55e',
     isInitial: false,
@@ -159,9 +183,9 @@ const DEFAULT_STATUSES: Array<{
     posY: 310,
   },
   {
-    key: 'testing_pre_prod',
+    key: 'to_deploy_prod',
     label: 'Testing (Pre-Prod)',
-    groupNames: ['DEPLOYMENT'],
+    groupNames: [WorkflowGroupEnum.DEPLOYMENT],
     sortOrder: 5,
     color: '#22c55e',
     isInitial: false,
@@ -172,7 +196,7 @@ const DEFAULT_STATUSES: Array<{
   {
     key: 'testing_prod',
     label: 'Testing (Prod)',
-    groupNames: ['DEPLOYMENT'],
+    groupNames: [WorkflowGroupEnum.DEPLOYMENT],
     sortOrder: 6,
     color: '#22c55e',
     isInitial: false,
@@ -183,7 +207,7 @@ const DEFAULT_STATUSES: Array<{
   {
     key: 'in_production',
     label: 'In Production',
-    groupNames: ['DEPLOYMENT'],
+    groupNames: [WorkflowGroupEnum.DEPLOYMENT],
     sortOrder: 7,
     color: '#22c55e',
     isInitial: false,
@@ -191,11 +215,15 @@ const DEFAULT_STATUSES: Array<{
     posX: 1250,
     posY: 310,
   },
-  // CROSS-CUTTING: visible in both DEVELOPMENT and DEPLOYMENT views
+  // CROSS-CUTTING
   {
     key: 'test_failed',
     label: 'Test Failed',
-    groupNames: ['DEVELOPMENT', 'DEPLOYMENT'],
+    groupNames: [
+      WorkflowGroupEnum.QA,
+      WorkflowGroupEnum.DEPLOYMENT,
+      WorkflowGroupEnum.DEVELOPMENT,
+    ],
     sortOrder: 0,
     color: '#ef4444',
     isInitial: false,
@@ -203,11 +231,13 @@ const DEFAULT_STATUSES: Array<{
     posX: 850,
     posY: 180,
   },
-  // TERMINAL: no group (shown everywhere as a terminal option)
   {
     key: 'cancelled',
     label: 'Cancelled',
-    groupNames: [],
+    groupNames: [
+      WorkflowGroupEnum.SPECIFICATION,
+      WorkflowGroupEnum.DEVELOPMENT,
+    ],
     sortOrder: 0,
     color: '#6b7280',
     isInitial: false,
