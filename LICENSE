@@ -1,37 +1,57 @@
-# Business Source License 1.1
+BUSINESS SOURCE LICENSE 1.1
 
-**Licensor:** YouriMartin  
-**Software:** [Insert Your App Name] (and its successive versions, unless otherwise stated)  
-**Change License:** GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later)  
-**Change Date:** 2029-01-01  
+Licensor:           YouriMartin
+Software:           [Insert Your App Name]
+Change License:     GNU Affero General Public License v3.0 or later
+Change Date:        2029-01-01
 
----
+-------------------------------------------------------------------------------
 
-### 1. Additional Use Grant
-By way of derogation from the restrictions of this License, the use of the Software is authorized free of charge and without royalty under the following conditions:
+1. ADDITIONAL USE GRANT
+By way of derogation from the restrictions of this License, the use of the 
+Software is authorized free of charge and without royalty under the following 
+conditions:
 
-* **Internal Use (On-Premise):** Installation and use of the Software on the end-user's own servers or infrastructure for their own internal business needs are authorized free of charge.
-* **Development and Testing:** Use for non-productive development, testing, or evaluation purposes is authorized.
+* INTERNAL USE (ON-PREMISE): Installation and use of the Software on the 
+  end-user's own servers or infrastructure for their own internal business 
+  needs are authorized free of charge.
+* DEVELOPMENT AND TESTING: Use for non-productive development, testing, or 
+  evaluation purposes is authorized.
 
-### 2. Commercial Restrictions (SaaS & Resale)
-Any use not covered by the "Additional Use Grant" above requires a separate commercial license and mandatory remuneration to the Licensor. The following are expressly prohibited without prior written agreement:
+2. COMMERCIAL RESTRICTIONS (SAAS & RESALE)
+Any use not covered by the "Additional Use Grant" above requires a separate 
+commercial license and mandatory remuneration to the Licensor. The following 
+are expressly prohibited without prior written agreement:
 
-* Providing access to the Software as a Service (**SaaS**), Platform as a Service (**PaaS**), or any other form of managed hosting for third parties.
-* Reselling access to the Software's features via a subscription system, royalty fee, or usage-based billing.
-* Integrating the Software into a third-party commercial product where access to the Software’s functionality is a paid feature.
+* Providing access to the Software as a Service (SaaS), Platform as a Service 
+  (PaaS), or any other form of managed hosting for third parties.
+* Reselling access to the Software's features via a subscription system, 
+  royalty fee, or usage-based billing.
+* Integrating the Software into a third-party commercial product where 
+  access to the Software’s functionality is a paid feature.
 
-Contact the Licensor at **[Your Email or Contact Link]** for commercial licensing terms.
+Contact the Licensor at [Your Email or Contact Link] for licensing terms.
 
----
+-------------------------------------------------------------------------------
 
-### 3. License Grant and Conditions
-Subject to the terms and conditions of this License, Licensor hereby grants you a non-exclusive, worldwide, non-transferable right to copy, modify, create derivative works of, and use the Software.
+3. LICENSE GRANT AND CONDITIONS
+Subject to the terms and conditions of this License, Licensor hereby grants 
+you a non-exclusive, worldwide, non-transferable right to copy, modify, 
+create derivative works of, and use the Software.
 
-* **Condition 1:** You may not use the Software for any purpose that does not meet the "Additional Use Grant" unless you have a separate commercial agreement.
-* **Condition 2:** You must include a copy of this License with all copies of the Software and derivative works.
+Condition 1: You may not use the Software for any purpose that does not meet 
+the "Additional Use Grant" unless you have a separate commercial agreement.
 
-### 4. Change to Open Source
-On the **Change Date** specified above, this License shall terminate and the Software (including all previous versions) will automatically be licensed under the **Change License** (AGPL v3.0).
+Condition 2: You must include a copy of this License with all copies of the 
+Software and derivative works.
 
-### 5. Disclaimer of Warranty
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+4. CHANGE TO OPEN SOURCE
+On the Change Date specified above, this License shall terminate and the 
+Software (including all previous versions) will automatically be licensed 
+under the Change License (AGPL v3.0).
+
+5. DISCLAIMER OF WARRANTY
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED. IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES OR 
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
+ARISING FROM, OUT OF THE USE OR OTHER DEALINGS IN THE SOFTWARE.
