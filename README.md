@@ -2,47 +2,49 @@
 
 **Jira and Monday's Killer** - A modern task management application built with a mono repo architecture.
 
-## 🏗️ Architecture
+## Architecture
 
 This is a mono repo application with the following structure:
 
-- **Backend**: NestJS API with clean architecture, PostgreSQL, logging, and telemetry
-- **Frontend**: Next.js application with TypeScript and Tailwind CSS
-- **Database**: PostgreSQL
+- **Backend**: NestJS API with Clean Architecture + CQRS, PostgreSQL, logging, and telemetry
+- **Frontend**: SvelteKit application with TypeScript and native CSS
+- **Database**: PostgreSQL 16
 - **Container**: Docker Compose for easy deployment
 
-## 🚀 Features
+## Features
 
 ### Backend (NestJS)
-- ✅ Clean Architecture (Domain, Application, Infrastructure, Presentation layers)
-- ✅ Kysely with PostgreSQL
-- ✅ Winston Logger for comprehensive logging
-- ✅ OpenTelemetry for observability and tracing
-- ✅ Swagger/OpenAPI documentation
-- ✅ Jest testing framework
-- ✅ Input validation with class-validator
-- ✅ RESTful API endpoints
+- Clean Architecture (Domain, Application, Infrastructure, Presentation layers)
+- CQRS pattern (Commands & Queries with separate handlers)
+- Kysely with PostgreSQL (type-safe query builder)
+- JWT authentication with refresh tokens (HTTP-only cookies)
+- Winston Logger for comprehensive logging
+- OpenTelemetry for observability and tracing
+- Swagger/OpenAPI documentation
+- Jest testing framework
+- Input validation with class-validator
+- RESTful API endpoints
 
-### Frontend (Next.js)
-- ✅ TypeScript support
-- ✅ Tailwind CSS for styling
-- ✅ Client-side task management
-- ✅ Modern React with hooks
-- ✅ Responsive design
+### Frontend (SvelteKit)
+- TypeScript support
+- Svelte 5 with runes (`$state`, `$effect`, `$props`)
+- Native CSS with scoped component styles
+- JWT auth with in-memory access tokens
+- Responsive design
 
 ### Infrastructure
-- ✅ Docker containerization
-- ✅ Docker Compose orchestration
-- ✅ PostgreSQL database
-- ✅ Environment-based configuration
+- Docker containerization
+- Docker Compose orchestration
+- PostgreSQL 16 database
+- Environment-based configuration
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Node.js 20.x or higher
 - npm 10.x or higher
 - Docker and Docker Compose (for containerized deployment)
 
-## 🛠️ Installation & Setup
+## Installation & Setup
 
 ### Local Development
 
@@ -58,7 +60,7 @@ This is a mono repo application with the following structure:
    ```
 
 3. **Set up environment variables**
-   
+
    Backend:
    ```bash
    cp apps/backend/.env.example apps/backend/.env
@@ -66,12 +68,11 @@ This is a mono repo application with the following structure:
 
    Frontend:
    ```bash
-   cp apps/frontend/.env.local.example apps/frontend/.env.local
+   cp apps/frontend/.env.example apps/frontend/.env
    ```
 
 4. **Run PostgreSQL** (if not using Docker)
    ```bash
-   # Using Docker for PostgreSQL only
    docker run -d \
      --name postgres \
      -e POSTGRES_USER=postgres \
@@ -85,7 +86,7 @@ This is a mono repo application with the following structure:
    ```bash
    npm run backend:dev
    ```
-   
+
    The backend will be available at `http://localhost:3000`
    Swagger documentation: `http://localhost:3000/api`
 
@@ -93,15 +94,14 @@ This is a mono repo application with the following structure:
    ```bash
    npm run frontend:dev
    ```
-   
+
    The frontend will be available at `http://localhost:3001`
 
 ### Docker Deployment
 
 1. **Build and start all services**
    ```bash
-   npm run docker:build
-   npm run docker:up
+   docker compose up -d
    ```
 
 2. **Access the applications**
@@ -112,36 +112,42 @@ This is a mono repo application with the following structure:
 
 3. **Stop all services**
    ```bash
-   npm run docker:down
+   docker compose down
    ```
 
-## 📚 API Documentation
+## API Documentation
 
 Once the backend is running, visit `http://localhost:3000/api` for the interactive Swagger documentation.
 
 ### Main Endpoints
 
-- `GET /tasks` - Get all tasks
-- `GET /tasks/:id` - Get a task by ID
-- `POST /tasks` - Create a new task
-- `PUT /tasks/:id` - Update a task
-- `DELETE /tasks/:id` - Delete a task
+| Resource | Endpoints |
+|----------|-----------|
+| Auth | `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout` |
+| Users | `GET/POST /users`, `GET/PATCH/DELETE /users/:id` |
+| Projects | `GET/POST /projects`, `GET/PATCH/DELETE /projects/:id` |
+| Epics | `GET/POST /epics`, `GET/PATCH/DELETE /epics/:id` |
+| Sprints | `GET/POST /sprints`, `GET/PATCH/DELETE /sprints/:id` |
+| User Stories | `GET/POST /user-stories`, `GET/PATCH/DELETE /user-stories/:id` |
+| Code Repos | `GET/POST /code-repositories`, `GET/PATCH/DELETE /code-repositories/:id` |
 
 ### Example Request
 
 ```bash
-# Create a task
-curl -X POST http://localhost:3000/tasks \
+# Create a user story
+curl -X POST http://localhost:3000/user-stories \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
   -d '{
     "title": "Implement authentication",
-    "description": "Add JWT-based authentication",
     "priority": "high",
-    "status": "todo"
+    "status": "todo",
+    "sprintId": "<sprint-uuid>",
+    "createdBy": "<user-uuid>"
   }'
 ```
 
-## 🧪 Testing
+## Testing
 
 ### Backend Tests
 
@@ -156,35 +162,38 @@ npm run backend:test -- --watch
 npm run backend:test -- --coverage
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 SprintFlow/
 ├── apps/
 │   ├── backend/              # NestJS backend
 │   │   ├── src/
-│   │   │   ├── domain/       # Domain entities and repositories
-│   │   │   ├── application/  # Use cases and DTOs
-│   │   │   ├── infrastructure/   # Database, config, logging, telemetry
-│   │   │   ├── presentation/     # Controllers and middlewares
-│   │   │   └── modules/      # Feature modules
-│   │   ├── test/             # E2E tests
+│   │   │   ├── domain/       # Domain entities and repository interfaces
+│   │   │   ├── application/  # Commands, queries, handlers, DTOs
+│   │   │   ├── infrastructure/   # Database, config, logging, auth
+│   │   │   ├── presentation/     # Controllers
+│   │   │   └── modules/      # NestJS feature modules
+│   │   ├── migrations/       # SQL migration files
 │   │   └── Dockerfile
-│   └── frontend/             # Next.js frontend
-│       ├── app/              # Next.js app directory
-│       ├── lib/              # API client and utilities
+│   └── frontend/             # SvelteKit frontend
+│       ├── src/
+│       │   ├── lib/          # API client, types, auth store
+│       │   └── routes/       # SvelteKit file-based routing
 │       └── Dockerfile
 ├── docker-compose.yml        # Docker orchestration
 └── package.json             # Root workspace configuration
 ```
 
-## 🔧 Technology Stack
+## Technology Stack
 
 ### Backend
 - **Framework**: NestJS 11
 - **Language**: TypeScript
+- **Architecture**: Clean Architecture + CQRS
 - **Database**: PostgreSQL 16
 - **Query Builder**: Kysely
+- **Authentication**: JWT (access + refresh tokens)
 - **Validation**: class-validator, class-transformer
 - **Documentation**: Swagger/OpenAPI
 - **Logging**: Winston
@@ -192,16 +201,16 @@ SprintFlow/
 - **Testing**: Jest
 
 ### Frontend
-- **Framework**: Next.js 16
+- **Framework**: SvelteKit
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **UI**: React 19
+- **UI**: Svelte 5 (runes API)
+- **Styling**: Native CSS (scoped per component)
 
 ### DevOps
 - **Containerization**: Docker
 - **Orchestration**: Docker Compose
 
-## 🔐 Environment Variables
+## Environment Variables
 
 ### Backend (.env)
 ```env
@@ -215,6 +224,11 @@ DB_USERNAME=postgres
 DB_PASSWORD=postgres
 DB_NAME=sprintflow
 
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=15m
+REFRESH_TOKEN_SECRET=your-refresh-secret
+REFRESH_TOKEN_EXPIRES_IN=7d
+
 LOG_LEVEL=info
 
 ENABLE_TELEMETRY=false
@@ -222,12 +236,12 @@ OTEL_SERVICE_NAME=sprintflow-backend
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces
 ```
 
-### Frontend (.env.local)
+### Frontend (.env)
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3000
+PUBLIC_API_URL=http://localhost:3000
 ```
 
-## 📝 Development Workflow
+## Development Workflow
 
 1. Create a feature branch
 2. Make changes
@@ -237,13 +251,7 @@ NEXT_PUBLIC_API_URL=http://localhost:3000
 6. Commit and push changes
 7. Create a pull request
 
-## 📖 Documentation
-
-- [Quick Start Guide](docs/QUICKSTART.md) - Get started in 5 minutes
-- [Development Guide](docs/DEVELOPMENT.md) - Development guidelines
-- [Implementation Summary](docs/IMPLEMENTATION.md) - Technical details
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -251,11 +259,11 @@ NEXT_PUBLIC_API_URL=http://localhost:3000
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0) with a **mandatory remuneration clause** - see the [LICENSE](LICENSE) file for details.
 
-### ⚠️ Important License Notice
+### Important License Notice
 
 **Commercial Use Requires Remuneration**: Any commercial use, deployment, or distribution of this software requires mandatory remuneration to the copyright holder(s). This includes:
 
@@ -268,24 +276,12 @@ This project is licensed under the GNU Affero General Public License v3.0 (AGPL-
 
 For non-commercial use, this software is available under the standard AGPL-3.0 terms.
 
-## 🎯 Roadmap
-
-- [ ] User authentication and authorization
-- [ ] Real-time updates with WebSockets
-- [ ] Sprint management
-- [ ] Team collaboration features
-- [ ] Advanced filtering and search
-- [ ] File attachments
-- [ ] Email notifications
-- [ ] Mobile app
-
-## 👥 Authors
+## Authors
 
 - **Youri Martin** - Initial work
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - NestJS team for the amazing framework
-- Next.js team for the powerful React framework
+- SvelteKit team for the powerful meta-framework
 - The open-source community
-
